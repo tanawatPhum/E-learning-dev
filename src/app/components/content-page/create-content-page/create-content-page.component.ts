@@ -1,7 +1,9 @@
 import { Component, OnInit, AfterContentInit, ViewEncapsulation, ViewChild, ElementRef, Input } from '@angular/core';
 import { catchError, mergeMap, toArray, map } from 'rxjs/operators';
-import { Observable, of, Subject } from 'rxjs';
+import { Observable, of, Subject, empty } from 'rxjs';
 import { Constants } from 'src/app/global/constants';
+import { BoxContentModel } from 'src/app/models/box-content.model';
+import { CommonService } from '../../../services/common/common.service';
 
 
 
@@ -28,13 +30,20 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
             addCssCurrentBox: 'addEventCurrentBox',
             triggerCurrentBox: 'triggerCurrentBox',
             triggerAttachFileModal: 'triggerAttachFileModal',
+            triggerDragAllBoxes: 'triggerDrag',
             removeBox: 'removeBox',
             removeCssBorderBox: 'removeCssBorderBox',
             removeCssToolbar: 'removeCssToolbar',
             removeCssBoxActive: 'removeCssBoxActive'
+        },
+        data: {
+            findIndexBox: 'findBox',
+            findBoxEmpty: 'findBoxEmpty'
         }
     };
+    private boxes: BoxContentModel[] = new Array<BoxContentModel>();
     constructor(
+        private commonService: CommonService
     ) { }
     ngOnInit() {
         this.initalDB();
@@ -81,7 +90,9 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
             // Do something with the request.result!
             if (request.result) {
                 this.rootElement.html(request.result.html);
-                this.addElements(this.constants.event.addEventBox);
+                this.addElements(this.constants.event.addEventBox).then(() => {
+                    this.retrieveData(request.result);
+                });
                 console.log('request.result', request.result);
             } else {
                 console.error('couldn\'t be found in your database!');
@@ -96,23 +107,27 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                 const numberOfBox = this.rootElement.find('.content-box').length;
                 this.rootElement.append('<div style="z-index:999" id=box_' + numberOfBox + ' class="content-box"></div>');
                 this.currentBox = $('#box_' + numberOfBox);
+                this.boxes.push({
+                    id: 'box_' + numberOfBox,
+                    html: null,
+                    isEmpty: true
+                });
             }
-            this.removeElements(this.constants.event.removeCssBoxActive);
-            this.removeElements(this.constants.event.removeCssToolbar);
-            this.removeElements(this.constants.event.removeCssBorderBox);
             this.triggerElements(this.constants.event.triggerCurrentBox);
             await this.rootElement.find('.content-box').draggable({
                 containment: this.contentTemplate.nativeElement,
                 stack: '.content-box',
                 start: ((event) => {
                     const elementFromId: any = $('[id="' + event.target.id + '"]');
-                    this.removeElements(this.constants.event.removeCssBoxActive);
-                    this.removeElements(this.constants.event.removeCssToolbar);
                     this.addElements(this.constants.event.addCssCurrentBox, elementFromId);
                 }),
                 stop: ((event) => {
                     setTimeout(() => {
-                        this.removeElements(this.constants.event.removeCssBoxActive);
+                        const elementFromId: any = $('[id="' + event.target.id + '"]');
+                        this.addElements(this.constants.event.addCssCurrentBox, elementFromId).then(() => {
+                            this.removeElements(this.constants.event.removeCssBoxActive);
+                        });
+
                     });
                 }),
             })
@@ -126,40 +141,68 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                     minWidth: Constants.element.limit.resize.width,
                     start: ((event) => {
                         const elementFromId: any = $('[id="' + event.target.id + '"]');
-                        this.removeElements(this.constants.event.removeCssBoxActive);
-                        this.removeElements(this.constants.event.removeCssToolbar);
                         this.addElements(this.constants.event.addCssCurrentBox, elementFromId);
                     }),
                     stop: ((event) => {
                         const elementFromId: any = $('[id="' + event.target.id + '"]');
                         setTimeout(() => {
-                            this.removeElements(this.constants.event.removeCssBoxActive);
-                            this.removeElements(this.constants.event.removeCssToolbar);
-                            this.addElements(this.constants.event.addCssCurrentBox, elementFromId);
+                            this.addElements(this.constants.event.addCssCurrentBox, elementFromId).then(() => {
+                                this.removeElements(this.constants.event.removeCssBoxActive);
+                            });
                         });
                     }),
                 });
+            this.triggerElements(this.constants.event.triggerDragAllBoxes);
         } else if (action === this.constants.event.addCssCurrentBox) {
-            this.removeElements(this.constants.event.removeCssBoxActive);
-            this.removeElements(this.constants.event.removeCssToolbar);
-            element.addClass('content-box-active');
+            this.currentBox = element;
+            this.addBoxActive(element);
             this.addBorderBox(element);
-            this.addToolBarBox(element);
+            const IndexBox = this.findData(this.constants.data.findIndexBox, element);
+            if (IndexBox !== -1) {
+                if (this.boxes[IndexBox].isEmpty) {
+                    this.addToolBarBox(element);
+                }
+            }
         } else if (action === this.constants.event.addTextArea) {
             this.removeElements(this.constants.event.removeCssToolbar);
-            element.append('<textarea></textarea>');
+            const IndexBox = this.findData(this.constants.data.findIndexBox, element);
+            if (IndexBox !== -1) {
+                this.boxes[IndexBox].isEmpty = false;
+            }
+            element.append('<textarea id="' + element.attr('id') + '_textarea" class="content-textarea"></textarea>');
+            element.find('textarea').focus();
         }
     }
     private triggerElements(action: string, element?: any) {
         if (action === this.constants.event.triggerCurrentBox) {
             this.rootElement.find('.content-box').click((event) => {
-                const elementFromId: any = $('[id="' + event.target.id + '"]');
-                this.removeElements(this.constants.event.removeCssBoxActive);
-                this.removeElements(this.constants.event.removeCssToolbar);
-                this.addElements(this.constants.event.addCssCurrentBox, elementFromId);
+                let elementFromId: any = $('[id="' + event.target.id + '"]');
+                if (event.target.id && !/_textarea/.test(event.target.id)) {
+                    this.currentBox = elementFromId;
+                } else {
+                    elementFromId = $(this.currentBox);
+                }
+                $(elementFromId).draggable({ disabled: true });
+                if (!$(elementFromId).hasClass('border border-primary')) {
+                    this.addElements(this.constants.event.addCssCurrentBox, elementFromId);
+                } else {
+                    this.removeElements(this.constants.event.removeCssBoxActive);
+                    this.removeElements(this.constants.event.removeCssBorderBox);
+                    this.removeElements(this.constants.event.removeCssToolbar);
+                }
             });
         } else if (action === this.constants.event.triggerAttachFileModal) {
             element.modal('show');
+        } else if (action === this.constants.event.triggerDragAllBoxes) {
+            if (this.commonService.isPlatform === Constants.platform.device) {
+                this.rootElement.find('.content-box').on('touchmove', (event) => {
+                    this.rootElement.find('.content-box').draggable({ disabled: false, cancel: '' });
+                });
+            } else {
+                this.rootElement.find('.content-box').mousemove(() => {
+                    this.rootElement.find('.content-box').draggable({ disabled: false, cancel: '' });
+                });
+            }
         }
     }
     private removeElements(action: string, element?: any) {
@@ -173,10 +216,13 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
             this.rootElement.find('.content-toolbar').remove();
         }
     }
-
+    private addBoxActive(element: any) {
+        this.removeElements(this.constants.event.removeCssBoxActive);
+        element.addClass('content-box-active');
+        this.addBorderBox(element);
+    }
     private addBorderBox(element: any) {
         this.removeElements(this.constants.event.removeCssBorderBox);
-        this.currentBox = element;
         $(element).addClass('border border-primary');
     }
     private async addToolBarBox(element: any) {
@@ -201,7 +247,7 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
             } else if (event.target.id === 'trash') {
                 this.removeElements(this.constants.event.removeBox, $(this.currentBox));
             } else if (event.target.id === 'text-area') {
-                this.addElements(this.constants.event.addTextArea,$(this.currentBox));
+                this.addElements(this.constants.event.addTextArea, $(this.currentBox));
             }
         });
     }
@@ -210,12 +256,9 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
         const objectStore = requestTran.objectStore('templates');
         const objectPage = {
             id: '01', html: this.rootElement.html(), contents: {
-                boxes: [
-                    {id: '', hasElement: false}
-                ]
+                boxes: this.boxes
             }
         };
-        this.retrieveData();
         if (objectStore.get('01')) {
             objectStore.put(objectPage);
         } else {
@@ -225,22 +268,30 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
             console.log('data has been added to your database.');
         });
         requestTran.onerror = ((event) => {
-            // this.indexDB.transaction(['templates'], 'readwrite')
-            // .objectStore('templates')
-            // .put({ id: '01', html: JSON.stringify(this.rootElement.html()) });
             console.error('Unable to add data\r\ndata is aready exist in your database! ');
         });
 
     }
-    private retrieveData() {
-        $(this.rootElement).find('.content-box').each((index, element) => {
-            console.log($(element).attr('id'));
-        });
+    private findData(action, element?) {
+        if (action === this.constants.data.findIndexBox) {
+            return this.boxes.findIndex(box => box.id === element.attr('id'));
+        }
     }
-    
-
-
-
-
-
+    private retrieveData(results) {
+        this.boxes = [];
+        if (results) {
+            if (results.contents.boxes.length === 0) {
+                $(this.rootElement).find('.content-box').each((index, element) => {
+                    const object: BoxContentModel = {
+                        id: $(element).attr('id'),
+                        isEmpty: true,
+                        html: ''
+                    };
+                    this.boxes.push(object);
+                });
+            } else {
+                this.boxes = results.contents.boxes;
+            }
+        }
+    }
 }

@@ -7,6 +7,7 @@ import { AppComponent } from './app.component';
 import { HomePageComponent } from './components/home-page/home-page.component';
 import { CreateContentPageComponent } from './components/content-page/create-content-page/create-content-page.component';
 import { MainContentPageComponent } from './components/content-page/main-content-page/main-content-page.component';
+import { CommonService } from './services/common/common.service';
 
 
 
@@ -26,6 +27,7 @@ export const MODULES: any[] = [
   AppRoutingModule,
 ];
 export const SERVICES: any[] = [
+  CommonService
 ];
 export const PIPES: any[] = [
 
