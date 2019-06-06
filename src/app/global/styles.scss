@@ -1,9 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
 
+$font-family:'Kanit';
+$font-style:normal;
+$font-extra-light:200;
+$font-light:300;
+$font-regular:400;
+$font-medium:500;
+$font-semi-bold:600;
+$font-bold:700;
+$font-extra-bold:800;
+$font-black:900;
 html,
 body {
     height: 100%;
     width: 100%;
+    font-size: 16px !important;
+    font-family: $font-family !important;
+    font-style: $font-style !important;
 }
 
 textarea {
@@ -16,4 +29,22 @@ div:focus,
 textarea:focus,
 input:focus {
     outline: none;
+}
+
+.content-font-title1 {
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
+}
+
+.content-font-title1 {
+    font-size: 1rem;
+}
+
+.content-font-title1 {
+    text-align: center;
+}
+
+.content-font-title1 {
+    font-weight: $font-regular;
 }

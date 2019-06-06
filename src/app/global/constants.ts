@@ -18,7 +18,7 @@ export class Constants {
     public static readonly element = {
         limit: {
             resize: {
-                height: 100,
+                height: 80,
                 width: 280
             }
         }
