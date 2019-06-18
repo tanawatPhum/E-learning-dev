@@ -1,0 +1,56 @@
+// component css goes here
+.document-navbar {
+    height: 8vh;
+}
+
+.document-bg-darkGrey {
+    background-color: #484848;
+}
+
+.document-sidenav {
+    height: 100%;
+    width: 200px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #EDF0F2;
+    overflow: hidden;
+    padding-top: 20px;
+}
+
+.document-sidenav-content {
+    height: 100%;
+    width: 196px;
+    background: white;
+}
+
+.document-sidenav-btnNav {
+    height: 25px;
+}
+
+.document-sidenav a {
+    padding: 6px 6px 6px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    display: block;
+}
+
+.document-form-select {
+    padding: 30px;
+    align-items: center;
+    width: 700px;
+    display: flex;
+    cursor: pointer;
+    justify-content: space-around;
+    img:first-child {
+        height: 50px;
+        width: 50px;
+    }
+    img {
+        height: 75px;
+        width: 75px;
+    }
+}
+
+.document-sidenav a:hover {}

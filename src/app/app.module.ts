@@ -6,9 +6,12 @@ import { AppComponent } from './app.component';
 
 import { HomePageComponent } from './components/home-page/home-page.component';
 import { CreateContentPageComponent } from './components/content-page/create-content-page/create-content-page.component';
-import { MainContentPageComponent } from './components/content-page/main-content-page/main-content-page.component';
-import { CommonService } from './services/common/common.service';
 
+import { CommonService } from './services/common/common.service';
+import { DocumentPageComponent } from './components/content-page/document-page/document-page.component';
+import { FormsModule } from '@angular/forms';
+import { ContentService } from './services/document/content.service';
+import { DocumentPreviewPageComponent } from './components/content-page/document-preview-page/document-preview-page.component';
 
 
 
@@ -16,18 +19,21 @@ import { CommonService } from './services/common/common.service';
 export const COMPONENTS: any[] = [
   AppComponent,
   HomePageComponent,
-  MainContentPageComponent,
- CreateContentPageComponent
+  DocumentPageComponent,
+ CreateContentPageComponent,
+ DocumentPreviewPageComponent
 ];
 export const LAYOUTS: any[] = [
 
 ];
 export const MODULES: any[] = [
+  FormsModule,
   BrowserModule,
   AppRoutingModule,
 ];
 export const SERVICES: any[] = [
-  CommonService
+  CommonService,
+  ContentService
 ];
 export const PIPES: any[] = [
 

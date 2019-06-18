@@ -1,0 +1,26 @@
+<!--component html goes here -->
+<nav class="document-navbar navbar navbar-expand-sm document-bg-darkGrey">
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link">Save</a>
+        </li>
+    </ul>
+</nav>
+<!-- <div class="document-sidenav">
+    <div class="document-sidenav-btnNav">navigation</div>
+    <div class="document-sidenav-content">
+        <a (click)="newPage()" href="javascript:void(0)">New</a>
+        <a (click)="addElement()" href="javascript:void(0)">Add</a>
+        <a (click)="savePage()" href="javascript:void(0)">Save</a>
+    </div>
+</div> -->
+<div class="document-form-select">
+    <img src="assets\imgs\documentPage\plus.svg">
+    <img src="assets\imgs\documentPage\content1.svg" (click)="createContent(contentType.oneLayout)">
+    <img src="assets\imgs\documentPage\content2.svg" (click)="createContent(contentType.twoLayout)">
+    <!-- <img src="assets\imgs\documentPage\content3.svg" (click)="createContent(contentType.twoLayoutHorizontal)"> -->
+    <img src="assets\imgs\documentPage\content4.svg" (click)="createContent(contentType.threeLayout)">
+    <img src="assets\imgs\documentPage\content5.svg" (click)="createContent(contentType.fourLayout)">
+    <img src="assets\imgs\documentPage\content6.svg" (click)="createContent(contentType.freedomLayout)">
+</div>
+<create-content-page [contentElement]="contentElement" [contentTypeSelected]="contentTypeSelected" [triggerElement]="triggerElement"></create-content-page>

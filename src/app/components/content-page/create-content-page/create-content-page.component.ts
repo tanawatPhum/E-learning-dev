@@ -1,19 +1,24 @@
 import { Component, OnInit, AfterContentInit, ViewEncapsulation, ViewChild, ElementRef, Input } from '@angular/core';
 import { catchError, mergeMap, toArray, map } from 'rxjs/operators';
-import { Observable, of, Subject, empty } from 'rxjs';
+import { Observable, of, Subject, empty, fromEvent } from 'rxjs';
 import { Constants } from 'src/app/global/constants';
 import { BoxContentModel } from 'src/app/models/content/elements/box-content.model';
 import { CommonService } from '../../../services/common/common.service';
-import { TemplateModel } from 'src/app/models/content/template.model';
+import { ContentModel } from 'src/app/models/content/content.model';
 import { TextAreaContentModel } from '../../../models/content/elements/textarea-content.model';
-
+import { ImgContentModel } from 'src/app/models/content/elements/img-content.model';
+import { VideoContentModel } from 'src/app/models/content/elements/video-content.model';
+import { ContentService } from 'src/app/services/document/content.service';
+import 'splitting/dist/splitting.css';
+import 'splitting/dist/splitting-cells.css';
+import Splitting from 'splitting';
 
 
 
 
 
 @Component({
-    selector: 'app-create-content-page',
+    selector: 'create-content-page',
     templateUrl: 'create-content-page.component.html',
     styleUrls: ['create-content-page.component.scss'],
     encapsulation: ViewEncapsulation.None
@@ -21,56 +26,93 @@ import { TextAreaContentModel } from '../../../models/content/elements/textarea-
 export class CreateContentPageComponent implements OnInit, AfterContentInit {
     @ViewChild('contentTemplate', { static: true }) contentTemplate: ElementRef;
     @Input() triggerElement: Subject<string>;
+    @Input() contentElement: Subject<ContentModel>;
+    @Input() contentTypeSelected: Subject<any>;
     private indexDB: any;
     private currentBox: any;
     private currentToolbar: string;
     private currentElement: any;
+    private currentContentType: { name: null, id: null };
+    private currentBrowseFile: any;
+    private contentType = Constants.document.contents.types;
     private rootElement;
-    private constants = {
+    private boxType = {
+        boxInitial: 'box-intial',
+        boxTextarea: 'box-textarea',
+        boxBrowseFile: 'box-browse-file',
+        boxImg: 'box-img',
+        boxVideo: 'box-video',
+        boxBrowseVideo: 'box-browse-video'
+    };
+    private contents = {
         event: {
-            addBox: 'addBox',
+            addElBox: 'addElBox',
+            addElTextArea: 'addElTextArea',
+            addElBrowseFile: 'addElBrowseFile',
+            addElBrowseVideo: 'addElBrowseVideo',
             addEventBox: 'addEventBox',
-            addTextArea: 'addTextArea',
-            addCssCurrentBoxBefore: 'addCssCurrentBoxBefore',
-            addCssCurrentBoxAfter: 'addCssCurrentBoxAfter',
-            addCssBoxBrowseSize: 'addCssBoxBrowseSize',
+            addStyleCurrentBoxBefore: 'addStyleCurrentBoxBefore',
+            addStyleCurrentBoxAfter: 'addStyleCurrentBoxAfter',
+            addStyleBoxBrowseSize: 'addStyleBoxBrowseSize',
             triggerCurrentBox: 'triggerCurrentBox',
             triggerAttachFileModal: 'triggerAttachFileModal',
             triggerDragBoxes: 'triggerDragBoxes',
             triggerToolbars: 'triggerToolbars',
-            triggerbtnBrowseFile: 'triggerbtnBrowseFile',
-            removeBox: 'removeBox',
-            removeCssBorderBox: 'removeCssBorderBox',
-            removeCssToolbar: 'removeCssToolbar',
-            removeCssBoxCurrent: 'removeCssBoxCurrent',
-            removeCssBoxActive: 'removeCssBoxActive',
-            removeCssBoxBrowseSize: 'removeCssBoxBrowseSize'
+            triggerBrowseFile: 'triggerBrowseFile',
+            triggerBrowseVideo: 'triggerBrowseVideo',
+            removeElBox: 'removeElBox',
+            removeStyleBorderBox: 'removeStyleBorderBox',
+            removeStyleBoxCurrent: 'removeStyleBoxCurrent',
+            removeStyleBoxActive: 'removeStyleBoxActive',
+            removeStyleBoxBrowseFileSize: 'removeStyleBoxBrowseSize',
+            removeStyleBoxBrowseVideoSize: 'removeStyleBoxBrowseVideoSize',
+            removeStyleBoxType: 'removeStyleBoxType',
+            removeContent: 'removeBoxContent'
         },
         data: {
-            addDataBox: 'addDataBox',
-            addDataTextArea: 'addDataTextArea',
-            retrieveDataBox: 'retrieveDataBox',
-            retrieveDataTextArea: 'retrieveDataTextArea',
-            findIndexBox: 'findBox',
-            findBoxEmpty: 'findBoxEmpty'
+            addBoxData: 'addBoxData',
+            addTextAreaData: 'addTextAreaData',
+            addImgData: 'addImgData',
+            retrieveBoxData: 'retrieveBoxData',
+            retrieveTextAreaData: 'retrieveTextAreaData',
+            findIndexBoxData: 'findIndexBoxData',
+            findEmptyData: 'findEmptyData'
         },
-        toobar: {
-            addInitalToolbar: 'addInitalToolbar',
-            addTextareaToolbar: 'addTextareaToolbar',
-            addBrowseToolbar: 'addBrowseToolbar'
+        toolbar: {
+            addInitalTool: 'addInitalTool',
+            addTextareaTool: 'addTextareaTool',
+            addBrowseFileTool: 'addBrowseFileTool',
+            addBrowseVideoTool: 'addBrowseVideoTool',
+            addVideoTool: 'addVideoTool',
+            removeTool: 'removeTool',
+            cancelTool: 'cancelTool'
         }
     };
     private boxes: BoxContentModel[] = new Array<BoxContentModel>();
     private textAreas: TextAreaContentModel[] = new Array<TextAreaContentModel>();
+    private imgs: ImgContentModel[] = new Array<ImgContentModel>();
+    private videos: VideoContentModel[] = new Array<VideoContentModel>();
     constructor(
-        private commonService: CommonService
+        private commonService: CommonService,
+        private contentService: ContentService
     ) { }
     ngOnInit() {
-        this.initalDB();
+        this.contentElement.subscribe((result) => {
+            this.rootElement.html(result.html);
+            this.addElements(this.contents.event.addEventBox).then(() => {
+                this.retrieveData(this.contents.data.addBoxData, result);
+                this.retrieveData(this.contents.data.addTextAreaData, result);
+                this.retrieveData(this.contents.data.addImgData, result);
+            });
+        });
+        this.contentTypeSelected.subscribe((contentType) => {
+            this.currentContentType = contentType;
+            this.addElements(this.contents.event.addElBox);
+        });
         this.triggerElement.subscribe((event) => {
             if (event === Constants.event.click.add) {
-                this.addElements(this.constants.event.addBox).then(() => {
-                    this.addElements(this.constants.event.addCssCurrentBoxBefore, this.currentBox);
+                this.addElements(this.contents.event.addElBox).then(() => {
+                    this.addElements(this.contents.event.addStyleCurrentBoxBefore, this.currentBox);
                 });
             } else if (event === Constants.event.click.save) {
                 this.savePage();
@@ -82,152 +124,173 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
         this.rootElement = $(this.contentTemplate.nativeElement);
         //   window.indexedDB = window.indexedDB;
     }
-    private async initalDB() {
-        const requestDB = await window.indexedDB.open('e-learning', 1);
-        requestDB.onerror = ((error) => {
-            console.error('error: ', error);
-        });
-        requestDB.onsuccess = ((event) => {
-            this.indexDB = requestDB.result;
-            this.loadHTMLFromDB();
-            // console.log('success: ' + this.indexDB);
-        });
-        requestDB.onupgradeneeded = ((event: any) => {
-            const db = event.target.result;
-            const objectStore = db.createObjectStore('templates', { keyPath: 'id' });
-        });
-    }
-    private loadHTMLFromDB() {
-        const transaction = this.indexDB.transaction(['templates']);
-        const objectStore = transaction.objectStore('templates');
-        const request = objectStore.get('01');
-
-        request.onerror = ((event) => {
-            console.error('Unable to retrieve daa from database!');
-        });
-
-        request.onsuccess = ((event) => {
-            // Do something with the request.result!
-            if (request.result) {
-                console.log('☛ Result from Database : ', request.result);
-                this.rootElement.html(request.result.html);
-                this.addElements(this.constants.event.addEventBox).then(() => {
-                    this.retrieveData(this.constants.data.addDataBox, request.result);
-                    this.retrieveData(this.constants.data.addDataTextArea, request.result);
-                });
-            } else {
-                console.error('couldn\'t be found in your database!');
-            }
-        });
-
-
-    }
-    private async addElements(action: string, element?: any) {
-        if (action === this.constants.event.addBox || action === this.constants.event.addEventBox) {
+    private async addElements(action: string, element?: any, subaction?: string, subElement?: any) {
+        if (action === this.contents.event.addElBox || action === this.contents.event.addEventBox) {
             this.setCurrentBox();
-            if (action === this.constants.event.addBox) {
+            this.setCurrentToolbar();
+            this.setCurrentBoxBackground();
+            if (action === this.contents.event.addElBox) {
                 const numberOfBox = this.rootElement.find('.content-box').length;
-                this.rootElement.append('<div style="z-index:999" id=box_' + numberOfBox + ' class="content-box"></div>');
+                if (this.currentContentType.name === this.contentType.freedomLayout.name) {
+                    this.rootElement.append('<div style="z-index:999" id=box_' + numberOfBox + ' class="content-box ' + this.boxType.boxInitial + '"></div>');
+                    $('[id="box_' + numberOfBox + '"]').
+                        $('[id="box_' + numberOfBox + '"]').css('position', 'absolute');
+                    $('[id="box_' + numberOfBox + '"]').css('width', '300px');
+                } else if (this.currentContentType.name === this.contentType.oneLayout.name) {
+                    this.rootElement.append('<div class="row"><div class="col-12"><div style=""id=box_' + numberOfBox + ' class="content-box ' + this.boxType.boxInitial + '"></div></div></div>');
+                } else if (this.currentContentType.name === this.contentType.twoLayout.name) {
+                    this.rootElement.append(
+                        '<div class="row">' +
+                        '<div class="col">' +
+                        '<div style=""id=box_' + numberOfBox + ' class="content-box ' + this.boxType.boxInitial + '">' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="col">' +
+                        '<div style=""id=box_' + (numberOfBox + 1) + ' class="content-box ' + this.boxType.boxInitial + '">' +
+                        '</div>' +
+                        '</div>');
+                }
+                this.removeElements(this.contents.toolbar.removeTool);
                 this.setCurrentBox($('#box_' + numberOfBox));
-                this.addData(this.constants.data.addDataBox, 'box_' + numberOfBox);
-                this.setCurrentToolbar();
+                const loopForAddData = this.currentContentType.id || 0;
+                this.addData(this.contents.data.addBoxData, 'box_' + numberOfBox);
             }
-            await this.rootElement.find('.content-box').draggable({
-                containment: this.contentTemplate.nativeElement,
-                stack: '.content-box',
-                start: ((event) => {
-                    const elementFromId: any = $('[id="' + event.target.id + '"]');
-                    this.addElements(this.constants.event.addCssCurrentBoxBefore, elementFromId);
-                }),
-                stop: ((event) => {
-                    setTimeout(() => {
+            if (this.currentContentType.name === this.contentType.freedomLayout.name) {
+                this.rootElement.find('.content-box').draggable({
+                    containment: this.contentTemplate.nativeElement,
+                    stack: '.content-box',
+                    scroll: false,
+                    start: ((event) => {
+                        this.setCurrentBoxBackground(Constants.element.css.bgWhiteColor);
                         const elementFromId: any = $('[id="' + event.target.id + '"]');
-                        this.addElements(this.constants.event.addCssCurrentBoxAfter, elementFromId);
-                    });
-                }),
+                        this.addElements(this.contents.event.addStyleCurrentBoxBefore, elementFromId);
+                    }),
+                    stop: ((event) => {
+                        this.setCurrentBoxBackground();
+                        const elementFromId: any = $('[id="' + event.target.id + '"]');
+                        this.addElements(this.contents.event.addStyleCurrentBoxAfter, elementFromId);
+                    }),
+                });
+            }
+            this.rootElement.find('.content-box').resizable({
+                handles: '',
             })
                 .resizable({
-                    handles: '',
-                })
-                .resizable({
-                    handles: 'n, e, s, w',
+                    handles: 'n, e, s, w, se, ne, sw, nw',
                     containment: this.contentTemplate.nativeElement,
                     minHeight: Constants.element.limit.resize.height,
                     minWidth: Constants.element.limit.resize.width,
                     start: ((event) => {
-                        console.log('testyy');
+                        this.setCurrentBoxBackground(Constants.element.css.bgWhiteColor);
                         const elementFromId: any = $('[id="' + event.target.id + '"]');
-                        this.addElements(this.constants.event.addCssCurrentBoxBefore, elementFromId);
+                        this.addElements(this.contents.event.addStyleCurrentBoxBefore, elementFromId);
                     }),
                     stop: ((event) => {
-                        console.log('testxx');
+                        this.setCurrentBoxBackground();
                         const elementFromId: any = $('[id="' + event.target.id + '"]');
-                        setTimeout(() => {
-                            this.addElements(this.constants.event.addCssCurrentBoxAfter, elementFromId);
-                        });
+                        this.addElements(this.contents.event.addStyleCurrentBoxAfter, elementFromId);
+
                     }),
                 });
-            this.triggerElements(this.constants.event.triggerCurrentBox);
-            this.triggerElements(this.constants.event.triggerDragBoxes);
-            this.triggerElements(this.constants.event.triggerToolbars);
-            this.triggerElements(this.constants.event.triggerToolbars, this.currentBox);
-        } else if (action === this.constants.event.addCssCurrentBoxBefore) {
+            if (this.currentContentType.name === this.contentType.freedomLayout.name) {
+                this.triggerElements(this.contents.event.triggerDragBoxes);
+            }
+
+            this.triggerElements(this.contents.event.triggerCurrentBox);
+            this.triggerElements(this.contents.event.triggerToolbars);
+            this.triggerElements(this.contents.event.triggerBrowseFile, this.currentBox);
+            this.addElements(this.contents.event.addStyleCurrentBoxBefore, this.currentBox);
+        } else if (action === this.contents.event.addStyleCurrentBoxBefore) {
             this.setCurrentBox(element);
             this.addBoxCurrent(element);
             this.addBorderBox(element);
             this.addBoxActive(element);
             this.setCurrentToolbar();
-            const IndexBox = this.findData(this.constants.data.findIndexBox, element);
+            const IndexBox = this.findData(this.contents.data.findIndexBoxData, element);
             if (IndexBox !== -1) {
                 if (this.boxes[IndexBox].isEmpty) {
                     this.addToolBarBox(this.currentToolbar, element);
                 }
             }
-        } else if (action === this.constants.event.addCssCurrentBoxAfter) {
+        } else if (action === this.contents.event.addStyleCurrentBoxAfter) {
             this.setCurrentBox(element);
             this.addBoxCurrent(element);
             this.addBorderBox(element);
             this.setCurrentToolbar();
-            this.removeElements(this.constants.event.removeCssBoxActive);
-            const IndexBox = this.findData(this.constants.data.findIndexBox, element);
+            this.removeElements(this.contents.event.removeStyleBoxActive);
+            const IndexBox = this.findData(this.contents.data.findIndexBoxData, element);
             if (IndexBox !== -1) {
                 if (this.boxes[IndexBox].isEmpty) {
                     this.addToolBarBox(this.currentToolbar, element);
                 }
             }
-        } else if (action === this.constants.event.addTextArea) {
-            this.setCurrentToolbar(this.constants.toobar.addTextareaToolbar);
+        } else if (action === this.contents.event.addElTextArea) {
+            this.setCurrentToolbar(this.contents.toolbar.addTextareaTool);
             this.addToolBarBox(this.currentToolbar, element);
-            const IndexBox = this.findData(this.constants.data.findIndexBox, element);
+            const IndexBox = this.findData(this.contents.data.findIndexBoxData, element);
             if (IndexBox !== -1) {
                 this.boxes[IndexBox].isEmpty = false;
             }
             element.append('<textarea id="' + element.attr('id') + '_textarea" class="content-textarea"></textarea>');
             element.find('textarea').focus();
+        } else if (action === this.contents.event.addElBrowseFile) {
+            const reader = new FileReader();
+            reader.onload = ((event: any) => {
+                this.imgs.push({
+                    id: element.attr('id') + '_img',
+                    path: event.target.result
+                });
+                element.append('<img src="' + event.target.result + '" id="' + element.attr('id') + '_img" class="content-img"></img>');
+            });
+            reader.readAsDataURL(this.currentBrowseFile[0]);
+        } else if (action === this.contents.event.addElBrowseVideo) {
+            if (subaction === 'videoSource') {
+                const reader = new FileReader();
+                reader.onload = ((event: any) => {
+                    this.videos.push({
+                        id: element.attr('id') + '_video',
+                        path: event.target.result
+                    });
+                    element.append('<video src="' + event.target.result + '" id="' + element.attr('id') + '_video" class="content-video" controls ></video>');
+                });
+                reader.readAsDataURL(this.currentBrowseFile[0]);
+            } else if (subaction === 'videoUrl') {
+                this.videos.push({
+                    id: element.attr('id') + '_video',
+                    path: this.currentBrowseFile
+                });
+                element.append('<iframe src="' + this.currentBrowseFile + '" id="' + element.attr('id') + '_video" class="content-video" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>');
+            }
         }
     }
     private triggerElements(action: string, element?: any) {
-        if (action === this.constants.event.triggerCurrentBox) {
+        if (action === this.contents.event.triggerCurrentBox) {
             this.rootElement.find('.content-box').click((event) => {
-                const elementFromId: any = this.currentElement = $('[id="' + event.target.id + '"]');
-                if (/_textarea/.test(event.target.id)) {
-                    $(elementFromId).focus();
+                if (event.target.id !== this.currentBox.attr('id')) {
+                    const elementFromId: any = this.currentElement = $('[id="' + event.target.id + '"]');
+                    if (/_textarea/.test(event.target.id)) {
+                        $(elementFromId).focus();
+                        this.removeElements(this.contents.toolbar.removeTool);
+                    }
+                    if (event.target.id && !/_textarea/.test(event.target.id)) {
+                        this.setCurrentBox(elementFromId);
+                    } else {
+                        this.setCurrentBox(elementFromId.parent());
+                    }
+                    this.currentBox.draggable({ disabled: true });
+                    this.addElements(this.contents.event.addStyleCurrentBoxAfter, this.currentBox);
+                    // if (!this.currentBox.hasClass('content-box-current')) {
+                    //     this.addElements(this.contents.event.addStyleCurrentBoxBefore, this.currentBox);
+                    // } else {
+                    //     this.addElements(this.contents.event.addStyleCurrentBoxAfter, this.currentBox);
+                    // }
+                    this.setCurrentBoxBackground();
                 }
-                if (event.target.id && !/_textarea/.test(event.target.id)) {
-                    this.setCurrentBox(elementFromId);
-                } else {
-                    this.setCurrentBox(elementFromId.parent());
-                }
-                this.currentBox.draggable({ disabled: true });
-                if (!this.currentBox.hasClass('content-box-current')) {
-                    this.addElements(this.constants.event.addCssCurrentBoxBefore, this.currentBox);
-                } else {
-                    this.addElements(this.constants.event.addCssCurrentBoxAfter, this.currentBox);
-                }
+
             });
-        } else if (action === this.constants.event.triggerAttachFileModal) {
+        } else if (action === this.contents.event.triggerAttachFileModal) {
             element.modal('show');
-        } else if (action === this.constants.event.triggerDragBoxes) {
+        } else if (action === this.contents.event.triggerDragBoxes) {
             if (this.commonService.isPlatform === Constants.platform.device) {
                 this.rootElement.find('.content-box').on('touchmove', (event) => {
                     this.rootElement.find('.content-box').draggable({ disabled: false, cancel: '' });
@@ -237,92 +300,191 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                     this.rootElement.find('.content-box').draggable({ disabled: false, cancel: '' });
                 });
             }
-        } else if (action === this.constants.event.triggerToolbars) {
+        } else if (action === this.contents.event.triggerToolbars) {
             this.rootElement.find('.content-toolbar').click((event) => {
                 event.stopPropagation();
-                if (event.target.id === 'img-picker') {
-                    this.setCurrentToolbar(this.constants.toobar.addBrowseToolbar);
-                    this.addToolBarBox(this.currentToolbar,this.currentBox);
+                if (event.target.id === 'file-browse') {
+                    this.setCurrentToolbar(this.contents.toolbar.addBrowseFileTool);
+                    this.setCurrentBoxBackground();
+                    console.log(event);
+                    this.removeElements(this.contents.event.removeStyleBoxType);
+                    this.currentBox.addClass(this.boxType.boxBrowseFile);
+                    this.addToolBarBox(this.currentToolbar, this.currentBox);
                     // this.triggerElements(this.constants.event.triggerAttachFileModal, $('#attach-file-modal'));
                 } else if (event.target.id === 'trash') {
-                    this.removeElements(this.constants.event.removeBox, this.currentBox);
+                    this.removeElements(this.contents.event.removeElBox);
                 } else if (event.target.id === 'text-area') {
-                    this.addElements(this.constants.event.addTextArea, this.currentBox);
+                    this.removeElements(this.contents.event.removeStyleBoxType);
+                    this.currentBox.addClass(this.boxType.boxTextarea);
+                    this.addElements(this.contents.event.addElTextArea, this.currentBox);
+                } else if (event.target.id === 'video-browse') {
+                    this.setCurrentToolbar(this.contents.toolbar.addBrowseVideoTool);
+                    this.removeElements(this.contents.event.removeStyleBoxType);
+                    this.currentBox.addClass(this.boxType.boxBrowseVideo);
+                    this.addToolBarBox(this.currentToolbar, this.currentBox);
+                } else if (event.target.id === 'cancel') {
+                    this.removeElements(this.contents.event.removeStyleBoxType);
+                    this.removeElements(this.contents.event.removeContent);
+                    this.setCurrentToolbar(this.contents.toolbar.addInitalTool);
+                    this.addToolBarBox(this.contents.toolbar.addInitalTool, element);
                 }
             });
-        } else if (action === this.constants.event.triggerbtnBrowseFile) {
+        } else if (action === this.contents.event.triggerBrowseFile) {
             element.find('#btn-file').click((event) => {
                 element.find('.content-browse-file').trigger('click');
+                element.find('.content-browse-file').change((fileEvent) => {
+                    this.removeElements(this.contents.event.removeStyleBoxType);
+                    this.currentBox.addClass(this.boxType.boxImg);
+                    this.setCurrentToolbar(this.contents.toolbar.cancelTool);
+                    this.addToolBarBox(this.contents.toolbar.cancelTool, element);
+                    this.currentBrowseFile = fileEvent.target.files;
+                    console.log(' ❏ File :', this.currentBrowseFile);
+                    this.setCurrentBoxBackground();
+                    this.addElements(this.contents.event.addElBrowseFile, element);
+                });
             });
-            element.find('.toolbar-browse').on('dragover', (event) => {
+            element.find('.toolbar-browse-file').on('dragover', (event) => {
                 event.preventDefault();
                 event.stopPropagation();
             });
-            element.find('.toolbar-browse').on('dragleave',  (event) => {
+            element.find('.toolbar-browse-file').on('dragleave', (event) => {
                 event.preventDefault();
                 event.stopPropagation();
             });
-            element.find('.toolbar-browse').on('drop', (event) => {
+            element.find('.toolbar-browse-file').on('drop', (event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                alert('Dropped!');
+                this.removeElements(this.contents.event.removeStyleBoxType);
+                this.currentBox.addClass(this.boxType.boxImg);
+                this.setCurrentToolbar(this.contents.toolbar.cancelTool);
+                this.addToolBarBox(this.contents.toolbar.cancelTool, element);
+                this.currentBrowseFile = event.originalEvent.dataTransfer.files;
+                console.log(' ❏ File :', this.currentBrowseFile);
+                this.setCurrentBoxBackground();
+                this.addElements(this.contents.event.addElBrowseFile, element);
             });
-            // element.find('.toolbar-browse').on('mouseover', (event) => {
-            //     console.log('test');
-            //     //    event.preventDefault();
-            //     //     event.stopPropagation();
+        } else if (action === this.contents.event.triggerBrowseVideo) {
+            element.find('#btn-video').click((event) => {
+                element.find('.content-browse-video').trigger('click');
+                element.find('.content-browse-video').change((fileEvent) => {
 
-            // });
-            // console.log(element);
-            // element.find('.content-toolbar').find('.content-browse-file').find('button').click((event) => {
-            //     console.log('xxxxx');
-            //     element.find('.content-browse-file').trigger('click');
-            // });
+                    this.removeElements(this.contents.event.removeStyleBoxType);
+                    this.currentBox.addClass(this.boxType.boxVideo);
+                    this.setCurrentToolbar(this.contents.toolbar.cancelTool);
+                    this.addToolBarBox(this.contents.toolbar.cancelTool, element);
+                    this.currentBrowseFile = fileEvent.target.files;
+                    console.log(' ❏ Video :', this.currentBrowseFile);
+                    this.setCurrentBoxBackground();
+                    this.addElements(this.contents.event.addElBrowseVideo, element);
+                });
+            });
+            element.find('.toolbar-browse-video').find('.toolbar-drag').on('dragover', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+            });
+            element.find('.toolbar-browse-video').find('.toolbar-drag').on('dragleave', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+            });
+            element.find('.toolbar-browse-video').find('.toolbar-drag').on('drop', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                this.removeElements(this.contents.event.removeStyleBoxType);
+                this.currentBox.addClass(this.boxType.boxVideo);
+                this.setCurrentToolbar(this.contents.toolbar.cancelTool);
+                this.addToolBarBox(this.contents.toolbar.cancelTool, element);
+                this.currentBrowseFile = event.originalEvent.dataTransfer.files;
+                console.log(' ❏ Video :', this.currentBrowseFile);
+                this.setCurrentBoxBackground();
+                this.addElements(this.contents.event.addElBrowseVideo, element, 'videoSource');
+            });
+            element.find('.toolbar-browse-video').find('#input-video-url').click(() => {
+                element.find('.toolbar-browse-video').find('#input-video-url').focus();
+                element.find('.toolbar-browse-video').find('#input-video-url').on('input', this.commonService.debounce((event) => {
+                    if (event.target.value) {
+                        const url = event.target.value;
+                        const youtubeId = this.commonService.getYoubuteId(url);
+                        if (youtubeId != null) {
+                            this.currentBrowseFile = 'https://www.youtube.com/embed/' + youtubeId[1];
+                        } else {
+                            console.log('The youtube url is not valid.');
+                            this.currentBrowseFile = event.target.value;
+                        }
+                        this.removeElements(this.contents.event.removeStyleBoxType);
+                        this.currentBox.addClass(this.boxType.boxVideo);
+                        this.setCurrentToolbar(this.contents.toolbar.cancelTool);
+                        this.addToolBarBox(this.contents.toolbar.cancelTool, element);
+                        console.log(' ❏ Video :', this.currentBrowseFile);
+                        this.setCurrentBoxBackground();
+                        this.addElements(this.contents.event.addElBrowseVideo, element, 'videoUrl');
+
+                    }
+                }, 500));
+            });
         }
     }
     private removeElements(action: string, element?: any) {
-        if (action === this.constants.event.removeBox) {
-            element.remove();
-        } else if (action === this.constants.event.removeCssToolbar) {
-            this.rootElement.find('.content-toolbar').remove();
-        } else if (action === this.constants.event.removeCssBorderBox) {
+        if (action === this.contents.event.removeElBox) {
+            this.currentBox.remove();
+        } else if (action === this.contents.toolbar.removeTool) {
+            this.rootElement.find('.content-box').find('.content-toolbar').remove();
+        } else if (action === this.contents.event.removeStyleBorderBox) {
             this.rootElement.find('.content-box').removeClass('border border-primary');
-        } else if (action === this.constants.event.removeCssBoxActive) {
+        } else if (action === this.contents.event.removeStyleBoxActive) {
             this.rootElement.find('.content-box').removeClass('content-box-active');
-        } else if (action === this.constants.event.removeCssBoxCurrent) {
+        } else if (action === this.contents.event.removeStyleBoxCurrent) {
             this.rootElement.find('.content-box').removeClass('content-box-current');
-        } else if (action === this.constants.event.removeCssBoxBrowseSize) {
-            this.rootElement.find('.content-box').removeClass('box-browse-size');
+        } else if (action === this.contents.event.removeStyleBoxBrowseFileSize) {
+            this.rootElement.find('.content-box').removeClass('box-browse-file-size');
+        } else if (action === this.contents.event.removeStyleBoxBrowseVideoSize) {
+            this.rootElement.find('.content-box').removeClass('box-browse-video-size');
+        } else if (action === this.contents.event.removeStyleBoxType) {
+            this.currentBox.removeClass(this.boxType.boxInitial);
+            this.currentBox.removeClass(this.boxType.boxTextarea);
+            this.currentBox.removeClass(this.boxType.boxImg);
+            this.currentBox.removeClass(this.boxType.boxBrowseFile);
+            this.currentBox.removeClass(this.boxType.boxVideo);
+            this.currentBox.removeClass(this.boxType.boxBrowseVideo);
+        } else if (action === this.contents.event.removeContent) {
+            this.currentBox.find('.content-textarea').remove();
+            this.currentBox.find('.content-img').remove();
+            this.currentBox.find('.content-file').remove();
+            this.currentBox.find('.content-video').remove();
         }
     }
-    private addBoxBrowseSize(element: any) {
-        this.removeElements(this.constants.event.removeCssBoxBrowseSize);
-        element.addClass('box-browse-size');
+    private addBoxBrowseSizeFile(element: any) {
+        this.removeElements(this.contents.event.removeStyleBoxBrowseFileSize);
+        element.addClass('box-browse-file-size');
+    }
+    private addBoxBrowseSizeVideo(element: any) {
+        this.removeElements(this.contents.event.removeStyleBoxBrowseFileSize);
+        element.addClass('box-browse-video-size');
     }
     private addBoxCurrent(element: any) {
-        this.removeElements(this.constants.event.removeCssBoxCurrent);
+        this.removeElements(this.contents.event.removeStyleBoxCurrent);
         element.addClass('content-box-current');
     }
     private addBoxActive(element: any) {
-        this.removeElements(this.constants.event.removeCssBoxActive);
+        this.removeElements(this.contents.event.removeStyleBoxActive);
         element.addClass('content-box-active');
     }
     private addBorderBox(element: any) {
-        this.removeElements(this.constants.event.removeCssBorderBox);
+        this.removeElements(this.contents.event.removeStyleBorderBox);
         element.addClass('border border-primary');
     }
     private async addToolBarBox(action: string, element: any) {
         let htmlTootBar;
-        this.removeElements(this.constants.event.removeCssToolbar);
-        this.removeElements(this.constants.event.removeCssBoxBrowseSize);
-        if (action === this.constants.toobar.addInitalToolbar) {
-            this.removeElements(this.constants.event.removeCssToolbar);
+        this.removeElements(this.contents.toolbar.removeTool);
+        this.removeElements(this.contents.event.removeStyleBoxBrowseFileSize);
+        this.removeElements(this.contents.event.removeStyleBoxBrowseVideoSize);
+        if (action === this.contents.toolbar.addInitalTool) {
+            this.removeElements(this.contents.toolbar.removeTool);
             htmlTootBar = '<div class="row content-toolbar toolbar-inital">'
                 + '<div class="col-12">'
                 + '<div class="row toolbar-picker">'
                 + '<div class="col-4"><img id="text-area" src="assets/imgs/contentPage/text-area.svg"></div>'
-                + '<div class="col-4"><img id="img-picker" src="assets/imgs/contentPage/image-picker.svg"> </div>'
-                + '<div class="col-4"><img src="assets/imgs/contentPage/video-camera.svg"> </div>'
+                + '<div class="col-4"><img id="file-browse" src="assets/imgs/contentPage/image-picker.svg"> </div>'
+                + '<div class="col-4"><img id="video-browse" src="assets/imgs/contentPage/video-camera.svg"> </div>'
                 + '</div>'
                 + '<div class="row toolbar-function">'
                 + '<div class="col-12"><img id="trash" src="assets/imgs/contentPage/trash.svg"></div>'
@@ -330,9 +492,8 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                 + '</div>'
                 + '</div>';
             this.rootElement.find(element).append(htmlTootBar);
-        }
-        if (action === this.constants.toobar.addBrowseToolbar) {
-            htmlTootBar = '<div class="row content-toolbar toolbar-browse">'
+        } else if (action === this.contents.toolbar.addBrowseFileTool) {
+            htmlTootBar = '<div class="row content-toolbar toolbar-browse-file">'
                 + '<div class="col-12">'
                 + '<input type="file" class="content-browse-file" id="input-file">'
                 + '<img src="assets/imgs/contentPage/browse-file.svg">'
@@ -341,17 +502,46 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                 + '</div>'
                 + '</div>';
             this.rootElement.find(element).append(htmlTootBar);
-            this.addBoxBrowseSize(element);
-            this.triggerElements(this.constants.event.triggerbtnBrowseFile, element);
-        }
-        if (action === this.constants.toobar.addTextareaToolbar) {
+            this.addBoxBrowseSizeFile(element);
+            this.triggerElements(this.contents.event.triggerBrowseFile, element);
+        } else if (action === this.contents.toolbar.addBrowseVideoTool) {
+            htmlTootBar = '<div class="row content-toolbar toolbar-browse-video">'
+                + '<div class="col-5 toolbar-drag">'
+                + '<input type="file" class="content-browse-video" accept="video/mp4,video/x-m4v,video/*" id="input-video">'
+                + '<img src="assets/imgs/contentPage/browse-file.svg">'
+                + '<p class="content-font-title1">Drag & Drop your files</p>'
+                + '<button id="btn-video" type="button" class="btn btn-primary">Browse</button>'
+                + '</div>'
+                + '<div class="col-2">'
+                + 'OR'
+                + '</div>'
+                + '<div class="col-5 toolbar-drag">'
+                + '<div class="form-group">'
+                + '<input placeholder="https://example.com" type="text" class="form-control" id="input-video-url">'
+                + '</div>'
+                + '<p class="content-font-title1">Get your URL</p>'
+                + '</div>'
+                + '</div>';
+            this.rootElement.find(element).append(htmlTootBar);
+            this.addBoxBrowseSizeVideo(element);
+            this.triggerElements(this.contents.event.triggerBrowseVideo, element);
+        } else if (action === this.contents.toolbar.addTextareaTool) {
             htmlTootBar = '<div class="row content-toolbar toolbar-textarea">'
                 + '<div class="col-12">'
                 + '</div>'
                 + '</div>';
+        } else if (action === this.contents.toolbar.cancelTool) {
+            htmlTootBar = '<div class="row content-toolbar toolbar-cancel">'
+                + '<div class="col-12">'
+                + '<div  class="row toolbar-function">'
+                + '<div id="cancel" class="col-12">X</div>'
+                + '</div>'
+                + '</div>'
+                + '</div>';
+            this.rootElement.find(element).append(htmlTootBar);
         }
 
-        this.triggerElements(this.constants.event.triggerToolbars, element);
+        this.triggerElements(this.contents.event.triggerToolbars, element);
     }
     private setCurrentBox(element?) {
         if (element) {
@@ -360,18 +550,31 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
             this.currentBox = $(this.rootElement).find('.content-box-current');
         }
     }
+    private setCurrentBoxBackground(bgColor?: string) {
+        // if (bgColor) {
+        //     this.currentBox.css('background', bgColor);
+        // } else {
+        //     if (this.currentToolbar === this.constants.toolbar.addBrowseToolbar) {
+        //         this.currentBox.css('background', Constants.element.css.bgWhiteColor);
+        //     } else {
+        //         this.currentBox.css('background', Constants.element.css.bgNoneColor);
+        //     }
+        // }
+    }
     private setCurrentToolbar(action?) {
         if (action) {
             this.currentToolbar = action;
         } else {
-            if (this.currentBox.find('.content-toolbar').hasClass('toolbar-inital')) {
-                this.currentToolbar = this.constants.toobar.addInitalToolbar;
-            } else if (this.currentBox.find('.content-toolbar').hasClass('toolbar-browse')) {
-                this.currentToolbar = this.constants.toobar.addBrowseToolbar;
-            } else if (this.currentBox.find('.content-toolbar').hasClass('toolbar-textarea')) {
-                this.currentToolbar = this.constants.toobar.addTextareaToolbar;
+            if (this.currentBox.hasClass(this.boxType.boxBrowseFile)) {
+                this.currentToolbar = this.contents.toolbar.addBrowseFileTool;
+            } else if (this.currentBox.hasClass(this.boxType.boxTextarea)) {
+                this.currentToolbar = this.contents.toolbar.addTextareaTool;
+            } else if (this.currentBox.hasClass(this.boxType.boxBrowseVideo)) {
+                this.currentToolbar = this.contents.toolbar.addBrowseVideoTool;
+            } else if (this.currentBox.hasClass(this.boxType.boxImg) || this.currentBox.hasClass(this.boxType.boxVideo)) {
+                this.currentToolbar = this.contents.toolbar.cancelTool;
             } else {
-                this.currentToolbar = this.constants.toobar.addInitalToolbar;
+                this.currentToolbar = this.contents.toolbar.addInitalTool;
             }
         }
 
@@ -380,13 +583,13 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
         const requestTran = this.indexDB.transaction(['templates'], 'readwrite');
         const objectStore = requestTran.objectStore('templates');
         this.createDataToSave().then(() => {
-            // this.removeElements(this.constants.event.removeCssBoxActive);
-            // this.removeElements(this.constants.event.removeCssBorderBox);
-            // this.removeElements(this.constants.event.removeCssToolbar);
-            const objectTemplate: TemplateModel = {
+            const objectTemplate: ContentModel = {
                 id: '01', html: this.rootElement.html(), elements: {
+                    subForms: [],
                     boxes: this.boxes,
-                    textAreas: this.textAreas
+                    textAreas: this.textAreas,
+                    imgs: this.imgs,
+                    videos: this.videos
                 }
             };
             if (objectStore.get('01')) {
@@ -405,27 +608,34 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
 
     }
     private addData(action: string, id: string, element?) {
-        if (action === this.constants.data.addDataBox) {
+        if (action === this.contents.data.addBoxData) {
             this.boxes.push({
                 id,
-                isEmpty: true
+                isEmpty: true,
+                contentType: this.currentContentType.name
             });
         }
     }
     private findData(action: string, element?) {
-        if (action === this.constants.data.findIndexBox) {
+        if (action === this.contents.data.findIndexBoxData) {
             return this.boxes.findIndex(box => box.id === element.attr('id'));
         }
     }
-    private retrieveData(action: string, results: TemplateModel) {
-        if (action === this.constants.data.addDataBox) {
+    private retrieveData(action: string, results: ContentModel) {
+        if (action === this.contents.data.addBoxData) {
             this.boxes = results.elements.boxes;
-        } else if (action === this.constants.data.addDataTextArea) {
+        } else if (action === this.contents.data.addTextAreaData) {
             this.textAreas = results.elements.textAreas;
             this.textAreas.forEach((textArea) => {
                 $(this.rootElement).find('[id="' + textArea.id + '"]').val(textArea.value);
             });
         }
+        // else if (action === this.constants.data.addDataImg) {
+        //     this.imgs = results.elements.imgs;
+        //     this.imgs.forEach((img) => {
+        //         $(this.rootElement).find('[id="' + img.id + '"]').val(textArea.value);
+        //     });
+        // }
     }
     private async createDataToSave() {
         await $(this.rootElement).find('.content-textarea').each((index, element) => {
