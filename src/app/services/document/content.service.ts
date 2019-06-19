@@ -6,7 +6,7 @@ import { ContentModel } from '../../models/content/content.model';
 @Injectable()
 export class ContentService {
     constructor() { }
-    private indexDB: any;
+    public indexDB: any;
     public loadHTMLFromDB(): Observable<ContentModel> {
         return new Observable(subscriber => {
             const requestDB = window.indexedDB.open('e-learning', 1);

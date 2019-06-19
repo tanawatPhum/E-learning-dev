@@ -580,7 +580,7 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
 
     }
     private savePage() {
-        const requestTran = this.indexDB.transaction(['templates'], 'readwrite');
+        const requestTran = this.contentService.indexDB.transaction(['templates'], 'readwrite');
         const objectStore = requestTran.objectStore('templates');
         this.createDataToSave().then(() => {
             const objectTemplate: ContentModel = {

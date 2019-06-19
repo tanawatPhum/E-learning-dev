@@ -18,7 +18,7 @@ export class DocumentPageComponent implements OnInit {
     ) { }
     ngOnInit() {
         this.contentService.loadHTMLFromDB().subscribe((result) => {
-            this.contentElement.next(result);
+           this.contentElement.next(result);
         });
     }
     private addElement() {
