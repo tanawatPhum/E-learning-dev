@@ -1,1 +1,25 @@
 // component css goes here
+.content-form-group {
+    margin-top: 10px
+}
+
+.content-show-preview {
+    display: block;
+    margin-top: 20px;
+}
+
+#content-preview {
+    // width: 100%;
+    // height: 100%;
+}
+
+fieldset {
+    min-width: 0;
+    padding: 60px;
+    margin: 60px;
+    border: 0;
+}
+
+.content-document-goback-button {
+    float: left;
+}

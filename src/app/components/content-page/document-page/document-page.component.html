@@ -26,5 +26,9 @@
     <img src="assets\imgs\documentPage\content4.svg" (click)="createContent(contentType.threeLayout)">
     <img src="assets\imgs\documentPage\content5.svg" (click)="createContent(contentType.fourLayout)">
     <img src="assets\imgs\documentPage\content6.svg" (click)="createContent(contentType.freedomLayout)">
+    <div class="document-preview-button">
+        <p><a href="/documentPreview" id="previewDoc">Preview</a></p>
+    </div>
 </div>
+
 <create-content-page [contentElement]="contentElement" [contentTypeSelected]="contentTypeSelected" [triggerElement]="triggerElement"></create-content-page>

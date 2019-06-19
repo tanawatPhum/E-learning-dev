@@ -33,4 +33,10 @@ export class DocumentPageComponent implements OnInit {
     private createContent(contentType: string) {
         this.contentTypeSelected.next(contentType);
     }
+    
 }
+$(document).ready(function(){
+    $("button").click(function(){
+      $("#previewDoc").attr("href", "/documentPreview");
+    });
+  });
