@@ -133,7 +133,6 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                 const numberOfBox = this.rootElement.find('.content-box').length;
                 if (this.currentContentType.name === this.contentType.freedomLayout.name) {
                     this.rootElement.append('<div style="z-index:999" id=box_' + numberOfBox + ' class="content-box ' + this.boxType.boxInitial + '"></div>');
-                    $('[id="box_' + numberOfBox + '"]').
                         $('[id="box_' + numberOfBox + '"]').css('position', 'absolute');
                     $('[id="box_' + numberOfBox + '"]').css('width', '300px');
                 } else if (this.currentContentType.name === this.contentType.oneLayout.name) {
