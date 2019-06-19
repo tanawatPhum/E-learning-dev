@@ -7,7 +7,6 @@ import { CommonService } from './services/common/common.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  
   title = 'E-learning';
   constructor(private commonService: CommonService) { }
   ngOnInit() {
