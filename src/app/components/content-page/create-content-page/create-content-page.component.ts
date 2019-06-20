@@ -227,9 +227,11 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
             this.setCurrentToolbar(this.contents.toolbar.addTextareaTool);
             this.addToolBarBox(this.currentToolbar, element);
             const IndexBox = this.findData(this.contents.data.findIndexBoxData, element);
+        
             if (IndexBox !== -1) {
                 this.boxes[IndexBox].isEmpty = false;
             }
+            
             element.append('<textarea id="' + element.attr('id') + '_textarea" class="content-textarea"></textarea>');
             element.find('textarea').focus();
         } else if (action === this.contents.event.addElBrowseFile) {
