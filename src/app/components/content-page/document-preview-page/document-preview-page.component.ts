@@ -22,19 +22,13 @@ export class DocumentPreviewPageComponent implements OnInit   {
             this.contentElement.next(result);
            $('#content-preview').html(result.html)
                  console.log(result)
-                 $('.content-textarea').click(function() {
-                  
-                  // $('id="' + element.attr('id') + '_textarea').val('id="' + element.attr('id') + '_textarea')
-                  // let listA = []
-                  // listA.forEach((obj,idx)=>{
-                  //   console.log(obj)
-                  // })
-                   console.log($(this).prop('value'))
-                  });
-                  
-                
-                
+
+                let textAreas = result.elements.textAreas;
+                textAreas.forEach((obj, idx)=>{
+                  $('#'+ obj.id).val(obj.value);
+                })
         });
+        
         
     }
 
@@ -42,56 +36,42 @@ export class DocumentPreviewPageComponent implements OnInit   {
     
 }
 $(document).ready(function(){
-  
-  // var app = angular.module('application', []);
-  //   app.controller('demoController', function ($scope) {
-  //       $scope.datas =[];       // เก็บข้อมูลทั้งหมดที่ถูกส่งจากฟอร์ม
-  //       $scope.data ={};  
-  //       $scope.addData = function (datas) { 
-  //         datas.push($scope.data);
-  //         $scope.data = {};
-  //     };
-  // });
 
     $("button").click(()=>{
       $("#content-go-back-create").attr("href", "/document");
-      
     });
     $('#button-question').click(()=>{
       $('#comment-area').val('question icon')
     })
+      
+    // $('#submit-comment').click(()=>{
+    //   var9[] commentpost = $('#comment-area').val()
+    // })
     
+    $('#submit-comment').on('submit',function(event){
+      event.preventDefault()
 
-
-
-
-
-
-
-  //   function handleFiles(fileInput) {
-  //     var files = fileInput.files;
-  //     for (var i = 0; i < files.length; i++) {
-  //         var file = files[i];
-  //         var imageType = /image.*/;
-   
-  //         if (!file.type.match(imageType)) {
-  //             continue;
-  //         }
-   
-  //         var img = document.createElement("img");
-  //         img.classList.add("obj");
-  //         // img.file = file;
-  //         $(fileInput).after(img);
-   
-  //         var reader = new FileReader();
-  //         reader.onload = (function(aImg) { 
-  //             return function(e) { 
-  //                 aImg.src = e.target.result; 
-  //             }; 
-  //         })(img);
-  //         reader.readAsDataURL(file);
-  //     }    
-  // }
-    
-
+      var form_data =$(this).serialize();
+      $.ajax({
+        url:"add_comment.php",
+        method:"POST",
+        data:form_data,
+        dataType:"JSON"
+       
+        
+      })
+    })
   });
+  
+
+
+
+
+
+
+
+
+
+    
+
+ 
