@@ -18,10 +18,13 @@ export class DocumentPreviewPageComponent implements OnInit   {
     private contentElement: Subject<ContentModel> = new Subject<ContentModel>();
 
     ngOnInit(){
+      
         this.contentService.loadHTMLFromDB().subscribe((result) => {
             this.contentElement.next(result);
            $('#content-preview').html(result.html)
                  console.log(result)
+           
+            
 
                 let textAreas = result.elements.textAreas;
                 textAreas.forEach((obj, idx)=>{
@@ -41,16 +44,24 @@ $(document).ready(function(){
       $("#content-go-back-create").attr("href", "/document");
     });
     $('#button-question').click(()=>{
-      var img = 
-      $('#comment_area').html('Q')
+      $('#comment_area').html('#question-icon')
+      
     });
     
     $("#submit-comment" ).click(()=>{
       let comment = $('#comment_area').val()
     })
+    $("#bold").click(()=>{
+      $("#text").css("font-weight","Bold")
+    })
+    $("#italic").click(()=>{
+      $("#text").css("font-style","italic")
+    })
+    $("#underline").click(()=>{
+      $("#text").css("text-decoration", "underline")
+    })
 
-    $(".content-like").click((e)=>{
-      
+    $("#content-like").click((e)=>{
       if($(this).html()=="Like"){
         $(this).html('Unlike');
       }else{
@@ -58,24 +69,24 @@ $(document).ready(function(){
       }
       return false
     })
-   
-
-    $(".content-reply").click(()=>{
-
-    })
+ 
   })
+  
+  
+
   function Controller($scope) {
+    "use strict";
     $scope.comments = [];
-    $scope.btn_post = function() {
-        if ($scope.commentbox != '') {
-            $scope.comments.push($scope.commentbox);
-            $scope.commentbox = "";
-        }
-    }
-    $scope.post_cmt = function($home) {
-        $scope.comments.splice($home, 1);
-    }
-}
+     $scope.btn_post = function() {
+         if ($scope.cmtName != '') {
+             $scope.comments.push($scope.cmtName);
+             $scope.cmtName = "";
+         }
+     }
+     $scope.post_cmt = function($home) {
+         $scope.comments.splice($home, 1);
+     }
+ }
   
 
       
