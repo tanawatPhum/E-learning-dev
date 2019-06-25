@@ -41,28 +41,51 @@ $(document).ready(function(){
       $("#content-go-back-create").attr("href", "/document");
     });
     $('#button-question').click(()=>{
-      $('#comment-area').val('question icon')
-    })
-      
-    // $('#submit-comment').click(()=>{
-    //   var9[] commentpost = $('#comment-area').val()
-    // })
+      var img = 
+      $('#comment_area').html('Q')
+    });
     
-    $('#submit-comment').on('submit',function(event){
-      event.preventDefault()
-
-      var form_data =$(this).serialize();
-      $.ajax({
-        url:"add_comment.php",
-        method:"POST",
-        data:form_data,
-        dataType:"JSON"
-       
-        
-      })
+    $("#submit-comment" ).click(()=>{
+      let comment = $('#comment_area').val()
     })
-  });
+
+    $(".content-like").click((e)=>{
+      
+      if($(this).html()=="Like"){
+        $(this).html('Unlike');
+      }else{
+        $(this).html('Like');
+      }
+      return false
+    })
+   
+
+    $(".content-reply").click(()=>{
+
+    })
+  })
+  function Controller($scope) {
+    $scope.comments = [];
+    $scope.btn_post = function() {
+        if ($scope.commentbox != '') {
+            $scope.comments.push($scope.commentbox);
+            $scope.commentbox = "";
+        }
+    }
+    $scope.post_cmt = function($home) {
+        $scope.comments.splice($home, 1);
+    }
+}
   
+
+      
+
+
+
+
+
+  
+
 
 
 

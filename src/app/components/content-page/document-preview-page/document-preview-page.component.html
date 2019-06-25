@@ -14,59 +14,95 @@
 
 
 
-    <div class="card-body" style="font-size: 13px">
+    <div ng-app class="card-body" style="font-size: 13px">
         <a style="font-size: 2.3rem">Comments</a>
-        <div class="row">
-            <!--UserPicture-->
-            <div class="col-md-1" style="padding: 13px">
-                <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid" style="max-width: 90%;    margin-top: 0px;" />
-            </div>
-            <div class="col-md-10">
-                <div class="content-form-group">
-                    <textarea ng-model="data.comment" id="comment-area" style="height: 80px;background-color: #F8F8F8  " placeholder="leave your comment here..." class="form-control "></textarea>
+        <div class="container">
+            <form ng-controller="Controller" id="comment_form">
+                <div class="row">
+                    <!--UserPicture-->
+                    <div class="col-md-1" style="padding: 13px">
+                        <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid" style="max-width: 90%;    margin-top: 0px;" />
+                    </div>
+                    <div class="col-md-10">
+                        <div class="content-form-group">
+                            <textarea ng-model="commentbox" id="comment_area" style="height: 80px;background-color: #F8F8F8  " placeholder="leave your comment here..." class="form-control "></textarea>
+                        </div>
+                        <form style="margin-top: 15px;">
+                            <!--Browse-->
+                            <div class="image-upload">
+                                <label for="file">
+                                    <img src="assets/imgs/previewPage/clip.svg" style="width: 10px;"/>
+                                </label>
+                                <img id="button-question" src="assets/imgs/previewPage/@.svg" style="width: 15px;margin-left: 15px;">
+                                <input type="file" id="file" style=" margin-left: 10px;">
+                                <button type="button" ng-click='btn_post();' class="btn btn-primary" id="submit-comment">Post Comment</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <form style="margin-top: 15px;">
-                    <!--Question-Icon-->
-                    <button type="button" class="btn btn-primary" id="button-question">Make ?</button>
-                    <!--Browse-->
-                    <input type="file" id="file">
-                    <!-- <span id="upload"></span> -->
-                    <!--Btn Submit-->
-                    <button type="submit" class="btn btn-primary" style="float: right" id="submit-comment">Submit</button>
-                </form>
-            </div>
+            </form>
+
         </div>
+        <hr/>
+
+        <!--RepliedComment-->
+        <ul class="list-group">
+            <li class="list-group-item " ng-repeat="cmt in comments">
+                <!--Model Reply-->
+                <div class="card-body" style="font-size: 13px">
+                    <div class="row">
+                        <!--UserPicture-->
+                        <div class="col-md-1" style="padding: 13px">
+                            <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid" style="max-width: 90%;    margin-top: 0px;" />
+                        </div>
+                        <div class="col-md-10">
+                            <!--Name-->
+                            <p><a class="float-left"><strong>Rotha</strong></a></p>
+                            <div class="clearfix"></div>
+                            <!--Comment-->
+                            <p style="margin-top: 10px">{{cmt}}</p>
+                            <!--Like&Reply-->
+                            <p><span><a class="float-left text-info "> <i id="content-like" href="#"></i>Like</a></span>
+                                <a class="float-left text-info " style=" padding-left: 10px;"> <i class="content-reply"></i> Reply</a>
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+                <a href="" ng-click="post_cmt($home)"></a>
+            </li>
+        </ul>
 
     </div>
 
-    <!--Reply Tab-->
-    <div class="card-body" style="font-size: 13px">
-        <div class="row">
-            <!--UserPicture-->
-            <div class="col-md-1" style="padding: 13px">
-                <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid" style="max-width: 90%;    margin-top: 0px;" />
-            </div>
-            <div class="col-md-10">
-                <!--Name-->
-                <p>
-                    <a class="float-left"><strong>Name</strong></a>
-                </p>
+</div>
+<button class="open-button" data-toggle="modal" data-target="#myModal" style="float: right">Open Form</button>
 
-                <div class="clearfix"></div>
-
-                <!--Comment-->
-                <p class="ng-binding" style="margin-top: 10px">
-                    Lomr yirga boutafodo lima boutcher
-                </p>
-                <!--Button-->
-                <p>
-                    <a class="float-left text-info "> <i class="content-like"></i> Like</a>
-                    <a class="float-left text-info " style=" padding-left: 10px;"> <i class="content-reply"></i> Reply</a>
-                </p>
+<!--Note Modal-->
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="note">
+                <div class="wmd-button-bar btr-sm" id="bar-button">
+                    <button type="button" data-role='bold' style="width: 1.5rem;">B</button>
+                    <button type="button" data-role='italic' style="width: 1.5rem;">I</button>
+                    <button type="button" data-role='underline' style="width: 1.5rem;">U</button>
+                    <button type="button" class="dropbtn">Font size</button>
+                    <button type="button">A</button>
+                    <button type="button">A</button>
+                    <button type="button">A</button>
+                    <button type="button">A</button>
+                    <button type="button">A</button>
+                </div>
+                <div id="text" class="editor-content" contenteditable style="height: 17rem;">
+                </div>
             </div>
+            <div class="d-flex" style="justify-content: flex-end">
+                <button type="submit" class="btn" id="close-modal" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn" id="send-modal">Send Mail</button>
+                <button type="submit" class="btn" id="save-button">Save</button>
+            </div>
+
         </div>
-
     </div>
-
-
 </div>

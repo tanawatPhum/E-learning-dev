@@ -43,3 +43,56 @@ fieldset {
     width: 100%;
     border: 1px solid #F2F2F2;
 }
+
+#bar-button {
+    height: 40px;
+    padding-top: 10px;
+    background: #e9ecef;
+}
+
+.editor-content {
+    padding: 10px;
+    outline: none;
+    min-height: 80px;
+    border-radius: 0px 0px 5px 5px;
+}
+
+#close-modal {
+    width: 115px;
+    background-color: cornflowerblue;
+    color: white;
+    margin-right: 10px;
+    height: 40px;
+}
+
+#save-button {
+    width: 115px;
+    background-color: cornflowerblue;
+    color: white;
+    margin-right: 10px;
+    height: 40px;
+}
+
+#send-modal {
+    width: 115px;
+    background-color: cornflowerblue;
+    color: white;
+    margin-right: 10px;
+    height: 40px;
+}
+
+.image-upload>input {
+    display: none;
+}
+
+.image-upload {
+    padding-left: 10px;
+}
+
+#submit-comment {
+    float: right;
+    width: 12rem;
+    height: 2rem;
+    border-radius: 15px;
+    font-size: 13px;
+}
