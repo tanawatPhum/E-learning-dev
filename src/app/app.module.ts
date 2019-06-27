@@ -12,6 +12,7 @@ import { DocumentPageComponent } from './components/content-page/document-page/d
 import { FormsModule } from '@angular/forms';
 import { ContentService } from './services/document/content.service';
 import { DocumentPreviewPageComponent } from './components/content-page/document-preview-page/document-preview-page.component';
+import { NoteComponentComponent } from './note-component/note-component.component';
 
 
 
@@ -21,7 +22,8 @@ export const COMPONENTS: any[] = [
   HomePageComponent,
   DocumentPageComponent,
  CreateContentPageComponent,
- DocumentPreviewPageComponent
+ DocumentPreviewPageComponent,
+ NoteComponentComponent
 ];
 export const LAYOUTS: any[] = [
 
@@ -46,7 +48,8 @@ export const DIRECTIVES: any[] = [
     ...COMPONENTS,
     ...DIRECTIVES,
     ...LAYOUTS,
-    ...PIPES
+    ...PIPES,
+    NoteComponentComponent
   ],
   imports: [
     ...MODULES

@@ -3,6 +3,25 @@
     margin-top: 10px
 }
 
+#user_img {
+    max-width: 90%;
+    margin-top: 0px;
+}
+
+#comment_area {
+    height: 80px;
+    background-color: #F8F8F8
+}
+
+#button-question {
+    width: 15px;
+    margin-left: 15x;
+}
+
+.document-note-button {
+    float: right;
+}
+
 .content-show-preview {
     display: block;
     margin-top: 20px;
@@ -15,13 +34,6 @@
     height: 100%;
 }
 
-fieldset {
-    min-width: 0;
-    padding: 60px;
-    margin: 60px;
-    border: 0;
-}
-
 .content-document-goback-button {
     float: left;
 }
@@ -29,11 +41,6 @@ fieldset {
 .content-form-inline {
     margin-top: 5px;
     float: right;
-}
-
-.content-comment-form {
-    padding-top: 0px;
-    margin-top: 15px;
 }
 
 #comment-area {
