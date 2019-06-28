@@ -2,6 +2,7 @@ import { Component, OnInit, NgModule } from '@angular/core';
 import { ContentModel } from '../../../models/content/content.model';
 import { ContentService } from '../../../services/document/content.service';
 import { Subject } from 'rxjs';
+
 // import * as $ from "jquery";
 
 
@@ -40,7 +41,6 @@ export class DocumentPreviewPageComponent implements OnInit   {
                   $('#'+ obj.id).val(obj.value);
                 })
         });
-  
     }
 
 
@@ -52,11 +52,11 @@ $(document).ready(function(){
   const commentList = $(".collection")
   const commentInput = $("#comment_area")
   loadEventListeners();
-
+  getComment();
   function loadEventListeners() {
-    document.addEventListener('DOMContentLoaded', getComment); 
+    // document.addEventListener('DOMContentLoaded', ); 
     document.getElementById("submit-comment").addEventListener("click", addComment)
-   
+    
 }
 
 function getComment() {
@@ -68,7 +68,8 @@ function getComment() {
     }
 
     listOfComment.forEach(function(commentVal) {
-        const li = document.createElement('li');
+        const li = document.createElement('div');
+
         li.className = 'collection-item'; 
         li.appendChild(document.createTextNode(commentVal));
         commentList.append(li);
@@ -82,11 +83,32 @@ function addComment() {
         alert('Add a comment');
         return false;
     }
-
-    const li = document.createElement('li'); 
+    const li = document.createElement('div'); 
+    const div = document.createElement('div');
+   const divrow = document.createElement('div');
+   const divcol1 = document.createElement('div');
+   const divcol10 = document.createElement('div');
+   const p1 = document.createElement('p');
+   const p2 = document.createElement('p');
+   const pcmt = document.createElement('p');
+   divcol1.className = 'col-md-1';
+   divcol10.className = 'col-md-10';
+   p1.className = 'name';
+   pcmt.className = 'comment'
+   divrow.className = 'row';
+   div.className = 'card-body';
+  //  $(".card-body").html(divrow)
+  //  $(".row").html('<div class="col-md-1" style="padding: 13px"><img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid" style="max-width: 90%; margin-top: 0px;" /></div><div class="col-md-10"><p><a class="float-left"><strong>Name</strong></a></p> <div class="clearfix"></div> <p style="margin-top: 10px">'+commentInput+'</p>')
     li.className = 'collection-item'; 
-    
-    li.appendChild(document.createTextNode(commentInput.val()));
+    // $(".collection-item").html('<div class="collection-item" style="font-size: 13px"><div class="row"><div class="col-md-1" style="padding: 13px"><img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid" style="max-width: 90%; margin-top: 0px;" /></div><div class="col-md-10"><p><a class="float-left"><strong>Name</strong></a></p> <div class="clearfix"></div> <p style="margin-top: 10px">'+commentInput.val()+'</p></div></div></div>')
+    // $(".collection-item").html(div)
+    // div.appendChild(document.createTextNode(commentInput.val()));
+    div.appendChild(divrow)
+    divrow.appendChild(divcol1)
+    divcol1.prepend(divcol10)
+    divcol10.appendChild(pcmt)
+    pcmt.appendChild(document.createTextNode(commentInput.val()))
+    li.appendChild(div);
     commentList.append(li);
     storeTaskInLocalStorage(commentInput.val()); 
     
@@ -103,7 +125,7 @@ function storeTaskInLocalStorage(comment) {
     listOfComment.push(comment);
     localStorage.setItem('listOfComment', JSON.stringify(listOfComment));
 }
- 
+
 
 
     $("button").click(()=>{
@@ -115,18 +137,7 @@ function storeTaskInLocalStorage(comment) {
     $('#button-question').click(()=>{
       $('#comment_area').html('#question-icon')
     });
-    // $('#submit-comment').click(()=>{
-    //   event.preventDefault();
-    //   var cmt = $("#comment_area").val()  
-    //   var storagediv = $(".storage").html()   
-    //   localStorage.cmts = cmt;
-    //   localStorage.div = storagediv
-    //   console.log(cmt)
-    //   // $("#replied-box").html(localStorage.getItem("cmts"));
-    //   // $("#test").html(localStorage.getItem("div"));
     
-    // })
-      
     $("#bold").click(()=>{
       $("#text").css("font-weight","Bold")
     });
@@ -136,6 +147,16 @@ function storeTaskInLocalStorage(comment) {
     $("#underline").click(()=>{
       $("#text").css("text-decoration", "underline")
     });
+
+    $('#save-button').click(()=>{
+      var container = document.querySelector('#text');
+    var anchor = document.querySelector('a');
+
+    anchor.onclick = function() {
+    anchor.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(container.val());
+    anchor.download = 'export.txt';
+};
+    })
 
     $("#content-like").click((e)=>{
       if($(this).html()=="Like"){

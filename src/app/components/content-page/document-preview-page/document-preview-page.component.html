@@ -10,8 +10,10 @@
     <div class="content-show-preview">
         <div id="content-preview"></div>
     </div>
+    <button class="open-button" data-toggle="modal" data-target="#myModal" style="float: right"><i class="glyphicon glyphicon-pencil"></i></button>
 
     <body ng-app>
+        <a style="font-size: 2.3rem">Comments</a>
         <div class="container">
 
             <form>
@@ -44,32 +46,119 @@
                     </div>
                 </div>
             </form>
+            <a style="font-size: 2rem;color:lightslategray ">Comments <a id="count-cmt"></a> </a>
             <div class="card-action">
                 <ul class="collection">
-                    <!-- comment จะอยู่ตรงนี้ -->
+                    <!-- comment-->
+
                 </ul>
             </div>
 
         </div>
 
     </body>
-    <button class="open-button" data-toggle="modal" data-target="#myModal" style="float: right"><i class="glyphicon glyphicon-pencil"></i></button>
 
-    <div class="modal fade" id="myModal" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div id="summernote">Hello Summernote</div>
-                <div class="d-flex" style="justify-content: flex-end">
-                    <button type="submit" class="btn" id="close-modal" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn" id="send-modal">Send Mail</button>
-                    <button type="submit" class="btn" id="save-button">Save</button>
-                </div>
-            </div>
-
-        </div>
-
-    </div>
 
     <!-- <div class="document-note-button">
         <p><a href="/note" id="note">Note</a></p>
     </div> -->
+
+</div>
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="note" style="border-style: double;">
+                <div class="wmd-button-bar btr-sm" id="bar-button">
+                    <div class="note-btn-group btn-group note-font" id="">
+                        <button id="bold" class="note-btn btn btn-default btn-sm note-btn-bold" type="button" data-role='bold'>
+                            <i class="note-icon-bold"></i>
+                        </button>
+                        <button id="italic" class="note-btn btn btn-default btn-sm note-btn-italic" type="button" data-role='italic'>
+                            <i class="note-icon-italic" ></i>
+                        </button>
+                        <button id="underline" class="note-btn btn btn-default btn-sm note-btn-underline" type="button" data-role='underline'>
+                            <i class="note-icon-underline"></i>
+                        </button>
+                    </div>
+
+                    <div class="note-btn-group btn-group note-fontname">
+                        <button type="button" class="note-btn btn btn-default btn-sm dropdown-toggle">
+                            <span class="note-current-fontname">Font</span>
+                        </button>
+
+                    </div>
+
+                    <div class="note-btn-group btn-group note-color">
+                        <div class="note-btn-group btn-group note-color note-color-all">
+                            <button type="button" style="padding: 5px 10px;" class="note-btn btn btn-default btn-sm note-current-color-button">
+                                    <i class="note-icon-font note-recent-color" ></i>
+                        </button>
+                            <button type="button" class="note-btn btn btn-default btn-sm dropdown-toggle" role="button">
+                            
+                        </button>
+                        </div>
+
+                    </div>
+
+                    <div class="note-btn-group btn-group note-para">
+                        <button type="button" class="note-btn btn btn-default btn-sm">
+                                <i class="note-icon-unorderedlist"></i>
+                        </button>
+                        <button type="button" class="note-btn btn btn-default btn-sm">
+                                <i class="note-icon-orderedlist"></i>
+                        </button>
+
+                        <button type="button" class="note-btn btn btn-default btn-sm dropdown-toggle">
+                                <i class="note-icon-align-left"></i>
+                            
+                        </button>
+
+
+                    </div>
+
+                </div>
+                <div id="text" class="editor-content" contenteditable style="height: 17rem;">
+                </div>
+            </div>
+            <div class="d-flex" style="justify-content: flex-end">
+                <button type="submit" class="btn" id="close-modal" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn" id="send-modal" data-toggle="modal" data-target="#send-email-modal">Send Mail</button>
+                <a><button  type="submit" class="btn" id="save-button">Save</button></a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div id="summernote">Hello Summernote</div>
+            <div class="d-flex" style="justify-content: flex-end">
+                <button type="submit" class="btn" id="close-modal" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn" id="send-modal" data-toggle="modal" data-target="#send-email-modal">Send Mail</button>
+                <button type="submit" class="btn" id="save-button">Save</button>
+            </div>
+        </div>
+
+    </div>
+
+</div> -->
+
+
+
+<div class="modal fade" id="send-email-modal" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="email-sender">
+                <div class="send-mail">Send E-mail</div>
+                <input type="text" id="e-mail" placeholder="send to someone">
+                <br>
+                <input type="text" id="title" placeholder="insert title">
+                <br>
+                <button type="submit" class="btn" id="close-email-modal" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn" id="send-mail">send</button>
+            </div>
+        </div>
+    </div>
+</div>

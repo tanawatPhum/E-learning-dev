@@ -1,27 +1,4 @@
 // component css goes here
-.content-form-group {
-    margin-top: 10px
-}
-
-#user_img {
-    max-width: 90%;
-    margin-top: 0px;
-}
-
-#comment_area {
-    height: 80px;
-    background-color: #F8F8F8
-}
-
-#button-question {
-    width: 15px;
-    margin-left: 15x;
-}
-
-.document-note-button {
-    float: right;
-}
-
 .content-show-preview {
     display: block;
     margin-top: 20px;
@@ -43,12 +20,61 @@
     float: right;
 }
 
+// comment
+#bar-button {
+    padding-top: 5px;
+}
+
+.content-form-group {
+    margin-top: 10px
+}
+
 #comment-area {
     resize: none;
     padding: 20px;
     height: 130px;
     width: 100%;
     border: 1px solid #F2F2F2;
+}
+
+#user_img {
+    max-width: 90%;
+    margin-top: 0px;
+}
+
+#comment_area {
+    height: 80px;
+    background-color: #F8F8F8
+}
+
+#button-question {
+    width: 15px;
+    margin-left: 15x;
+}
+
+.image-upload>input {
+    display: none;
+}
+
+.image-upload {
+    padding-left: 10px;
+}
+
+#submit-comment {
+    float: right;
+    width: 12rem;
+    height: 2rem;
+    border-radius: 15px;
+    font-size: 13px;
+}
+
+// note-modal
+.document-note-button {
+    float: right;
+}
+
+.modal-content {
+    padding: 0px
 }
 
 #bar-button {
@@ -88,18 +114,29 @@
     height: 40px;
 }
 
-.image-upload>input {
-    display: none;
+// emailpopup
+.email-sender {
+    background-color: antiquewhite;
+    width: 25rem;
+    position: relative;
+    display: block;
+    width: 100%;
 }
 
-.image-upload {
-    padding-left: 10px;
+.send-mail {
+    margin-left: 40%;
 }
 
-#submit-comment {
+#e-mail {
+    margin-left: 30%;
+    margin-top: 10px;
+}
+
+#title {
+    margin-left: 30%;
+    margin-top: 10px;
+}
+
+#close-email-modal {
     float: right;
-    width: 12rem;
-    height: 2rem;
-    border-radius: 15px;
-    font-size: 13px;
 }
