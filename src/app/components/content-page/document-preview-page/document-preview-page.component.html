@@ -11,57 +11,57 @@
         <div id="content-preview"></div>
     </div>
     <button class="open-button" data-toggle="modal" data-target="#myModal" style="float: right"><i class="glyphicon glyphicon-pencil"></i></button>
+    <!-- 
+    <body ng-app> -->
+    <a style="font-size: 2.3rem">Comments</a>
+    <div class="container">
 
-    <body ng-app>
-        <a style="font-size: 2.3rem">Comments</a>
-        <div class="container">
-
-            <form>
-                <div class="row">
-                    <!--UserPicture-->
-                    <div class="col-md-1" style="padding: 13px">
-                        <img src="https://image.ibb.co/jw55Ex/def_face.jpg" id="user_img" class="img img-rounded img-fluid" />
-                    </div>
-                    <div class="col-md-10">
-                        <form id="comment-form">
-                            <div class="content-form-group">
-                                <textarea class="form-control" name="comment" id="comment_area" placeholder="leave your comment here..." class="form-control "></textarea>
-                            </div>
-                        </form>
-
-                        <form style="margin-top: 15px;">
-                            <!--Browse-->
-                            <div class="image-upload">
-                                <label for="file">
+        <form class="commentbox">
+            <div class="row">
+                <!--UserPicture-->
+                <div class="col-md-1" style="padding: 13px">
+                    <img src="https://image.ibb.co/jw55Ex/def_face.jpg" id="user_img" class="img img-rounded img-fluid" />
+                </div>
+                <div class="col-md-10">
+                    <form id="comment-form">
+                        <div class="content-form-group">
+                            <textarea class="form-control" name="comment" id="comment_area" placeholder="leave your comment here..." class="form-control "></textarea>
+                        </div>
+                    </form>
+                    <form style="margin-top: 15px;">
+                        <!--Browse-->
+                        <div class="image-upload">
+                            <label for="file">
                                             <img src="assets/imgs/previewPage/clip.svg" style="width: 10px;"/>
                                             </label>
-                                <label class="question-icon" style="margin-left: 10px">
-                                                <img id="button-question" src="assets/imgs/previewPage/@.svg" >
+                            <label class="question-icon" style="margin-left: 10px">
+                                                <img (click)="addQuestionFlag();$event.stopPropagation()" class="button-question" src="assets/imgs/previewPage/@.svg" >
                                             </label>
 
-                                <input type="file" id="file" style=" margin-left: 10px;">
-                                <button type="submit" class="btn btn-primary" id="submit-comment">Post Comment</button>
-                            </div>
-                        </form>
-                    </div>
+                            <input type="file" id="file" style=" margin-left: 10px;">
+                            <button (click)="addComment()" type="submit" class="btn btn-primary" id="submit-comment">Post Comment</button>
+                        </div>
+                    </form>
                 </div>
-            </form>
-            <a style="font-size: 2rem;color:lightslategray ">Comments <a id="count-cmt"></a> </a>
-            <div class="card-action">
-                <ul class="collection">
-                    <!-- comment-->
-
-                </ul>
             </div>
+        </form>
+        <hr/>
+        <a style="font-size: 2rem;color:lightslategray ">Comments <a id="count-cmt"></a> </a>
+        <div id="card-action">
+            <ul class="collection">
+                <!-- comment-->
 
+            </ul>
         </div>
 
-    </body>
-
-
+    </div>
+    <!-- 
+    </body> -->
     <!-- <div class="document-note-button">
         <p><a href="/note" id="note">Note</a></p>
     </div> -->
+
+
 
 </div>
 <div class="modal fade" id="myModal">
@@ -81,14 +81,14 @@
                         </button>
                     </div>
 
-                    <div class="note-btn-group btn-group note-fontname">
+                    <div class="note-btn-group btn-group note-fontname" id="fontname-btn">
                         <button type="button" class="note-btn btn btn-default btn-sm dropdown-toggle">
                             <span class="note-current-fontname">Font</span>
                         </button>
 
                     </div>
 
-                    <div class="note-btn-group btn-group note-color">
+                    <div class="note-btn-group btn-group note-color" id="fontcolor-btn">
                         <div class="note-btn-group btn-group note-color note-color-all">
                             <button type="button" style="padding: 5px 10px;" class="note-btn btn btn-default btn-sm note-current-color-button">
                                     <i class="note-icon-font note-recent-color" ></i>
@@ -100,7 +100,7 @@
 
                     </div>
 
-                    <div class="note-btn-group btn-group note-para">
+                    <div class="note-btn-group btn-group note-para" id="order-btn">
                         <button type="button" class="note-btn btn btn-default btn-sm">
                                 <i class="note-icon-unorderedlist"></i>
                         </button>
@@ -120,7 +120,7 @@
                 <div id="text" class="editor-content" contenteditable style="height: 17rem;">
                 </div>
             </div>
-            <div class="d-flex" style="justify-content: flex-end">
+            <div class="d-flex" id="content-function" style="justify-content: flex-end">
                 <button type="submit" class="btn" id="close-modal" data-dismiss="modal">Close</button>
                 <button type="submit" class="btn" id="send-modal" data-toggle="modal" data-target="#send-email-modal">Send Mail</button>
                 <a><button  type="submit" class="btn" id="save-button">Save</button></a>
@@ -162,3 +162,5 @@
         </div>
     </div>
 </div>
+
+<!--Reply-->

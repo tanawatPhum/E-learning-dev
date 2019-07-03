@@ -21,6 +21,10 @@
 }
 
 // comment
+.container {
+    padding-top: 19px;
+}
+
 #bar-button {
     padding-top: 5px;
 }
@@ -44,10 +48,11 @@
 
 #comment_area {
     height: 80px;
-    background-color: #F8F8F8
+    background-color: #F8F8F8;
+    border: white;
 }
 
-#button-question {
+.button-question {
     width: 15px;
     margin-left: 15x;
 }
@@ -66,6 +71,22 @@
     height: 2rem;
     border-radius: 15px;
     font-size: 13px;
+    background-color: #43d4c5;
+    border: aliceblue;
+}
+
+.submit-reply {
+    float: right;
+    width: 12rem;
+    height: 2rem;
+    border-radius: 15px;
+    font-size: 13px;
+    background-color: #43d4c5;
+    border: aliceblue;
+}
+
+.commentbox-reply {
+    display: none
 }
 
 // note-modal
@@ -90,12 +111,30 @@
     border-radius: 0px 0px 5px 5px;
 }
 
+#fontname-btn {
+    margin-left: 8px
+}
+
+#fontcolor-btn {
+    margin-left: 8px
+}
+
+#order-btn {
+    margin-left: 8px
+}
+
+#content-function {
+    margin-top: 12px;
+    margin-bottom: 7px;
+}
+
 #close-modal {
     width: 115px;
     background-color: cornflowerblue;
     color: white;
     margin-right: 10px;
     height: 40px;
+    border-radius: 0px;
 }
 
 #save-button {
@@ -104,6 +143,7 @@
     color: white;
     margin-right: 10px;
     height: 40px;
+    border-radius: 0px;
 }
 
 #send-modal {
@@ -112,6 +152,7 @@
     color: white;
     margin-right: 10px;
     height: 40px;
+    border-radius: 0px;
 }
 
 // emailpopup
