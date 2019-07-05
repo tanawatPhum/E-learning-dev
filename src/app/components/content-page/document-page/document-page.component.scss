@@ -1,3 +1,9 @@
+//custome boostap css
+.progress {
+    border-radius: 0 !important;
+    height: 5px;
+}
+
 // component css goes here
 .document-navbar {
     height: 8vh;
@@ -9,24 +15,22 @@
 
 .document-sidenav {
     height: 100%;
-    width: 200px;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
+    width: 100%;
     background-color: #EDF0F2;
     overflow: hidden;
-    padding-top: 20px;
 }
 
 .document-sidenav-content {
     height: 100%;
-    width: 196px;
+    width: 98%;
     background: white;
 }
 
 .document-sidenav-btnNav {
-    height: 25px;
+    & .arrow-custome {
+        font-size: 1.5em;
+        cursor: pointer;
+    }
 }
 
 .document-sidenav a {

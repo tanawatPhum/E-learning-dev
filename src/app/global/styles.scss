@@ -19,6 +19,14 @@ body {
     font-style: $font-style !important;
 }
 
+.min-height {
+    min-height: 100% !important;
+}
+
+.max-height {
+    height: 100% !important;
+}
+
 textarea {
     resize: none;
     height: 100%;
@@ -193,4 +201,10 @@ video::-webkit-media-controls-fullscreen-button,
 video::-webkit-media-controls-play-button,
 video::-webkit-media-controls-pausebutton {
     display: none;
+}
+
+.item-middle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

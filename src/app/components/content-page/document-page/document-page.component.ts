@@ -13,6 +13,7 @@ export class DocumentPageComponent implements OnInit {
     private contentElement: Subject<ContentModel> = new Subject<ContentModel>();
     private contentType =  Constants.document.contents.types;
     private contentTypeSelected: Subject<any> = new Subject<any>();
+    private isOpenMenu :boolean  = true;
     constructor(
         private contentService: ContentService
     ) { }
@@ -32,6 +33,10 @@ export class DocumentPageComponent implements OnInit {
     }
     private createContent(contentType: string) {
         this.contentTypeSelected.next(contentType);
+    }
+    private toggleMenu(){
+        this.isOpenMenu = !this.isOpenMenu;
+        $('#document-sidenav').slider();
     }
     
 }
