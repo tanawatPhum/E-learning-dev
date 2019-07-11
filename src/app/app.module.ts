@@ -5,14 +5,16 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
 import { HomePageComponent } from './components/home-page/home-page.component';
-import { CreateContentPageComponent } from './components/content-page/create-content-page/create-content-page.component';
+import { CreateContentPageComponent } from './components/document-page/content-page/create-content-page/create-content-page.component';
 
 import { CommonService } from './services/common/common.service';
-import { DocumentPageComponent } from './components/content-page/document-page/document-page.component';
+import { DocumentHomePageComponent } from './components/document-page/document-home-page/document-home-page.component';
 import { FormsModule } from '@angular/forms';
-import { ContentService } from './services/document/content.service';
-import { DocumentPreviewPageComponent } from './components/content-page/document-preview-page/document-preview-page.component';
+import { DocumentService } from './services/document/document.service';
+import { DocumentPreviewPageComponent } from './components/document-page/document-preview-page/document-preview-page.component';
 import { NoteComponentComponent } from './note-component/note-component.component';
+import { DocumentModalPageComponent } from './components/document-page/document-modal-page/document-modal-page.component';
+import { DocumentDataControlService } from './services/document/document-data-control.service';
 
 
 
@@ -20,10 +22,11 @@ import { NoteComponentComponent } from './note-component/note-component.componen
 export const COMPONENTS: any[] = [
   AppComponent,
   HomePageComponent,
-  DocumentPageComponent,
+  DocumentHomePageComponent,
  CreateContentPageComponent,
  DocumentPreviewPageComponent,
- NoteComponentComponent
+ NoteComponentComponent,
+ DocumentModalPageComponent
 ];
 export const LAYOUTS: any[] = [
 
@@ -35,7 +38,8 @@ export const MODULES: any[] = [
 ];
 export const SERVICES: any[] = [
   CommonService,
-  ContentService
+  DocumentService,
+  DocumentDataControlService
 ];
 export const PIPES: any[] = [
 

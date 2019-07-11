@@ -21,19 +21,19 @@ export class NoteComponentComponent implements OnInit {
   }
 
 }
-$(document).ready(function(){
+// $(document).ready(function(){
 
 
-  $("button").click(()=>{
-    $("#content-go-back-preview").attr("href", "/documentPreview");
-  });
-  $("#bold").click(()=>{
-    $("#text").css("font-weight","Bold")
-  })
-  $("#italic").click(()=>{
-    $("#text").css("font-style","italic")
-  })
-  $("#underline").click(()=>{
-    $("#text").css("text-decoration", "underline")
-  })
-})
+//   $("button").click(()=>{
+//     $("#content-go-back-preview").attr("href", "/documentPreview");
+//   });
+//   $("#bold").click(()=>{
+//     $("#text").css("font-weight","Bold")
+//   })
+//   $("#italic").click(()=>{
+//     $("#text").css("font-style","italic")
+//   })
+//   $("#underline").click(()=>{
+//     $("#text").css("text-decoration", "underline")
+//   })
+// })

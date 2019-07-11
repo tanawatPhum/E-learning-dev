@@ -4,19 +4,29 @@
 <head>
     <meta charset="utf-8">
     <title>ELearning</title>
-    <base href="/">
+    <base href="./">
     <link href="https://fonts.googleapis.com/css?family=Kanit:100,200,300,400,500,600,700,800,900&amp;subset=latin-ext,thai" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="assets/plugins/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="assets/plugins/jquery-ui/jquery-ui.min.css">
-    <script type="application/javascript" src="assets/plugins/jquery/jquery-3.4.1.min.js"></script>
-    <script type="application/javascript" src="assets/plugins/jquery-ui/jquery-ui.min.js"></script>
-    <script type="application/javascript" src="assets/plugins/jquery-ui/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
-    <script type="application/javascript" src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        if (typeof module === 'object') {
+            window.module = module;
+            module = undefined
+        }
+    </script>
+    <script>
+        var electron = require('electron');
+    </script>
+    <script type="text/javascript" src="assets/plugins/jquery/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="assets/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="assets/plugins/jquery-ui/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+    <script type="text/javascript" src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.8/angular.min.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.8/angular.min.js"></script>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous"> -->
 
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">

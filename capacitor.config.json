@@ -1,0 +1,7 @@
+{
+    "appId": "elearning.app",
+    "appName": "E-learning",
+    "bundledWebRuntime": false,
+    "npmClient": "npm",
+    "webDir": "dist/E-learning"
+}

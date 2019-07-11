@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { HomePageComponent } from './components/home-page/home-page.component';
-import { CreateContentPageComponent } from './components/content-page/create-content-page/create-content-page.component';
-import { DocumentPageComponent } from './components/content-page/document-page/document-page.component';
-import { DocumentPreviewPageComponent } from './components/content-page/document-preview-page/document-preview-page.component';
+import { CreateContentPageComponent } from './components/document-page/content-page/create-content-page/create-content-page.component';
+import { DocumentHomePageComponent } from './components/document-page/document-home-page/document-home-page.component';
+import { DocumentPreviewPageComponent } from './components/document-page/document-preview-page/document-preview-page.component';
 import { NoteComponentComponent } from './note-component/note-component.component';
 
 
@@ -12,8 +12,8 @@ import { NoteComponentComponent } from './note-component/note-component.componen
 
 
 const routes: Routes = [
-  { path: '', redirectTo: '/document', pathMatch: 'full' },
-  { path: 'document', component: DocumentPageComponent },
+  { path: '', redirectTo: '/documentHome', pathMatch: 'full' },
+  { path: 'documentHome', component: DocumentHomePageComponent },
   { path: 'documentPreview', component: DocumentPreviewPageComponent },
   { path: 'content', component: CreateContentPageComponent },
    { path: 'home', component: HomePageComponent },

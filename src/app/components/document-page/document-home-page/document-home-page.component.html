@@ -1,0 +1,82 @@
+<!--component html goes here -->
+<nav class="document-navbar navbar navbar-expand-sm document-bg-darkGrey">
+    <ul class="nav navbar-nav mr-auto">
+        <li class="nav-item">
+            <a class="nav-link text-white" (click)="newDocument()" href="javascript:void(0)">New</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" (click)="saveDocument()" href="javascript:void(0)">Save</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" (click)="previewDocument()" href="javascript:void(0)">Preview</a>
+        </li>
+    </ul>
+    <!-- <ul class="nav navbar-nav ml-auto">
+        <li class="nav-item">
+            <a class="nav-link item-middle">
+                <div class="spinner-border text-warning" role="status">
+                </div>
+                <span class="pl-1 text-white">Loading...</span>
+            </a>
+        </li>
+    </ul> -->
+    <ul class="nav navbar-nav ml-auto">
+        <!-- <li class="nav-item">
+            <a class="nav-link item-middle">
+                <div class="spinner-border text-warning" role="status">
+                </div>
+                <span class="pl-1 text-white">Loading...</span>
+            </a>
+        </li> -->
+        <li class="nav-item">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          {{currentDocument}}
+                        </button>
+                <div *ngIf="(documentList||[]).length>0" style="z-index: 99999" class="dropdown-menu dropdown-menu-center" aria-labelledby="dropdownMenu2">
+                    <button (click)="changeDocument(document.nameDocument)" *ngFor="let document of documentList" class="dropdown-item" [ngClass]="{'active':currentDocument === document.nameDocument}" type="button">{{document.nameDocument}}</button>
+                </div>
+            </div>
+            <!-- <a class="nav-link text-white" (click)="newDocument()" href="javascript:void(0)">New</a> -->
+        </li>
+    </ul>
+
+</nav>
+<div *ngIf="loading" class="progress">
+    <div id="progress-bar" class="bg-warning progress-bar" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+
+<div class="row min-height m-0">
+    <div id="document-sidenav" [ngStyle]="{'width':isOpenMenu? '200px':'50px'}">
+        <div class="document-sidenav">
+            <div class="document-sidenav-btnNav p-3 ml-3"><span class="text-muted" *ngIf="isOpenMenu">navigation</span> <i (click)="toggleMenu()" class="fa fa-angle-{{isOpenMenu? 'left':'right'}} float-right arrow-custome text-muted"></i></div>
+            <div class="document-sidenav-content" *ngIf="isOpenMenu">
+
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="document-form-select">
+            <img src="assets\imgs\documentPage\plus.svg">
+            <img src="assets\imgs\documentPage\content1.svg" (click)="createContent(contentTypes.oneLayout)">
+            <!-- <img src="assets\imgs\documentPage\content2.svg" (click)="createContent(contentTypes.twoLayout)"> -->
+            <!-- <img src="assets\imgs\documentPage\content3.svg" (click)="createContent(contentType.twoLayoutHorizontal)"> -->
+            <!-- <img src="assets\imgs\documentPage\content4.svg" (click)="createContent(contentTypes.threeLayout)">
+            <img src="assets\imgs\documentPage\content5.svg" (click)="createContent(contentTypes.fourLayout)"> -->
+            <img src="assets\imgs\documentPage\content6.svg" (click)="createContent(contentTypes.freedomLayout)">
+            <!-- <div class="document-preview-button">
+                <p><a href="/documentPreview" id="previewDoc">Preview</a></p>
+            </div> -->
+        </div>
+
+        <create-content-page [contentElement]="contentElement" [contentTypeSelected]="contentTypeSelected" [triggerElement]="triggerElement" (eventToParent)="eventFromChild($event)"></create-content-page>
+        <document-modal-page [triggerModal]="triggerModal" (eventModal)="eventModal($event)"></document-modal-page>
+    </div>
+    <div *ngIf="loading" class="alert alert-fixed" role="alert">
+        <a href="#" class="alert-link item-middle">
+            <div class="spinner-border text-warning" role="status">
+            </div>
+            <span class="pl-1 text-dark">Loading...</span>
+        </a>
+    </div>
+</div>
