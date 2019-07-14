@@ -16,10 +16,26 @@ body {
     max-height: 100%;
     width: 100%;
     // // overflow-x: hidden;
-    overflow: hidden;
+    // overflow: hidden;
     font-size: 16px !important;
     font-family: $font-family !important;
     font-style: $font-style !important;
+}
+
+.bg-darkGrey {
+    background-color: #484848;
+}
+
+.bg-darkBrown {
+    background: #404040;
+}
+
+.text-darkGrey {
+    color: #4B4B4B;
+}
+
+.text-lightGrey {
+    color: #C9C9C9;
 }
 
 .min-height {
@@ -30,11 +46,22 @@ body {
     height: 100% !important;
 }
 
+.nav-footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
 textarea {
     resize: none;
     overflow: hidden;
     height: 100%;
     width: 100%;
+}
+
+.cursor-pointer {
+    cursor: pointer;
 }
 
 .ui-icon,

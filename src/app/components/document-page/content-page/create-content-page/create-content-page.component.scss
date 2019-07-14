@@ -1,3 +1,33 @@
+//custome bootstrap css
+.list-group-item {
+    user-select: none;
+}
+
+.list-group input[type="checkbox"] {
+    display: none;
+}
+
+.list-group input[type="checkbox"]+.list-group-item {
+    cursor: pointer;
+}
+
+.list-group input[type="checkbox"]+.list-group-item:before {
+    content: "\2713";
+    color: transparent;
+    font-weight: bold;
+    margin-right: 1em;
+}
+
+.list-group input[type="checkbox"]:checked+.list-group-item {
+    background-color: #0275D8;
+    border-radius: 0;
+    color: #FFF;
+}
+
+.list-group input[type="checkbox"]:checked+.list-group-item:before {
+    color: inherit;
+}
+
 // component css goes here
 .bg-test {
     background: red;
@@ -45,6 +75,9 @@
     background: #fff;
     // border-radius: 4px;
     transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
+    &.content-box-active {
+        box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    }
     &.box-browse-file-size {
         min-width: 300px !important;
         min-height: 300px !important;
@@ -53,13 +86,9 @@
         min-width: 540px !important;
         min-height: 300px !important;
     }
-    //box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
 }
 
-.content-box-active {
-    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
-}
-
+//css content in box
 .content-toolbar {
     left: 0;
     top: 0;
@@ -109,14 +138,19 @@
     &.toolbar-cancel {
         height: 50px;
         .toolbar-function {
-            color: white;
+            color: black;
             width: 18px;
             margin-top: -1rem;
             margin-right: 0.1rem;
             float: right;
         }
     }
-    //background: red;
+    ;
+    &.toolbar-subform {
+        display: initial;
+        height: 100%;
+        position: relative;
+    }
 }
 
 .content-textarea {
@@ -146,8 +180,19 @@
     display: none;
 }
 
-video::-webkit-media-controls-fullscreen-button,
-video::-webkit-media-controls-play-button,
-video::-webkit-media-controls-pausebutton {
-    display: none;
+.content-subform {
+    width: 100%;
+    text-align: left;
 }
+
+// css extend and overwrite global
+.nav-footer-custome {
+    position: absolute;
+    bottom: 4%;
+}
+
+// video::-webkit-media-controls-fullscreen-button,
+// video::-webkit-media-controls-play-button,
+// video::-webkit-media-controls-pausebutton {
+//     display: none;
+// }

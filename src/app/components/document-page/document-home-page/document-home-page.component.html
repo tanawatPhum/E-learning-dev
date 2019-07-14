@@ -1,14 +1,8 @@
 <!--component html goes here -->
-<nav class="document-navbar navbar navbar-expand-sm document-bg-darkGrey">
-    <ul class="nav navbar-nav mr-auto">
+<nav class="document-navbar navbar navbar-expand-sm bg-darkGrey">
+    <ul class="nav navbar-nav mr-auto pl-2">
         <li class="nav-item">
-            <a class="nav-link text-white" (click)="newDocument()" href="javascript:void(0)">New</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-white" (click)="saveDocument()" href="javascript:void(0)">Save</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-white" (click)="previewDocument()" href="javascript:void(0)">Preview</a>
+            <a class="nav-link text-white bg-darkBrown pr-4 pl-4" (click)="newDocument()" href="javascript:void(0)">New</a>
         </li>
     </ul>
     <!-- <ul class="nav navbar-nav ml-auto">
@@ -20,7 +14,7 @@
             </a>
         </li>
     </ul> -->
-    <ul class="nav navbar-nav ml-auto">
+    <ul class="nav navbar-nav m-auto">
         <!-- <li class="nav-item">
             <a class="nav-link item-middle">
                 <div class="spinner-border text-warning" role="status">
@@ -29,15 +23,36 @@
             </a>
         </li> -->
         <li class="nav-item">
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <div class="navbar-form pull-left">
+                <select (ngModelChange)="changeDocument($event)" [(ngModel)]="currentDocument" class="form-control text-white shadow-none document-select-custome">
+                    <option class="text-dark" *ngIf="(documentList||[]).length==0" value="New Document">New Document</option>
+                    <option class="text-dark" *ngFor="let document of documentList" [value]="document.nameDocument">{{document.nameDocument}}</option>
+                        </select>
+            </div>
+            <!-- <select [(ngModel)]="currentDocument" multiple class="form-control">
+                        <option *ngFor="let document of documentList" [value]="document.nameDocument">{{document.nameDocument}}</option>
+                </select> -->
+            <!-- <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="documentList" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                           {{currentDocument}}
                         </button>
-                <div *ngIf="(documentList||[]).length>0" style="z-index: 99999" class="dropdown-menu dropdown-menu-center" aria-labelledby="dropdownMenu2">
+                <div *ngIf="(documentList||[]).length>0" style="z-index: 99999" class="dropdown-menu dropdown-menu-center" aria-labelledby="dropdown-toggle">
                     <button (click)="changeDocument(document.nameDocument)" *ngFor="let document of documentList" class="dropdown-item" [ngClass]="{'active':currentDocument === document.nameDocument}" type="button">{{document.nameDocument}}</button>
                 </div>
-            </div>
+            </div> -->
             <!-- <a class="nav-link text-white" (click)="newDocument()" href="javascript:void(0)">New</a> -->
+        </li>
+    </ul>
+    <ul class="nav navbar-nav ml-auto">
+        <li class="nav-item">
+            <a class="nav-link text-white p-0" (click)="saveDocument()" href="javascript:void(0)">
+                <img width="40%" src="assets/imgs/documentPage/saveDocument.svg">
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white p-0" (click)="previewDocument()" href="javascript:void(0)">
+                <img width="40%" src="assets/imgs/documentPage/previewDocument.svg">
+            </a>
         </li>
     </ul>
 

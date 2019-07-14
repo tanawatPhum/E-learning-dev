@@ -26,11 +26,12 @@ export class DocumentModalPageComponent implements OnInit {
         console.log('❏ Save : '+ this.documentName);
         if(typeSave=='new'){
             this.eventModal.emit({action:this.eventType.saveNewDocument.name,data:this.documentName});
-            this.closeModal("create_document_modal")
+            this.closeModal("create_document_modal");
         }
         else if(typeSave=='old'){
             this.eventModal.emit({action:this.eventType.saveOldDocument.name,data:this.oldDocument});
-            this.openModal("create_document_modal")
+            this.closeModal("save_document_modal");
+            this.openModal("create_document_modal");
         }
 
     }

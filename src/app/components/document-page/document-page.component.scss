@@ -4,6 +4,12 @@
     height: 5px;
 }
 
+.btn:focus,
+.btn:active {
+    outline: none !important;
+    box-shadow: none;
+}
+
 // component css goes here
 .alert-fixed {
     position: fixed;
@@ -13,10 +19,6 @@
 
 .document-navbar {
     height: 55px;
-}
-
-.document-bg-darkGrey {
-    background-color: #484848;
 }
 
 .document-sidenav {
@@ -62,13 +64,70 @@
     }
 }
 
-.document-sidenav a:hover {}
-
-.document-preview-button {
-    float: right;
+.document-select-custome {
+    width: 200px;
+    background: transparent;
+    outline: 0;
+    border-color: white;
 }
 
-.document-content-preview {
+.document-sidenav a:hover {}
+
+.document-preview-comment {
+    height: 36%;
+    padding-left: 8rem;
+    padding-right: 8rem;
+    padding-top: 1rem;
+    & .comment-header {
+        font-size: 1.6rem;
+        margin-bottom: 2rem;
+    }
+    & .comment-form {
+        height: 100%;
+        &.submit {
+            border-bottom: solid 1.5px #EDEDED;
+        }
+    }
+    & .comment-profile {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 50px;
+        height: 50px;
+        &.icon {
+            border-radius: 50%;
+            background: #E6E7E2;
+        }
+        & img {
+            width: 70%;
+        }
+    }
+    & .comment-textarea {
+        border: none;
+        width: 100%;
+        height: 100%;
+        font-size: 1.2rem;
+        &::placeholder {
+            color: #D9D9D9;
+        }
+    }
+    & .comment-tool {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 30px;
+        height: 30px;
+        &.attach {
+            border-radius: 50%;
+            background: #E6E7E2;
+        }
+        & img {
+            width: 70%;
+        }
+    }
+}
+
+.document-preview-content {
     position: relative;
     overflow-y: scroll;
     overflow-x: hidden;

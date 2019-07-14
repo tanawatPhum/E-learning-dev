@@ -12,10 +12,11 @@ import { DocumentService } from 'src/app/services/document/document.service';
 import 'splitting/dist/splitting.css';
 import 'splitting/dist/splitting-cells.css';
 import Splitting from 'splitting';
-import { triggerEventModel } from 'src/app/models/document/document.model';
+import { triggerEventModel, documentIndexModel } from 'src/app/models/document/document.model';
 import { SubFormContentModel } from '../../../../models/document/elements/subForm-content.model';
 import { ScreenDetailModel } from '../../../../models/general/general.model';
 import { DocumentDataControlService } from '../../../../services/document/document-data-control.service';
+import { element } from 'protractor';
 declare var electron: any;
 @Component({
     selector: 'create-content-page',
@@ -35,6 +36,8 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
     public currentElement: any;
     public currentContentType: { name: null, id: null };
     public currentBrowseFile: any;
+    public currentSubForms:SubFormContentModel[] = new Array<SubFormContentModel>();
+    public currentSubFormType = {id:'subform-silde',name:'silde'};
     public contentTypes = Constants.document.contents.types;
     public rootElement;
     public boxType = {
@@ -43,7 +46,8 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
         boxBrowseFile: 'box-browse-file',
         boxImg: 'box-img',
         boxVideo: 'box-video',
-        boxBrowseVideo: 'box-browse-video'
+        boxBrowseVideo: 'box-browse-video',
+        boxSubform: 'box-subform',
     };
     public contents = {
         event: {
@@ -51,7 +55,9 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
             addElTextArea: 'addElTextArea',
             addElBrowseFile: 'addElBrowseFile',
             addElBrowseVideo: 'addElBrowseVideo',
+            addElSubForm: 'addElSubForm',
             addEventBox: 'addEventBox',
+            addSubForm:'addSubForm',
             addStyleCurrentBoxBefore: 'addStyleCurrentBoxBefore',
             addStyleCurrentBoxAfter: 'addStyleCurrentBoxAfter',
             addStyleBoxBrowseSize: 'addStyleBoxBrowseSize',
@@ -61,6 +67,7 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
             triggerToolbars: 'triggerToolbars',
             triggerBrowseFile: 'triggerBrowseFile',
             triggerBrowseVideo: 'triggerBrowseVideo',
+            triggerSubForm: 'triggerSubForm',
             removeElBox: 'removeElBox',
             removeStyleBorderBox: 'removeStyleBorderBox',
             removeStyleBoxCurrent: 'removeStyleBoxCurrent',
@@ -74,6 +81,8 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
             addBoxData: 'addBoxData',
             addTextAreaData: 'addTextAreaData',
             addImgData: 'addImgData',
+            createDataToSave:'createDataToSave',
+            createIndexData:'createIndexData',
             retrieveBoxData: 'retrieveBoxData',
             retrieveTextAreaData: 'retrieveTextAreaData',
             findIndexBoxData: 'findIndexBoxData',
@@ -98,7 +107,7 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
     constructor(
         private commonService: CommonService,
         private contentService: DocumentService,
-        private documentDataService:DocumentDataControlService,
+        private documentDataService: DocumentDataControlService,
     ) { }
     ngOnInit() {
         this.contentElement.subscribe((result) => {
@@ -121,6 +130,12 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
             } else if (event.action === Constants.general.event.click.save) {
                 this.saveDocument(event.data);
             } else if (event.action === Constants.general.event.click.new) {
+                this.boxes = new Array<BoxContentModel>();
+                this.textAreas = new Array<TextAreaContentModel>();
+                this.imgs = new Array<ImgContentModel>();
+                this.videos = new Array<VideoContentModel>();
+                this.subForms = new Array<SubFormContentModel>();
+                this.rootElement.html(null);
                 this.saveDocument(event.data);
             }
 
@@ -128,18 +143,18 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
     }
     ngAfterContentInit() {
         this.rootElement = $(this.contentTemplate.nativeElement);
-        let contentSize:ScreenDetailModel = new ScreenDetailModel();
+        let contentSize: ScreenDetailModel = new ScreenDetailModel();
         contentSize.height = $('.content-template').outerHeight();
         contentSize.width = $('.content-template').outerWidth();
         // this.documentDataService.contentSize  = contentSize;
-        localStorage.setItem('contentSize',JSON.stringify(contentSize))
+        localStorage.setItem('contentSize', JSON.stringify(contentSize))
         //   window.indexedDB = window.indexedDB;
     }
     private async addElements(action: string, element?: any, subaction?: string, subElement?: any) {
         if (action === this.contents.event.addElBox || action === this.contents.event.addEventBox) {
             this.setCurrentBox();
             this.setCurrentToolbar();
-            this.setCurrentBoxBackground();
+           
             if (action === this.contents.event.addElBox) {
                 const numberOfBox = this.rootElement.find('.content-box').length;
                 if (this.currentContentType.name === this.contentTypes.freedomLayout.name) {
@@ -177,12 +192,11 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                 stack: '.freedom-layout',
                 scroll: true,
                 start: ((event) => {
-                    this.setCurrentBoxBackground(Constants.general.element.css.box.bgWhiteColor);
                     const elementFromId: any = $('[id="' + event.target.id + '"]');
                     this.addElements(this.contents.event.addStyleCurrentBoxBefore, elementFromId);
                 }),
                 stop: ((event) => {
-                    this.setCurrentBoxBackground();
+                   
                     const elementFromId: any = $('[id="' + event.target.id + '"]');
                     // $(elementFromId).css("left", (parseFloat($(elementFromId).css("left")) / ($(this.contentTemplate.nativeElement).width() / 100)) + "%");
                     // $(elementFromId).css("top", (parseFloat($(elementFromId).css("top")) / ($(this.contentTemplate.nativeElement).height() / 100)) + "%");
@@ -201,12 +215,11 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                     // minHeight: Constants.general.element.css.box.height,
                     // minWidth: Constants.general.element.css.box.width,
                     start: ((event) => {
-                        this.setCurrentBoxBackground(Constants.general.element.css.box.bgWhiteColor);
                         const elementFromId: any = $('[id="' + event.target.id + '"]');
                         this.addElements(this.contents.event.addStyleCurrentBoxBefore, elementFromId);
                     }),
                     stop: ((event) => {
-                        this.setCurrentBoxBackground();
+                       
                         const elementFromId: any = $('[id="' + event.target.id + '"]');
                         // $(elementFromId).css("left", (parseFloat($(elementFromId).css("left")) / ($(this.contentTemplate.nativeElement).width() / 100)) + "%");
                         // $(elementFromId).css("top", (parseFloat($(elementFromId).css("top")) / ($(this.contentTemplate.nativeElement).height() / 100)) + "%");
@@ -287,6 +300,27 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                 element.append('<iframe src="' + this.currentBrowseFile + '" id="' + element.attr('id') + '_video" class="content-video" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>');
             }
         }
+        else if (action === this.contents.event.addElSubForm) {
+            let htmlSubform = '';
+            console.log(this.currentSubFormType.id)
+            if(this.currentSubFormType.id === 'subform-link'){
+                htmlSubform += '<ul class="list-group content-subform mt-1">';
+                this.currentSubForms.forEach((subform)=>{
+                    htmlSubform += '<li class="cursor-pointer list-group-item">'+subform.nameDocument+'</li>'
+                })
+                htmlSubform += '</ul>';
+            }
+            element.css('display','initial');
+            element.append(htmlSubform);
+//             <ul class="list-group list-group-flush">
+//   <li class="list-group-item">Cras justo odio</li>
+//   <li class="list-group-item">Dapibus ac facilisis in</li>
+//   <li class="list-group-item">Morbi leo risus</li>
+//   <li class="list-group-item">Porta ac consectetur ac</li>
+//   <li class="list-group-item">Vestibulum at eros</li>
+// </ul>
+            // element.append()
+        }
     }
     private triggerElements(action: string, element?: any) {
         if (action === this.contents.event.triggerCurrentBox) {
@@ -309,7 +343,7 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                     // } else {
                     //     this.addElements(this.contents.event.addStyleCurrentBoxAfter, this.currentBox);
                     // }
-                    this.setCurrentBoxBackground();
+                   
                 }
 
             });
@@ -330,7 +364,7 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                 event.stopPropagation();
                 if (event.target.id === 'file-browse') {
                     this.setCurrentToolbar(this.contents.toolbar.addBrowseFileTool);
-                    this.setCurrentBoxBackground();
+                   
                     this.removeElements(this.contents.event.removeStyleBoxType);
                     this.currentBox.addClass(this.boxType.boxBrowseFile);
                     this.addToolBarBox(this.currentToolbar, this.currentBox);
@@ -348,11 +382,12 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                     this.addToolBarBox(this.currentToolbar, this.currentBox);
                 }
                 else if (event.target.id === 'subform') {
-                    this.setCurrentToolbar(this.contents.toolbar.addBrowseVideoTool);
+                    this.setCurrentToolbar(this.contents.toolbar.addSubform);
                     this.addToolBarBox(this.currentToolbar, this.currentBox);
+                    this.currentBox.addClass(this.boxType.boxSubform);
                     // this.removeElements(this.contents.event.removeStyleBoxType);
                     // this.currentBox.addClass(this.boxType.boxBrowseVideo);
-                    // this.addToolBarBox(this.currentToolbar, this.currentBox);
+                    // this.addToolBarBox(this.currentToolbar, this.currentBox); this.addToolBarBox(this.currentToolbar, this.currentBox);
                 }
                 else if (event.target.id === 'cancel') {
                     this.removeElements(this.contents.event.removeStyleBoxType);
@@ -371,7 +406,7 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                     this.addToolBarBox(this.contents.toolbar.cancelTool, element);
                     this.currentBrowseFile = fileEvent.target.files;
                     console.log(' ❏ File :', this.currentBrowseFile);
-                    this.setCurrentBoxBackground();
+                   
                     this.addElements(this.contents.event.addElBrowseFile, element);
                 });
             });
@@ -392,7 +427,7 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                 this.addToolBarBox(this.contents.toolbar.cancelTool, element);
                 this.currentBrowseFile = event.originalEvent.dataTransfer.files;
                 console.log(' ❏ File :', this.currentBrowseFile);
-                this.setCurrentBoxBackground();
+               
                 this.addElements(this.contents.event.addElBrowseFile, element);
             });
         } else if (action === this.contents.event.triggerBrowseVideo) {
@@ -406,7 +441,7 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                     this.addToolBarBox(this.contents.toolbar.cancelTool, element);
                     this.currentBrowseFile = fileEvent.target.files;
                     console.log(' ❏ Video :', this.currentBrowseFile);
-                    this.setCurrentBoxBackground();
+                   
                     this.addElements(this.contents.event.addElBrowseVideo, element);
                 });
             });
@@ -427,7 +462,7 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                 this.addToolBarBox(this.contents.toolbar.cancelTool, element);
                 this.currentBrowseFile = event.originalEvent.dataTransfer.files;
                 console.log(' ❏ Video :', this.currentBrowseFile);
-                this.setCurrentBoxBackground();
+               
                 this.addElements(this.contents.event.addElBrowseVideo, element, 'videoSource');
             });
             element.find('.toolbar-browse-video').find('#input-video-url').click(() => {
@@ -447,12 +482,70 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                         this.setCurrentToolbar(this.contents.toolbar.cancelTool);
                         this.addToolBarBox(this.contents.toolbar.cancelTool, element);
                         console.log(' ❏ Video :', this.currentBrowseFile);
-                        this.setCurrentBoxBackground();
+                       
                         this.addElements(this.contents.event.addElBrowseVideo, element, 'videoUrl');
 
                     }
                 }, 500));
             });
+
+        }else if (action === this.contents.event.triggerSubForm) {
+            element.find('.toolbar-subform').find('.nav-item').click((itemElement) => {
+                $(element).find('.toolbar-subform').find('.nav-item').removeClass('active');
+                $(element).find('.toolbar-subform').find('.nav-item').removeClass('text-primary');
+                $(itemElement.currentTarget).addClass('active');
+                $(itemElement.currentTarget).addClass('text-primary');
+                this.currentSubFormType = {
+                    id:$(itemElement.currentTarget).attr('id'),
+                    name:$(itemElement.currentTarget).data('subformtype')
+                }
+                element.find('.toolbar-subform').find('#subform-silde').text('Silde (0)');
+                element.find('.toolbar-subform').find('#subform-link').text('Link (0)');
+                if(this.currentSubFormType.id === "subform-silde"){
+                    element.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Silde ('+ this.currentSubForms.length +')');
+                }
+                else if(this.currentSubFormType.id === "subform-link"){
+                    element.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Link ('+ this.currentSubForms.length +')');
+                }
+            });
+            element.find('.toolbar-subform').find('#subform-btn-submit').click((btnElement) => {
+                this.removeElements(this.contents.event.removeStyleBoxType);
+                this.setCurrentToolbar(this.contents.toolbar.cancelTool);
+                this.addToolBarBox(this.contents.toolbar.cancelTool, element);
+                this.addElements(this.contents.event.addElSubForm,element)
+                
+
+            })
+            element.find('.toolbar-subform').find('input[type="checkbox"]').click((itemElement) => {
+                console.log($(itemElement.currentTarget).val())
+                if(!this.currentSubForms.find(form=>form.id === $(itemElement.currentTarget).val())){
+                    let targetDocument = this.documentDataService.documentList.find((document)=>document.id === $(itemElement.currentTarget).val())
+                    this.currentSubForms.push({
+                        id:targetDocument.id,
+                        nameDocument:targetDocument.nameDocument,
+                        isLinked:true
+                    });
+                   
+                    console.log(element.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]'))
+                //    $(this.currentSubFormType.id).text('test')
+                }else{
+                    this.currentSubForms = this.currentSubForms.filter((form)=>form.id != $(itemElement.currentTarget).val()) 
+                }
+                console.log(this.currentSubFormType)
+                if(this.currentSubFormType.id === "subform-silde"){
+                    element.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Silde ('+ this.currentSubForms.length +')');
+                }
+                else if(this.currentSubFormType.id === "subform-link"){
+                    element.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Link ('+ this.currentSubForms.length +')');
+                }
+               
+               console.log(this.currentSubForms)
+                // this.currentSubForms.findIndex((form)=>form.)
+                // console.log($(itemElement.currentTarget).is(':checked'))
+                // list-group input[type="checkbox"]:checked
+                // console.log( $(itemElement).is(':checked'))
+            })
+                
         }
     }
     private removeElements(action: string, element?: any) {
@@ -565,12 +658,44 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                 + '</div>';
         }
         else if (action === this.contents.toolbar.addSubform) {
+            let htmlDocumentList = '<div class="list-group text-left">';
+            let documentSubformList =  this.documentDataService.documentList.filter((document)=>document.nameDocument != this.documentDataService.currentDocument)
+            documentSubformList.forEach((document,index)=>{
+                htmlDocumentList += '<input type="checkbox" value="'+ document.nameDocument +'" id="subform-name-'+ this.commonService.getPatternId(document.nameDocument) +'" />';
+             
+                    if(index==0){
+                        htmlDocumentList += '<label class="list-group-item border-top-0" for="subform-name-'+ this.commonService.getPatternId(document.nameDocument) +'">'+document.nameDocument +'</label>'; 
+                    }else{
+                        htmlDocumentList += '<label class="list-group-item" for="subform-name-'+ this.commonService.getPatternId(document.nameDocument) +'">'+document.nameDocument +'</label>'; 
+                    }
+              
+            
+                // if(index==0){
+                //     htmlDocumentList += '<li class="list-group-item toolbar-subform-list border-top-0">';
+                //     htmlDocumentList += '<input type="checkbox" name="CheckBoxInputName" />';
+                //     htmlDocumentList += '<label class="list-group-item" for="CheckBox2">'+document.nameDocument +'</label>';                  
+                //     htmlDocumentList += '</li>';
+                // }else{
+                //     htmlDocumentList += '<li class="list-group-item toolbar-subform-list">' +document.nameDocument +'</li>';
+                // }
+            });
+            htmlDocumentList += '</div>'
             htmlTootBar = '<div class="row content-toolbar toolbar-subform">'
                 + '<div class="col-12">'
+                + '<nav>'
+                +'<div class="nav nav-tabs text-lightGrey ">'
+                + '<a data-subformtype="silde" id="subform-silde" class="nav-item nav-link cursor-pointer w-50 active text-primary border-top-0 rounded-0">Silde (0)</a>'
+                + '<a data-subformtype="link" id="subform-link" class="nav-item nav-link cursor-pointer w-50 border-top-0 rounded-0" >Link (0)</a>'
+                + '</nav>'
+                + htmlDocumentList
+                + '</div>'
+                + '<div  class="nav-footer nav-footer-custome">'
+                + '<button type="button" id="subform-btn-submit" class="btn btn-outline-success">Submit</button>'
                 + '</div>'
                 + '</div>';
+                this.rootElement.find(element).append(htmlTootBar);
+                this.triggerElements(this.contents.event.triggerSubForm, element);
         }
-
         else if (action === this.contents.toolbar.cancelTool) {
             htmlTootBar = '<div class="row content-toolbar toolbar-cancel">'
                 + '<div class="col-12">'
@@ -591,17 +716,6 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
             this.currentBox = $(this.rootElement).find('.content-box-current');
         }
     }
-    private setCurrentBoxBackground(bgColor?: string) {
-        // if (bgColor) {
-        //     this.currentBox.css('background', bgColor);
-        // } else {
-        //     if (this.currentToolbar === this.constants.toolbar.addBrowseToolbar) {
-        //         this.currentBox.css('background', Constants.element.css.bgWhiteColor);
-        //     } else {
-        //         this.currentBox.css('background', Constants.element.css.bgNoneColor);
-        //     }
-        // }
-    }
     private setCurrentToolbar(action?) {
         if (action) {
             this.currentToolbar = action;
@@ -614,72 +728,100 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
                 this.currentToolbar = this.contents.toolbar.addBrowseVideoTool;
             } else if (this.currentBox.hasClass(this.boxType.boxImg) || this.currentBox.hasClass(this.boxType.boxVideo)) {
                 this.currentToolbar = this.contents.toolbar.cancelTool;
-            } else {
+            } 
+            else if (this.currentBox.hasClass(this.boxType.boxSubform)) {
+                this.currentToolbar = this.contents.toolbar.addSubform;
+            }
+            else {
                 this.currentToolbar = this.contents.toolbar.addInitalTool;
             }
         }
 
     }
     private saveDocument(nameDocument) {
-        // this.createDataToSave().then(() => {
-        //     const objectTemplate: ContentModel = {
-        //         id: '01', html: this.rootElement.html(), elements: {
-        //             subForms: [],
-        //             boxes: this.boxes,
-        //             textAreas: this.textAreas,
-        //             imgs: this.imgs,
-        //             videos: this.videos
-        //         }
-        //     };
-        //     try{
-        //         // electron.ipcRenderer.once('asynchronous-reply', (event, arg) => {
-        //         //     console.log("testIPCRender",arg) // prints "pong"
-        //         //     alert("testIPCRender")
-        //         //   })
-        //         electron.ipcRenderer.send('save-document',JSON.stringify(objectTemplate))
-        //     }catch(e){}
-        // });
-        const requestTran = this.contentService.indexDB.transaction(['templates'], 'readwrite');
-        const objectStore = requestTran.objectStore('templates');
-        this.createDataToSave().then(() => {
-            const objectTemplate: DocumentModel = {
-                nameDocument: nameDocument,
-                id: nameDocument, html: this.rootElement.html(), elements: {
-                    subForms: [],
-                    boxes: this.boxes,
-                    textAreas: this.textAreas,
-                    imgs: this.imgs,
-                    videos: this.videos,
-                    subFroms: this.subForms
+        if (electron) {
+            this.createData(this.contents.data.createDataToSave).then(() => {
+                const objectTemplate: DocumentModel = {
+                    nameDocument: nameDocument,
+                    id: nameDocument, html: this.rootElement.html(), elements: {
+                        subForms: [],
+                        boxes: this.boxes,
+                        textAreas: this.textAreas,
+                        imgs: this.imgs,
+                        videos: this.videos,
+                        subFroms: this.subForms
+                    }
+                };
+                console.log(' ❏ Object for Save :', objectTemplate);
+                electron.ipcRenderer.send('request-save-document', JSON.stringify(objectTemplate))
+                electron.ipcRenderer.once('reponse-save-document', (event, status) => { 
+                    electron.ipcRenderer.send('request-read-document-list',null)
+                    console.log('data has been saved to your file.');
+
+                    //this.eventToParent.emit({ action: Constants.general.event.load.success, data: event })
+                });
+                electron.ipcRenderer.once('reponse-read-document-list', (event,documentList) => { 
+                    let newDocumentList:documentIndexModel[] = new Array<documentIndexModel>();
+                    if(documentList && documentList.length>0){
+                        console.log(documentList);
+                        console.log(nameDocument);
+                        if(!documentList.find((document)=>document.nameDocument == nameDocument)){
+                            newDocumentList = documentList
+                            newDocumentList.push({
+                                id:nameDocument,
+                                nameDocument:nameDocument
+                            });
+                            electron.ipcRenderer.send('request-save-document-list', JSON.stringify(newDocumentList))
+                        }else{
+                            this.eventToParent.emit({ action: Constants.general.event.load.success, data: event })
+                        }
+                      
+                    }else{
+                        newDocumentList.push({
+                            id:nameDocument,
+                            nameDocument:nameDocument
+                        });
+                        electron.ipcRenderer.send('request-save-document-list', JSON.stringify(newDocumentList))
+                    };
+                });
+                electron.ipcRenderer.once('response-save-document-list', (event, status) => { 
+                    console.log('heeloo');
+                    this.eventToParent.emit({ action: Constants.general.event.load.success, data: event })
+                });
+            });
+        } else {
+            const requestTran = this.contentService.indexDB.transaction(['templates'], 'readwrite');
+            const objectStore = requestTran.objectStore('templates');
+            this.createData(this.contents.data.createDataToSave).then(() => {
+                const objectTemplate: DocumentModel = {
+                    nameDocument: nameDocument,
+                    id: this.commonService.getPatternId(nameDocument), html: this.rootElement.html(), elements: {
+                        subForms: [],
+                        boxes: this.boxes,
+                        textAreas: this.textAreas,
+                        imgs: this.imgs,
+                        videos: this.videos,
+                        subFroms: this.subForms
+                    }
+                };
+                console.log(' ❏ Object for Save :', objectTemplate);
+                if (objectStore.get(nameDocument)) {
+                    objectStore.put(objectTemplate).onsuccess = (event) => {
+                        this.eventToParent.emit({ action: Constants.general.event.load.success, data: event })
+                        console.log('data has been updated to your database.');
+                    };
+                } else {
+                    objectStore.add(objectTemplate).onsuccess = (event) => {
+                        this.eventToParent.emit({ action: Constants.general.event.load.success, data: event })
+                        console.log('data has been added to your database.');
+                    };
                 }
-            };
-            console.log(' ❏ Object for Save :', objectTemplate);
-            try {
-                // electron.ipcRenderer.once('asynchronous-reply', (event, arg) => {
-                //     console.log("testIPCRender",arg) // prints "pong"
-                //     alert("testIPCRender")
-                //   })
-                electron.ipcRenderer.send('save-document', objectTemplate)
-            } catch (e) { }
-            if (objectStore.get(nameDocument)) {
-                objectStore.put(objectTemplate).onsuccess = (event) => {
-                    this.eventToParent.emit({ action: Constants.general.event.load.success, data: event })
-                    console.log('data has been updated to your database.');
-                };
-            } else {
-                objectStore.add(objectTemplate).onsuccess = (event) => {
-                    this.eventToParent.emit({ action: Constants.general.event.load.success, data: event })
-                    console.log('data has been added to your database.');
-                };
-            }
-            // requestTran.onsuccess = ((event) => {
-            //     //this.eventToParent.emit({action:Constants.general.event.load.success,data:event})
-            //     console.log('data has been added to your database.');
-            // });
-            // requestTran.onerror = ((event) => {
-            //     console.error('Unable to add data\r\ndata is aready exist in your database! ');
-            // });
-        });
+            });
+            this.createData(this.contents.data.createIndexData).then(() => {
+                
+            })
+        }
+
 
 
     }
@@ -713,13 +855,19 @@ export class CreateContentPageComponent implements OnInit, AfterContentInit {
         //     });
         // }
     }
-    private async createDataToSave() {
-        this.textAreas = new Array<TextAreaContentModel>();
-        await $(this.rootElement).find('.content-textarea').each((index, element) => {
-            const elementTextArea = $(element);
-            const objectTextArea: TextAreaContentModel = { id: elementTextArea.attr('id'), value: elementTextArea.val() && elementTextArea.val().toString() };
-            this.textAreas.push(objectTextArea);
-        });
+    private async createData(action: string) {
+        if(action === this.contents.data.createDataToSave){
+            this.textAreas = new Array<TextAreaContentModel>();
+            await $(this.rootElement).find('.content-textarea').each((index, element) => {
+                const elementTextArea = $(element);
+                const objectTextArea: TextAreaContentModel = { id: elementTextArea.attr('id'), value: elementTextArea.val() && elementTextArea.val().toString() };
+                this.textAreas.push(objectTextArea);
+            });
+        }
+        else if(action === this.contents.data.createIndexData){
+            
+        }
+
     }
     private openModal(action) {
 

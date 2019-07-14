@@ -6,8 +6,15 @@ import { ScreenDetailModel } from 'src/app/models/general/general.model';
 
 @Injectable()
 export class DocumentDataControlService {
-    private _currentDocument: string;
+    private _currentDocument: string = "New Document";
     private _contentSize: ScreenDetailModel = new ScreenDetailModel();
+    private _documentList: DocumentModel[] = new Array<DocumentModel>();
+    public get documentList(): DocumentModel[] {
+        return this._documentList;
+    }
+    public set documentList(value: DocumentModel[]) {
+        this._documentList = value;
+    }
     public get contentSize(): ScreenDetailModel {
         return this._contentSize;
     }

@@ -5,14 +5,14 @@ import { Router } from '@angular/router';
 import { DocumentModel } from '../../../models/document/content.model';
 import { ScreenDetailModel } from 'src/app/models/general/general.model';
 import { Constants } from '../../../global/constants';
-
+declare var electron: any;
 @Component({
     selector: 'document-preview-page',
     templateUrl: 'document-preview-page.component.html',
     styleUrls: ['../../document-page/document-page.component.scss']
 })
 export class DocumentPreviewPageComponent implements OnInit {
-    @ViewChild('documentContentPreview', { static: true }) documentContentPreview: ElementRef;
+    @ViewChild('documentPreviewContent', { static: true }) documentPreviewContent: ElementRef;
     private rootElement;
     private currentResult:DocumentModel = new DocumentModel();
     private currentScreenSize:ScreenDetailModel = new ScreenDetailModel();
@@ -30,33 +30,46 @@ export class DocumentPreviewPageComponent implements OnInit {
     ngOnInit() {
     }
     ngAfterContentInit() {
-        this.rootElement = $(this.documentContentPreview.nativeElement);
-        $('.document-content-preview').css('height',$(document).height() - Constants.general.element.css.navBar.height)  
-        this.currentScreenSize.height = $('.document-content-preview').outerHeight();
-        this.currentScreenSize.width = $('.document-content-preview').outerWidth();
+        this.rootElement = $(this.documentPreviewContent.nativeElement);
+        // $('.document-content-preview').css('height',$(document).height() - Constants.general.element.css.navBar.height)  
+        this.currentScreenSize.height = $('.document-preview-content').outerHeight();
+        this.currentScreenSize.width = $('.document-preview-content').outerWidth();
         this.loadHtml(this.documentDataService.currentDocument);
         $(window).resize((event)=>{
-            $('.document-content-preview').css('height',event.currentTarget.innerHeight - Constants.general.element.css.navBar.height) 
+            $('.document-preview-content').css('height',event.currentTarget.innerHeight - Constants.general.element.css.navBar.height) 
             this.currentScreenSize.height = event.currentTarget.innerHeight -Constants.general.element.css.navBar.height;
             this.currentScreenSize.width = event.currentTarget.innerWidth;
             this.rootElement.html(this.currentResult.html)
-            this.setElements(this.contents.element.previewElement)
-    
-    
-
-        })
+            this.setElements(this.contents.element.previewElement);
+        });
     }
     public loadHtml(documentName?){
-        this.documentService.loadHTMLFromDB(documentName).subscribe((result) => {
-            if(!Array.isArray(result)){
-                result = [result]
-            }
-            if(result.length>0){
-                this.currentResult =  result[0];
-                this.rootElement.html(result[0].html)
-                this.setElements(this.contents.element.previewElement)
-            }        
-         });
+        if (electron) {
+            electron.ipcRenderer.send('request-read-document', documentName)
+            electron.ipcRenderer.once('reponse-read-document', (event, result) => { 
+                console.log(' ❏ Object Document :', document);
+                if(!Array.isArray(result)){
+                    result = [result]
+                }
+                if(result.length>0){
+                    this.currentResult =  result[0];
+                    this.rootElement.html(result[0].html)
+                    this.setElements(this.contents.element.previewElement)
+                } 
+                this.currentResult = result;        
+            });
+        }else{
+            this.documentService.loadHTMLFromDB(documentName).subscribe((result) => {
+                if(!Array.isArray(result)){
+                    result = [result]
+                }
+                if(result.length>0){
+                    this.currentResult =  result[0];
+                    this.rootElement.html(result[0].html)
+                    this.setElements(this.contents.element.previewElement)
+                } 
+            });
+        };
     }
     public setElements(action){
         if(action === this.contents.element.previewElement){
