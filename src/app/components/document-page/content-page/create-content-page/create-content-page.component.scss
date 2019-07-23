@@ -60,8 +60,8 @@
     }
 }
 
+//css content in box
 .content-box {
-    //float: left;
     width: 100%;
     height: 100%;
     border: solid 1px #ccc;
@@ -86,103 +86,13 @@
         min-width: 540px !important;
         min-height: 300px !important;
     }
-}
-
-//css content in box
-.content-toolbar {
-    left: 0;
-    top: 0;
-    width: 100%;
-    z-index: 99;
-    margin: 0;
-    cursor: pointer;
-    position: absolute;
-    height: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    vertical-align: middle;
-    &.toolbar-inital {
-        padding: 1.250rem 1.250rem 0 1.250rem;
-        .toolbar-function {
-            width: 23px;
-            margin-right: 1rem;
-            float: right;
-        }
-        .toolbar-picker {
-            width: 180px;
-            float: left;
-        }
-        img {
-            height: 23px;
-        }
-    }
-    &.toolbar-browse-file {
-        height: 100%;
-        img {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 25px;
-        }
-    }
-    &.toolbar-browse-video {
-        height: 100%;
-        display: flexbox;
-        img {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 25px;
-        }
-        .toolbar-drag {}
-    }
-    &.toolbar-cancel {
-        height: 50px;
-        .toolbar-function {
-            color: black;
-            width: 18px;
-            margin-top: -1rem;
-            margin-right: 0.1rem;
-            float: right;
-        }
-    }
-    ;
-    &.toolbar-subform {
+    &.box-subform {
         display: initial;
-        height: 100%;
-        position: relative;
     }
 }
 
-.content-textarea {
-    background: transparent;
-    border: none;
-}
-
-.content-img {
-    width: 100%;
-    height: 100%;
-    background-position: center;
-    /* Center the image */
-    background-repeat: no-repeat;
-    /* Do not repeat the image */
-    background-size: cover;
-}
-
-.content-video {
-    object-fit: fill;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-}
-
-.content-browse-file,
-.content-browse-video {
-    display: none;
-}
-
-.content-subform {
-    width: 100%;
-    text-align: left;
+.content-box-active {
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
 // css extend and overwrite global

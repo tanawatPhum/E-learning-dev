@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Constants } from '../../global/constants';
+import { PostitionDetailModel, ScreenDetailModel, ElementDetailModel } from '../../models/general/general.model';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class CommonService {
@@ -34,5 +36,31 @@ export class CommonService {
   }
   public getPatternId(string:string){
     return  string.replace(/\s/g,'').toLowerCase();
+  }
+  public calPositionCenter(parenteElement, targetElement:JQuery<Element>):PostitionDetailModel{
+    let positionElement = new PostitionDetailModel();
+    positionElement.top =  Math.max(0, (($(parenteElement).height() - $(targetElement).outerHeight()) / 2) + 
+                                                $(parenteElement).scrollTop())
+    positionElement.left =Math.max(0, (($(parenteElement).width() - $(targetElement).outerWidth()) / 2) + 
+                                                $(parenteElement).scrollLeft())
+
+                                                // console.log($(window).height())
+                                                // console.log($(window).width())
+                                                // console.log(parenteElement.outerHeight());
+                                                // console.log(parenteElement.outerWidth());
+    return positionElement;
+  }
+  public calGCD (a, b) {
+    return (b == 0) ? a : this.calGCD (b, a%b);
+  }
+  public calPositionForNewScreen(element,oldScreen):Observable<ElementDetailModel>{
+    return  new Observable((subscriber)=>{
+      let elementDetail = new ElementDetailModel();
+      elementDetail.postitionDetail.top =  ( 100 * parseFloat( ($(element).position().top / oldScreen.height).toString() ));
+      elementDetail.postitionDetail.left = ( 100 * parseFloat( ($(element).position().left / oldScreen.width).toString() ));
+      elementDetail.screenDetail.width =   ($(element).width()/oldScreen.width*100);
+      elementDetail.screenDetail.height = ($(element).height()/oldScreen.height*100);
+      subscriber.next(elementDetail);
+    });
   }
 }

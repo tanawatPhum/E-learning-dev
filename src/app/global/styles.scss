@@ -1,5 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 
+//custom element tag
 $font-family:'Kanit';
 $font-style:normal;
 $font-extra-light:200;
@@ -10,16 +11,44 @@ $font-semi-bold:600;
 $font-bold:700;
 $font-extra-bold:800;
 $font-black:900;
+$color-primary1:#002380;
+$color-primary2:#0049B0;
+$color-primary3:#5574E3;
+$color-primary4:#ffff;
 html,
 body {
     height: 100%;
     max-height: 100%;
     width: 100%;
     // // overflow-x: hidden;
-    // overflow: hidden;
+    overflow: hidden;
     font-size: 16px !important;
     font-family: $font-family !important;
     font-style: $font-style !important;
+}
+
+textarea {
+    resize: none;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+}
+
+li {
+    list-style-type: none;
+}
+
+// css here go
+.bg-primary-1 {
+    background-color: $color-primary1;
+}
+
+.bg-primary-2 {
+    background-color: $color-primary2;
+}
+
+.bg-primary-3 {
+    background-color: $color-primary3;
 }
 
 .bg-darkGrey {
@@ -30,12 +59,69 @@ body {
     background: #404040;
 }
 
+.color-primary-1 {
+    color: $color-primary4;
+}
+
+.w-10 {
+    width: 10%;
+}
+
+.w-20 {
+    width: 20%;
+}
+
+.w-30 {
+    width: 30%;
+}
+
+.w-40 {
+    width: 40%;
+}
+
+.w-50 {
+    width: 50%;
+}
+
+.w-60 {
+    width: 60%;
+}
+
+.w-70 {
+    width: 70%;
+}
+
+.w-80 {
+    width: 80%;
+}
+
+.w-90 {
+    width: 90%;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.full-screen {
+    width: 100%;
+    height: 100%;
+}
+
 .text-darkGrey {
     color: #4B4B4B;
 }
 
 .text-lightGrey {
     color: #C9C9C9;
+}
+
+.text-lightGrey2 {
+    color: #9D9E9E;
+}
+
+.text-cobalt {
+    color: #2866B4
 }
 
 .min-height {
@@ -53,15 +139,12 @@ body {
     width: 100%;
 }
 
-textarea {
-    resize: none;
-    overflow: hidden;
-    height: 100%;
-    width: 100%;
-}
-
 .cursor-pointer {
     cursor: pointer;
+}
+
+.cursor-default {
+    cursor: default;
 }
 
 .ui-icon,
@@ -113,36 +196,6 @@ input:focus {
     position: relative;
 }
 
-.content-box {
-    //float: left;
-    width: 100%;
-    height: 100%;
-    border: solid 1px #ccc;
-    color: black;
-    // color: rgba(0, 0, 0, 0.87);
-    cursor: move;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    background: #fff;
-    // border-radius: 4px;
-    transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
-    &.box-browse-file-size {
-        min-width: 300px !important;
-        min-height: 300px !important;
-    }
-    &.box-browse-video-size {
-        min-width: 540px !important;
-        min-height: 300px !important;
-    }
-    //box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
-}
-
-.content-box-active {
-    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
-}
-
 .content-toolbar {
     left: 0;
     top: 0;
@@ -192,14 +245,19 @@ input:focus {
     &.toolbar-cancel {
         height: 50px;
         .toolbar-function {
-            color: white;
+            color: black;
             width: 18px;
             margin-top: -1rem;
             margin-right: 0.1rem;
             float: right;
         }
     }
-    //background: red;
+    ;
+    &.toolbar-subform {
+        display: initial;
+        height: 100%;
+        position: relative;
+    }
 }
 
 .content-textarea {
@@ -227,6 +285,11 @@ input:focus {
 .content-browse-file,
 .content-browse-video {
     display: none;
+}
+
+.content-subform {
+    width: 100%;
+    text-align: left;
 }
 
 video::-webkit-media-controls-fullscreen-button,

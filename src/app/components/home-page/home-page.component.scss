@@ -1,1 +1,67 @@
 // component css goes here
+.home-menu {
+    width: 180px;
+    & .menu-list {
+        & .list-logo {
+            width: 100%;
+            & .logo-text {
+                width: 100%;
+                font-size: 1.25rem;
+                & div {
+                    border-radius: 50%;
+                    width: 40px;
+                    height: 40px;
+                    margin-right: 3px;
+                    font-size: 1.75rem;
+                    border: white solid 1px;
+                }
+            }
+        }
+        & .list-sub {
+            cursor: pointer;
+            & span {
+                font-weight: 200;
+            }
+            & img {
+                margin-right: 10px;
+            }
+        }
+    }
+}
+
+.home-container-document {
+    & .document-title {
+        font-size: 1.25rem;
+        color: black;
+    }
+    & .document-container {
+        display: inline-flex;
+        position: relative;
+        justify-content: center;
+        padding-bottom: 0.5em;
+        cursor: pointer;
+        & .document-paper {
+            background: white;
+            height: 180px;
+            width: 130px;
+            display: inline-flex;
+            overflow: hidden;
+            pointer-events: none;
+            margin: 1em 1em 1.5em 1em;
+            border: solid 0.5px #C6C6C6;
+        }
+        & .document-text {
+            cursor: pointer;
+            font-size: 0.9rem;
+            position: absolute;
+            bottom: 2.5%;
+        }
+    }
+    & .document-container:hover {
+        background: #E7EAED;
+    }
+}
+
+.home-loading {
+    opacity: 0.1;
+}

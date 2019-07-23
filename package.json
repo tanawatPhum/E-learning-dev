@@ -23,6 +23,7 @@
         "@capacitor/cli": "^1.1.0",
         "@capacitor/core": "^1.1.0",
         "@types/jquery": "^3.3.30",
+        "html2canvas": "^1.0.0-rc.3",
         "rxjs": "~6.4.0",
         "splitting": "^1.0.6",
         "tslib": "^1.9.0",

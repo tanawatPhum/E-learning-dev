@@ -55,11 +55,12 @@ export class Constants {
         modals:{
             types:{
                 saveDocument:{name:'saveDocument',id:1},
-                newDocument:{name:'newDocument',id:2}
+                newDocument:{name:'newDocument',id:2},
             },
             events:{
                 saveNewDocument:{name:'saveNewDocument',id:1},
                 saveOldDocument:{name:'saveOldDocument',id:2},
+                cancelSaveDocument:{name:'cancelSaveDocument',id:3}
             }
         }
     };

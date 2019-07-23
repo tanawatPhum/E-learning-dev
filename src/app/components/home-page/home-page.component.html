@@ -1,1 +1,28 @@
 <!--component html goes here -->
+<div class="container-fluid max-height">
+    <div class="row max-height">
+        <div class="text-white home-menu">
+            <ul class="list-group list-group-flush bg-primary-1 max-height menu-list mt-0">
+                <li class="pt-4   pb-3 list-logo">
+                    <span class="logo-text d-flex align-items-center pl-3"><div class="item-middle">S</div>mart Doc</span>
+                </li>
+                <li *ngFor="let menuBar of menuBarList;let index = index" (click)="changeCurrentMenu(menuBar,index)" [ngClass]="{'bg-primary-2':index===currentMenu.index}" class="list-group-item bg-primary-1 d-flex align-items-center border-0 bg-primary-1 color-primary-1 pl-4 pt-3  pb-3  list-sub">
+                    <img class="ml-1 color-white w-20" src="assets/imgs/homePage/{{menuBar.icon}}"> <span>{{menuBar.name}}</span>
+                </li>
+            </ul>
+        </div>
+        <div class="col">
+            <div class="home-container-document">
+                <p class="document-title pl-5 mt-3">Documents</p>
+                <div #homeDocumentList style="background: #F5F5F6" class="full-screen pl-5" [ngClass]="{'home-loading':loading}">
+
+                </div>
+            </div>
+
+            <loading-page *ngIf="loading"></loading-page>
+        </div>
+    </div>
+
+
+
+</div>

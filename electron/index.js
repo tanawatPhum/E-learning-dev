@@ -55,7 +55,8 @@ async function createWindow() {
     }
     ipcMain.on('request-save-document', (event, document) => {
         let documentJson = JSON.parse(document);
-        fs.writeFile('./documents/' + documentJson.id + '.json', document, function(err) {
+        console.log(documentJson);
+        fs.writeFile('./documents/' + documentJson.nameDocument + '.json', document, function(err) {
             event.sender.send('reponse-save-document', "The file was saved");
             if (err) {
                 return console.log(err);
@@ -66,25 +67,47 @@ async function createWindow() {
     ipcMain.on('request-read-document', (event, documentName) => {
         console.log("request-read-document", documentName)
         fs.readFile('./documents/' + documentName + '.json', function read(err, data) {
+            if (err) {
+                return console.log(err);
+            }
+
             event.sender.send('reponse-read-document', JSON.parse(data));
+
+
             // if (err) {
             //     throw err;
             // }
             // event.sender.send('reponse-document', data);
         });
     });
+
+    ipcMain.on('request-read-target-document', (event, documentName) => {
+        console.log("request-read-target-document", documentName)
+        fs.readFile('./documents/' + documentName + '.json', function read(err, data) {
+            if (err) {
+                throw err;
+            }
+            event.sender.send('request-read-target-document', JSON.parse(data));
+
+            // event.sender.send('reponse-document', data);
+        });
+    });
     ipcMain.on('request-read-document-list', (event, data) => {
         fs.readFile('./documents/documentList.json', function read(err, data) {
-            let documentList = data;
+            let documentList = data || [];
             if (documentList) {
-                documentList = JSON.parse(data);
+                try {
+
+                    documentList = JSON.parse(data);
+                } catch (e) {
+
+                }
+                event.sender.send('reponse-read-document-list', documentList);
             }
-            event.sender.send('reponse-read-document-list', documentList);
-        });
+        })
     });
 
     ipcMain.on('request-save-document-list', (event, documentList) => {
-        console.log('ddddddddddddddddddddddddddd')
         fs.writeFile('./documents/documentList.json', documentList, function(err) {
             event.sender.send('response-save-document-list', "The file was saved");
             if (err) {

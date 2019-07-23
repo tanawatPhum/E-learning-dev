@@ -31,10 +31,10 @@ export class DocumentPreviewPageComponent implements OnInit {
     }
     ngAfterContentInit() {
         this.rootElement = $(this.documentPreviewContent.nativeElement);
-        // $('.document-content-preview').css('height',$(document).height() - Constants.general.element.css.navBar.height)  
-        this.currentScreenSize.height = $('.document-preview-content').outerHeight();
-        this.currentScreenSize.width = $('.document-preview-content').outerWidth();
-        this.loadHtml(this.documentDataService.currentDocument);
+        $(this.rootElement).css('height',$(window).height() - Constants.general.element.css.navBar.height)  
+        this.currentScreenSize.height = $(this.rootElement).outerHeight();
+        this.currentScreenSize.width = $(this.rootElement).outerWidth();
+        this.loadHtml(this.documentDataService.currentDocumentName);
         $(window).resize((event)=>{
             $('.document-preview-content').css('height',event.currentTarget.innerHeight - Constants.general.element.css.navBar.height) 
             this.currentScreenSize.height = event.currentTarget.innerHeight -Constants.general.element.css.navBar.height;
@@ -47,25 +47,20 @@ export class DocumentPreviewPageComponent implements OnInit {
         if (electron) {
             electron.ipcRenderer.send('request-read-document', documentName)
             electron.ipcRenderer.once('reponse-read-document', (event, result) => { 
-                console.log(' ❏ Object Document :', document);
-                if(!Array.isArray(result)){
-                    result = [result]
-                }
-                if(result.length>0){
-                    this.currentResult =  result[0];
-                    this.rootElement.html(result[0].html)
+                console.log(' ❏ Object Document :', result);
+                if(result){
+                    this.currentResult =  result;
+                    this.rootElement.html(result.html)
                     this.setElements(this.contents.element.previewElement)
                 } 
                 this.currentResult = result;        
             });
         }else{
-            this.documentService.loadHTMLFromDB(documentName).subscribe((result) => {
-                if(!Array.isArray(result)){
-                    result = [result]
-                }
-                if(result.length>0){
-                    this.currentResult =  result[0];
-                    this.rootElement.html(result[0].html)
+            this.documentService.loadDocFromDB(documentName).subscribe((result) => {
+                console.log(' ❏ Object Document :', result)
+                if(result){
+                    this.currentResult =  result;
+                    this.rootElement.html(result.html)
                     this.setElements(this.contents.element.previewElement)
                 } 
             });

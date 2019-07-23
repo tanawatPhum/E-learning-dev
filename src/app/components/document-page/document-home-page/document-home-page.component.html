@@ -1,8 +1,8 @@
 <!--component html goes here -->
-<nav class="document-navbar navbar navbar-expand-sm bg-darkGrey">
+<nav class="document-navbar navbar navbar-expand-sm bg-primary-2">
     <ul class="nav navbar-nav mr-auto pl-2">
         <li class="nav-item">
-            <a class="nav-link text-white bg-darkBrown pr-4 pl-4" (click)="newDocument()" href="javascript:void(0)">New</a>
+            <a class="nav-link text-white bg-primary-2 pr-4 pl-4" (click)="newDocument()" href="javascript:void(0)">New</a>
         </li>
     </ul>
     <!-- <ul class="nav navbar-nav ml-auto">
@@ -14,7 +14,7 @@
             </a>
         </li>
     </ul> -->
-    <ul class="nav navbar-nav m-auto">
+    <ul class="nav navbar-nav m-auto d-flex align-items-center">
         <!-- <li class="nav-item">
             <a class="nav-link item-middle">
                 <div class="spinner-border text-warning" role="status">
@@ -23,12 +23,12 @@
             </a>
         </li> -->
         <li class="nav-item">
-            <div class="navbar-form pull-left">
-                <select (ngModelChange)="changeDocument($event)" [(ngModel)]="currentDocument" class="form-control text-white shadow-none document-select-custome">
-                    <option class="text-dark" *ngIf="(documentList||[]).length==0" value="New Document">New Document</option>
-                    <option class="text-dark" *ngFor="let document of documentList" [value]="document.nameDocument">{{document.nameDocument}}</option>
+            <!-- <div class="navbar-form pull-left">
+                <select (ngModelChange)="changeDocument($event)" [(ngModel)]="currentDocumentName" class="form-control text-white shadow-none document-select-custome">
+                    <option class="text-dark" *ngIf="currentDocumentName =='Blank document'" value="Blank document">Please Select</option>
+                    <option class="text-dark" *ngFor="let document of documentNavList" [value]="document.nameDocument">{{document.nameDocument}}</option>
                         </select>
-            </div>
+            </div> -->
             <!-- <select [(ngModel)]="currentDocument" multiple class="form-control">
                         <option *ngFor="let document of documentList" [value]="document.nameDocument">{{document.nameDocument}}</option>
                 </select> -->
@@ -45,7 +45,7 @@
     </ul>
     <ul class="nav navbar-nav ml-auto">
         <li class="nav-item">
-            <a class="nav-link text-white p-0" (click)="saveDocument()" href="javascript:void(0)">
+            <a class="nav-link text-white p-0" (click)="saveDocument(contents.data.savecurrentDoc)" href="javascript:void(0)">
                 <img width="40%" src="assets/imgs/documentPage/saveDocument.svg">
             </a>
         </li>
@@ -64,8 +64,8 @@
 <div class="row min-height m-0">
     <div id="document-sidenav" [ngStyle]="{'width':isOpenMenu? '200px':'50px'}">
         <div class="document-sidenav">
-            <div class="document-sidenav-btnNav p-3 ml-3"><span class="text-muted" *ngIf="isOpenMenu">navigation</span> <i (click)="toggleMenu()" class="fa fa-angle-{{isOpenMenu? 'left':'right'}} float-right arrow-custome text-muted"></i></div>
-            <div class="document-sidenav-content" *ngIf="isOpenMenu">
+            <div class="document-sidenav-btnNav p-3 pl-4"><span class="text-lightGrey2" *ngIf="isOpenMenu">navigation</span> <i (click)="toggleMenu()" class="fa fa-angle-{{isOpenMenu? 'left':'right'}} float-right arrow-custome text-lightGrey2"></i></div>
+            <div class="document-sidenav-content pt-3" *ngIf="isOpenMenu">
 
             </div>
         </div>

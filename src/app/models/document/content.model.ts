@@ -13,7 +13,6 @@ export class DocumentModel {
 }
 
 export class ElementsModel {
-    public subForms: SubFormContentModel[];
     public boxes: BoxContentModel[];
     public textAreas: TextAreaContentModel[];
     public imgs: ImgContentModel[];

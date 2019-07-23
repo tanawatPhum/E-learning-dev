@@ -32,6 +32,22 @@
     height: 100%;
     width: 98%;
     background: white;
+    & .sidenav-content-list {
+        position: relative;
+        & .sidenav-content-line {
+            position: absolute;
+            height: 100%;
+            width: 1.5px;
+            background: red;
+        }
+        & .sidenav-content-sublist:before {
+            content: "━";
+            font-size: 8px;
+            position: absolute;
+            top: 6px;
+            left: 10px;
+        }
+    }
 }
 
 .document-sidenav-btnNav {
