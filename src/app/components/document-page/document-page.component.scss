@@ -21,17 +21,29 @@
     height: 55px;
 }
 
-.document-sidenav {
+.document-sidenav,
+.document-sidetool {
     height: 100%;
     width: 100%;
     background-color: #EDF0F2;
     overflow: hidden;
 }
 
-.document-sidenav-content {
+.document-sidetool {
+    background-color: white;
+}
+
+.document-sidenav-content,
+.document-sidetool-content {
     height: 100%;
     width: 98%;
     background: white;
+    & li {
+        & img {
+            cursor: pointer;
+            width: 40%;
+        }
+    }
     & .sidenav-content-list {
         position: relative;
         & .sidenav-content-line {

@@ -63,4 +63,8 @@ export class CommonService {
       subscriber.next(elementDetail);
     });
   }
+  public getCurrentCaret(){
+    return window.getSelection()
+
+  }
 }

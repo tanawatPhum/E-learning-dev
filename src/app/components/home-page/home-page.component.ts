@@ -1,4 +1,4 @@
-import { Component,OnInit,AfterViewInit,ViewChild, ElementRef,ViewEncapsulation } from '@angular/core';
+import { Component,OnInit,AfterViewInit,ViewChild, ElementRef,ViewEncapsulation} from '@angular/core';
 import { Router } from '@angular/router';
 import { DocumentService } from '../../services/document/document.service';
 import { DocumentNavigatorModel } from '../../models/document/document.model';
@@ -124,7 +124,22 @@ export class HomePageComponent implements OnInit , AfterViewInit{
     public triggerElements(action: string, element?: JQuery<Element>) {
         if (action === this.contents.event.triggerDoc) {
             element.click((event)=>{      
-                this.documentDataService.currentDocumentName  =  $(event.currentTarget).attr('document-data');
+                if($(event.currentTarget).attr('document-data') == 'Blank document'){
+                    this.documentDataService.currentDocumentName = 'New Document'
+                    let countDuplicateDocName = 0;
+                    let regexForCheckDuplicateDocName = RegExp(this.documentDataService.currentDocumentName);
+                    this.documentNavList.forEach((docNav) => {
+                        if (regexForCheckDuplicateDocName.test(docNav.nameDocument)) {
+                            countDuplicateDocName = countDuplicateDocName + 1;
+                        }
+                    })
+                    if(countDuplicateDocName > 0){
+                        this.documentDataService.currentDocumentName = this.documentDataService.currentDocumentName + "(" + countDuplicateDocName + ")";
+                    }
+                    this.documentNavList.find((docNav)=>docNav.nameDocument === this.documentDataService.currentDocumentName)
+                }else{
+                    this.documentDataService.currentDocumentName  =  $(event.currentTarget).attr('document-data');
+                }
                 this.router.navigate(['documentHome'])
             })
         }

@@ -39,6 +39,9 @@ export class Constants {
                 }
 
             }
+        },
+        style:{
+            fontSizeList:[8,9,10,11,12,14,16,18,20,22,24,26,28,36,48,72]
         }
 
     }
@@ -61,6 +64,15 @@ export class Constants {
                 saveNewDocument:{name:'saveNewDocument',id:1},
                 saveOldDocument:{name:'saveOldDocument',id:2},
                 cancelSaveDocument:{name:'cancelSaveDocument',id:3}
+            }
+        },
+        tools:{
+            types:{
+                trash: {name : 'trash', id: 1 },
+                textArea: {name : 'text-area', id: 1 },
+                videoBrowse: {name : 'video-browse', id: 1 },
+                subform: {name : 'subform', id: 1 },
+                fileBrowse: {name : 'file-browse', id: 1 },
             }
         }
     };

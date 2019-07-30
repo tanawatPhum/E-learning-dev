@@ -17,12 +17,14 @@ declare var electron: any;
 })
 export class DocumentHomePageComponent implements OnInit, AfterContentInit, AfterViewInit {
     public triggerElement: Subject<TriggerEventModel> = new Subject<TriggerEventModel>();
+    public dropElement: Subject<TriggerEventModel> = new Subject<TriggerEventModel>();
     public triggerModal: Subject<TriggerEventModel> = new Subject<TriggerEventModel>();
     public loading: boolean = false;
     public contentElement: Subject<DocumentModel> = new Subject<DocumentModel>();
     public contentTypes = Constants.document.contents.types;
     public modalTypes = Constants.document.modals.types;
     public modalEvents = Constants.document.modals.events;
+    public toolTypes = Constants.document.tools.types;
     public contentTypeSelected: Subject<any> = new Subject<any>();
     public isOpenMenu: boolean = true;
     public triggerFromChild: Subject<TriggerEventModel> = new Subject<TriggerEventModel>();
@@ -36,6 +38,7 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
     public contents = {
         event: {
             triggerNavDoc: 'triggerNavDoc',
+            dropTool:'dropTool'
         },
         data:{
             savecurrentDoc:'savecurrentDoc',
@@ -87,13 +90,10 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
     public async loadTargetDoc(targetDocumentName: string) {
    
             if (electron) {
-                console.log("targetDocumentName",targetDocumentName)
                 electron.ipcRenderer.send('request-read-document', targetDocumentName)
                 await electron.ipcRenderer.once('reponse-read-document', (event, result) => {           
-                    this.ngZone.run(()=>{
-                        console.log(' ❏ Object Document :', result);
-                        this.contentElement.next(result);   
-                    })
+                    console.log(' ❏ Object Document :', result);
+                    this.contentElement.next(result);   
                     electron.ipcRenderer.removeListener('request-read-document',()=>{});
                     electron.ipcRenderer.removeListener('reponse-read-document',()=>{});
                 });
@@ -309,8 +309,6 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
         }
     }
     public createHTMLNavDoc(documentNav: DocumentNavigatorModel, parentDocId: string) {
-        this.ngZone.run(()=>{
-            console.log("documentNav",documentNav);
             let htmlNavDocument = '<ul class="pl-3 sidenav-content-list">'
             htmlNavDocument += '<li id="nav-doc-' + documentNav.id + '" class="sidenav-content-sublist cursor-default text-muted pl-2">';
             htmlNavDocument += '<span id="nav-textdoc-' + documentNav.id + '"class="cursor-pointer sidenav-content-text">';
@@ -319,7 +317,6 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
             htmlNavDocument += '</li>';
             htmlNavDocument += '</ul>';
             if (!parentDocId && $('.document-sidenav-content').find('.sidenav-content-firstDoc').length == 0) {
-                console.log("vvvvvvvv")
                 let firstNav = '<ul class="pl-4">';
                 firstNav += '<li id="nav-doc-' + documentNav.id + '" class="cursor-default text-cobalt sidenav-content-firstDoc">';
                 firstNav += '<span  id=""nav-textdoc-' + documentNav.id + '" class="cursor-pointer sidenav-content-text">';
@@ -332,7 +329,6 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
             } else {
                 $('.document-sidenav-content').find('[id="nav-doc-' + parentDocId + '"]').append(htmlNavDocument)
             }
-        })
     }
     public triggerElements(action: string, element?: any) {
         if (action === this.contents.event.triggerNavDoc) {
@@ -349,6 +345,19 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
         }
 
     }
+    public dragTool(event){
+        event.dataTransfer.setData("tool-type", $(event.target).attr('document-data'));
+        // console.log("drag",$(event.target).attr('document-data'));
+
+    }
+    public dropTool(event){
+        let data ={element:event,toolType:event.dataTransfer.getData("tool-type")}
+        this.dropElement.next({action: this.contents.event.dropTool,data:data})
+        // console.log(event)
+        // console.log("drop",event.dataTransfer.getData("tool-type"));
+
+    }
+    
 }
 // $(document).ready(function(){
 //     $("button").click(function(){

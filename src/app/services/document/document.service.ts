@@ -4,10 +4,12 @@ import { Observable } from 'rxjs';
 import { DocumentModel } from '../../models/document/content.model';
 import { DocumentNavigatorModel } from 'src/app/models/document/document.model';
 declare var electron: any;
+declare var rangy:any;
 @Injectable()
 export class DocumentService {
     constructor() { }
     public indexDB: any;
+    public highlighter:any;
     public loadDocFromDB(documentName): Observable<DocumentModel> {
         return new Observable(subscriber => {
             if(electron){
@@ -157,5 +159,45 @@ export class DocumentService {
                 }
             });
         });
+    }
+    public async initialApplierStylesText(styles){
+        rangy.init();
+        this.highlighter = rangy.createHighlighter();
+
+        // this.highlighter.addClassApplier(rangy.createClassApplier("highlight", {
+        //     ignoreWhiteSpace: true,
+        //     tagNames: ["span", "a"]
+        // }));
+        await this.highlighter.addClassApplier(rangy.createClassApplier('content-text', {
+            ignoreWhiteSpace: true,
+            useExistingElements:false,
+            elementTagName: "span",
+            elementProperties: {
+                // href: "#",
+                // id: "test",
+                style:styles
+                // onclick: () => {
+                //     let highlight = this.highlighter.getHighlightForElement(this);
+                //     if (window.confirm("Delete this note (ID " + highlight.id + ")?")) {
+                //         this.highlighter.removeHighlights([highlight]);
+                //     }
+                //     return false;
+                // }
+            }
+        }));
+    }
+    public compileStylesText(){
+        // setTimeout(() => {
+        //     this.highlighter.unhighlightSelection();
+        // }, 3000);
+       
+    
+        this.highlighter.highlightSelection('content-text');
+      
+        
+    }
+    public remove(){
+        console.log('cxcxcxc');
+        this.highlighter.unhighlightSelection();
     }
 }

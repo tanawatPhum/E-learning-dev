@@ -176,6 +176,10 @@ input:focus {
     font-weight: $font-regular;
 }
 
+.content-text {
+    //interface of rangy
+}
+
 // component css goes here
 .bg-test {
     background: red;
@@ -234,6 +238,7 @@ input:focus {
     }
     &.toolbar-browse-video {
         height: 100%;
+        padding: 0 1em 0 1em;
         display: flexbox;
         img {
             width: 80px;

@@ -16,6 +16,7 @@ import { NoteComponentComponent } from './note-component/note-component.componen
 import { DocumentModalPageComponent } from './components/document-page/document-modal-page/document-modal-page.component';
 import { DocumentDataControlService } from './services/document/document-data-control.service';
 import { LoadingPageComponent } from './components/plugin-page/loading-page/loading-page.component';
+import { ExampleDocumentPageComponent } from './components/example-document-page/example-document-page/example-document-page.component';
 
 
 
@@ -28,7 +29,8 @@ export const COMPONENTS: any[] = [
  DocumentPreviewPageComponent,
  NoteComponentComponent,
  DocumentModalPageComponent,
- LoadingPageComponent
+ LoadingPageComponent,
+ ExampleDocumentPageComponent
 ];
 
 export const LAYOUTS: any[] = [

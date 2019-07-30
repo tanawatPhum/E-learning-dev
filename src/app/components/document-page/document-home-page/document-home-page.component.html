@@ -23,6 +23,7 @@
             </a>
         </li> -->
         <li class="nav-item">
+            <span class="text-white">{{currentDocumentName}}</span>
             <!-- <div class="navbar-form pull-left">
                 <select (ngModelChange)="changeDocument($event)" [(ngModel)]="currentDocumentName" class="form-control text-white shadow-none document-select-custome">
                     <option class="text-dark" *ngIf="currentDocumentName =='Blank document'" value="Blank document">Please Select</option>
@@ -44,6 +45,7 @@
         </li>
     </ul>
     <ul class="nav navbar-nav ml-auto">
+
         <li class="nav-item">
             <a class="nav-link text-white p-0" (click)="saveDocument(contents.data.savecurrentDoc)" href="javascript:void(0)">
                 <img width="40%" src="assets/imgs/documentPage/saveDocument.svg">
@@ -64,27 +66,43 @@
 <div class="row min-height m-0">
     <div id="document-sidenav" [ngStyle]="{'width':isOpenMenu? '200px':'50px'}">
         <div class="document-sidenav">
-            <div class="document-sidenav-btnNav p-3 pl-4"><span class="text-lightGrey2" *ngIf="isOpenMenu">navigation</span> <i (click)="toggleMenu()" class="fa fa-angle-{{isOpenMenu? 'left':'right'}} float-right arrow-custome text-lightGrey2"></i></div>
+            <div class="document-sidenav-btnNav p-3 pl-4"><span class="text-lightGrey2" *ngIf="isOpenMenu">Navigation</span> <i (click)="toggleMenu()" class="fa fa-angle-{{isOpenMenu? 'left':'right'}} float-right arrow-custome text-lightGrey2"></i></div>
             <div class="document-sidenav-content pt-3" *ngIf="isOpenMenu">
-
+            </div>
+        </div>
+    </div>
+    <div id="document-sidenav" [ngStyle]="{'width':isOpenMenu? '80px':'50px'}">
+        <div class="document-sidetool">
+            <div class="document-sidenav-btnNav p-3 pl-4"><span class="text-lightGrey2"></span> </div>
+            <div class="document-sidetool-content pt-4">
+                <li class="nav-item d-flex justify-content-center pb-2 pt-2">
+                    <img document-data="text-area" draggable="true" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/text-area.svg">
+                </li>
+                <li class="nav-item d-flex justify-content-center pb-2 pt-2">
+                    <img document-data="file-browse" draggable="true" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/image-picker.svg">
+                </li>
+                <li class="nav-item d-flex justify-content-center pb-2 pt-2">
+                    <img document-data="video-browse" draggable="true" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/video-camera.svg">
+                </li>
+                <li class="nav-item d-flex justify-content-center pb-2 pt-2">
+                    <img document-data="subform" draggable="true" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/subform.svg">
+                </li>
             </div>
         </div>
     </div>
     <div class="col">
-        <div class="document-form-select">
+        <nav class="document-navbar navbar navbar-expand-sm"></nav>
+        <!-- <div class="document-form-select">
             <img src="assets\imgs\documentPage\plus.svg">
             <img src="assets\imgs\documentPage\content1.svg" (click)="createContent(contentTypes.oneLayout)">
-            <!-- <img src="assets\imgs\documentPage\content2.svg" (click)="createContent(contentTypes.twoLayout)"> -->
-            <!-- <img src="assets\imgs\documentPage\content3.svg" (click)="createContent(contentType.twoLayoutHorizontal)"> -->
-            <!-- <img src="assets\imgs\documentPage\content4.svg" (click)="createContent(contentTypes.threeLayout)">
-            <img src="assets\imgs\documentPage\content5.svg" (click)="createContent(contentTypes.fourLayout)"> -->
+            <img src="assets\imgs\documentPage\content2.svg" (click)="createContent(contentTypes.twoLayout)">
+            <img src="assets\imgs\documentPage\content3.svg" (click)="createContent(contentType.twoLayoutHorizontal)">
+            <img src="assets\imgs\documentPage\content4.svg" (click)="createContent(contentTypes.threeLayout)">
+            <img src="assets\imgs\documentPage\content5.svg" (click)="createContent(contentTypes.fourLayout)">
             <img src="assets\imgs\documentPage\content6.svg" (click)="createContent(contentTypes.freedomLayout)">
-            <!-- <div class="document-preview-button">
-                <p><a href="/documentPreview" id="previewDoc">Preview</a></p>
-            </div> -->
-        </div>
 
-        <create-content-page [contentElement]="contentElement" [contentTypeSelected]="contentTypeSelected" [triggerElement]="triggerElement" (eventToParent)="eventFromChild($event)"></create-content-page>
+        </div> -->
+        <create-content-page (drop)="dropTool($event)" (dragover)="$event.preventDefault()" [dropElement]="dropElement" [contentElement]="contentElement" [contentTypeSelected]="contentTypeSelected" [triggerElement]="triggerElement" (eventToParent)="eventFromChild($event)"></create-content-page>
         <document-modal-page [triggerModal]="triggerModal" (eventModal)="eventModal($event)"></document-modal-page>
     </div>
     <div *ngIf="loading" class="alert alert-fixed" role="alert">
