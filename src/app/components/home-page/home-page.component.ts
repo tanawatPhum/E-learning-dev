@@ -54,37 +54,15 @@ export class HomePageComponent implements OnInit , AfterViewInit{
     }
     public  getDocumentList(){
         this.documentList = new  Array<DocumentModel>();
-        this.documentNavList.forEach(async (documentNav)=>{
-            this.documentService.loadDocFromDB(documentNav.id).subscribe((documentObj)=>{
-                this.createHTMLDocList(documentObj)
-                // this.homeDocumentList.append(
-                //     '<div class="home-document" id="document-' + document.id+'" ></div>'
-                // )
-                // this.homeDocumentList.append($('<iframe id="iframe-'+document.id+'"/>').attr({'srcdoc':document.html}));
-                // this.homeDocumentList.append(
-                //     '<div class="home-document" id="document-' + document.id+'" ></div>'
-                // )
-                // this.homeDocumentList.find('#document-'+document.id).append(document.html)
-                // this.documentList.push(document);
-            //     this.homeDocumentList.append('<iframe class="home-document" id="iframe-'+documentObj.id+'"/>')
-            //     this.homeDocumentList.find('#iframe-'+documentObj.id).contents().find("body").append(documentObj.html)
-            //     let oldScreen: ScreenDetailModel = JSON.parse(localStorage.getItem('contentSize'))
-            // // console.log('xcx',this.homeDocumentList.find('#iframe-'+document.id).contents().find("body").find('.content-box'))
-            // this.homeDocumentList.find('#iframe-'+documentObj.id).contents().find("body").find('.content-box').each((index, contentBox) => {
-            //     let node = document.getElementById($(contentBox).attr('id'));
-            //     console.log(node);
-            //     // console.log(contentBox)
-            //         // this.commonService.calPositionForNewScreen(contentBox,oldScreen).subscribe((elementDetail)=>{
-            //         //     console.log("elementDetail",contentBox)
-            //         //     $(contentBox).css('height',elementDetail.screenDetail.height + "%");
-            //         //     $(contentBox).css('width',elementDetail.screenDetail.width + "%");
-            //         //     $(contentBox).css('left',elementDetail.postitionDetail.left + "%");
-            //         //     $(contentBox).css('top',elementDetail.postitionDetail.top + "%" );
-            //         // })
-            //     })
-
+        if(this.documentNavList.length ==0){
+            this.loading = false;
+        }else{
+            this.documentNavList.forEach(async (documentNav)=>{
+                this.documentService.loadDocFromDB(documentNav.id).subscribe((documentObj)=>{
+                    this.createHTMLDocList(documentObj)
+                });
             });
-        });
+        }
     }
     public createHTMLDocList(documentObj:DocumentModel){
         this.homeDocumentList.append('<div class="document-container" document-data="'+documentObj.nameDocument+'"  id="document-container-'+documentObj.id+'"><iframe class="document-paper" scrolling="no" id="iframe-'+documentObj.id+'"/><span class="document-text">'+ documentObj.nameDocument+'</span></div>')

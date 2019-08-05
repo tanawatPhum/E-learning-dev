@@ -1,3 +1,8 @@
+//custome tag css
+p {
+    margin: 0;
+}
+
 //custome bootstrap css
 .list-group-item {
     user-select: none;
@@ -28,6 +33,16 @@
     color: inherit;
 }
 
+//custome font picker
+.font-select {
+    width: 100%;
+    // margin-left: 5%;
+    text-align: left;
+    & span {
+        padding-left: 10px;
+    }
+}
+
 // component css goes here
 .bg-test {
     background: red;
@@ -52,7 +67,8 @@
 .content-template {
     height: 80%;
     width: 100%;
-    overflow-y: scroll;
+    word-break: break-all;
+    overflow-y: auto;
     overflow-x: hidden;
     position: relative;
     &.content-template-create {
@@ -118,6 +134,18 @@
 .nav-footer-custome {
     position: absolute;
     bottom: 4%;
+}
+
+.template-doc {
+    width: 100%;
+    min-height: 100%;
+    // z-index: 10;
+    // background: red;
+    // position: relative;
+    // top: 0;
+    // left: 0;
+    // right: 0;
+    // bottom: 0;
 }
 
 // video::-webkit-media-controls-fullscreen-button,

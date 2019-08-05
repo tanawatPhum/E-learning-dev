@@ -72,7 +72,6 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
 
     }
     ngAfterViewInit(){
-        console.log("this.currentDocumentName",this.currentDocumentName)
         this.loadTargetDoc(this.currentDocumentName);
         this.loadDocumentNavigator();
     }

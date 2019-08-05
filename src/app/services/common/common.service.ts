@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Constants } from '../../global/constants';
 import { PostitionDetailModel, ScreenDetailModel, ElementDetailModel } from '../../models/general/general.model';
 import { Observable } from 'rxjs';
+import { VideoConetentDataModel } from 'src/app/models/document/elements/video-content.model';
 
 @Injectable()
 export class CommonService {
@@ -31,8 +32,16 @@ export class CommonService {
       }.bind(this), delay);
     };
   }
-  public getYoubuteId(url: string) {
-    return url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/);
+  public getStreamId(url: string) :VideoConetentDataModel {
+    let streamId = new VideoConetentDataModel();
+    if(url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)){
+      streamId.streamId  =url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)[1];
+      streamId.channelStream = 'youtube'
+    }else if(url.match(/(?:https?:\/{2})?.*wistia\.(?:com)(?:\/medias\/)([^\s&]+)/)){
+      streamId.streamId  =url.match(/(?:https?:\/{2})?.*wistia\.(?:com)(?:\/medias\/)([^\s&]+)/)[1];
+      streamId.channelStream = 'wistia'
+    }
+    return streamId;
   }
   public getPatternId(string:string){
     return  string.replace(/\s/g,'').toLowerCase();

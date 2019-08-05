@@ -3,11 +3,17 @@ import { Constants } from '../../global/constants';
 import { Observable } from 'rxjs';
 import { DocumentModel } from '../../models/document/content.model';
 import { DocumentNavigatorModel } from 'src/app/models/document/document.model';
+import { DocumentDataControlService } from './document-data-control.service';
 declare var electron: any;
 declare var rangy:any;
+declare var CKEDITOR:any;
 @Injectable()
 export class DocumentService {
-    constructor() { }
+    constructor(
+       private documentDataControlService:DocumentDataControlService
+    ) { 
+       
+    }
     public indexDB: any;
     public highlighter:any;
     public loadDocFromDB(documentName): Observable<DocumentModel> {
@@ -160,44 +166,35 @@ export class DocumentService {
             });
         });
     }
-    public async initialApplierStylesText(styles){
-        rangy.init();
-        this.highlighter = rangy.createHighlighter();
-
-        // this.highlighter.addClassApplier(rangy.createClassApplier("highlight", {
-        //     ignoreWhiteSpace: true,
-        //     tagNames: ["span", "a"]
-        // }));
-        await this.highlighter.addClassApplier(rangy.createClassApplier('content-text', {
-            ignoreWhiteSpace: true,
-            useExistingElements:false,
-            elementTagName: "span",
-            elementProperties: {
-                // href: "#",
-                // id: "test",
-                style:styles
-                // onclick: () => {
-                //     let highlight = this.highlighter.getHighlightForElement(this);
-                //     if (window.confirm("Delete this note (ID " + highlight.id + ")?")) {
-                //         this.highlighter.removeHighlights([highlight]);
-                //     }
-                //     return false;
-                // }
+    // public initCKeditor(){
+    //     CKEDITOR.replace( this.documentDataControlService.nameTemplate, {
+    //         toolbar: [],
+    //         removePlugins :'elementspath,save,font,resize',
+    //         on: {
+    //             loaded: ()=> {
+    //                 $(document).find('#cke_1_top').remove();  
+    //             }
+    //         }
+    //     });
+    // }
+    public compileStyles(styles:string,tagElement?:string){
+        console.log(CKEDITOR.instances)
+        let editor = CKEDITOR.instances[this.documentDataControlService.nameTemplate];
+        console.log(editor)
+        let style = new CKEDITOR.style({
+            element: tagElement || 'span',
+            attributes: {
+                'style': styles
             }
-        }));
-    }
-    public compileStylesText(){
-        // setTimeout(() => {
-        //     this.highlighter.unhighlightSelection();
-        // }, 3000);
-       
-    
-        this.highlighter.highlightSelection('content-text');
-      
+        });
         
-    }
-    public remove(){
-        console.log('cxcxcxc');
-        this.highlighter.unhighlightSelection();
+        editor.applyStyle(style);
+        // console.log(styles)
+        // let editor = CKEDITOR.instances[this.documentDataControlService.nameTemplate];
+        // var selectedText = editor.getSelection().getSelectedText(); 
+        // var newElement = new CKEDITOR.dom.element('span');    
+        // newElement.setAttributes({style:styles})             
+        // newElement.setText(selectedText);                         
+        // editor.insertElement(newElement);  
     }
 }

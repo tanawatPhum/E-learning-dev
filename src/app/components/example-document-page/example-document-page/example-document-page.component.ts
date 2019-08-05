@@ -1,65 +1,67 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewEncapsulation } from '@angular/core';
+import { CKEditor4 } from 'ckeditor4-angular/ckeditor';
+import { DocumentService } from '../../../services/document/document.service';
+import { Constants } from '../../../global/constants';
+declare var CKEDITOR:any;
+
 
 @Component({
     selector: 'example-document-page',
     templateUrl: 'example-document-page.component.html',
-    styleUrls: ['example-document-page.component.scss']
+    styleUrls: ['example-document-page.component.scss',],
+    encapsulation: ViewEncapsulation.None
 })
 export class ExampleDocumentPageComponent implements OnInit,AfterViewInit {
-    constructor(){
+    public rootTemplateDoc:JQuery<Element>
+    public textSize =  Constants.general.style.fontSizeList[0];
+    public textSizeList =  Constants.general.style.fontSizeList;
+    constructor(
+        public documentService:DocumentService
+       
+    ){
 
     }
+    // public onChange( event: CKEditor4.EventInfo ) {
+    //     cons
+    //     console.log( event.editor.getData() );
+    // }
     ngOnInit(){
-        //this.setCarret();
+    
 
-        $('#test').click((event)=>{
-            console.log('xxxcxc',event)
-            console.log(this.getMouseEventCaretRange(event));
-        })
+   
+    // this.rootTemplateDoc  =$( '#template-doc' )
+    // CKEDITOR.inline( 'editable', {
+    //     removePlugins: 'toolbar'
+    // } );
+        
+   
+
     }
     ngAfterViewInit(){
+        // this.documentService.initCKeditor();
+        // setTimeout(() => {
+        //     $('#option-color').colorPalettePicker();
+        // }, 1000);
+      
+    }
+
+    changeTextSize(fontsize){
+        let style = 'font-size:'+fontsize +'px'
+      
+        this.documentService.compileStyles(style);
+        
+        // let editor = CKEDITOR.instances['template-doc'];
+        // var selectedText = editor.getSelection().getSelectedText(); 
+        // var newElement = new CKEDITOR.dom.element('span');    
+        // newElement.setAttributes({style: 'font-size:'+ fontsize +'px'})             
+        // newElement.setText(selectedText);                         
+        // editor.insertElement(newElement);  
+
 
     }
-    setCarret(){
-        var el = document.getElementsByTagName('div')[0];
-        var range = document.createRange();
-        var sel = window.getSelection();
-        range.setStart(el.childNodes[0], 1);
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
-        el.focus();
-    }
-    public getMouseEventCaretRange(evt) {
-        var range, x = evt.clientX, y = evt.clientY;
-        console.log(x);
+    
 
-        if (typeof document.createRange != "undefined") {
-            // Try Mozilla's rangeOffset and rangeParent properties,
-            // which are exactly what we want
-            // if (typeof evt.rangeParent != "undefined") {
-            //     range = document.createRange();
-            //     range.setStart(evt.rangeParent, evt.rangeOffset);
-            //     range.collapse(true);
-            // }
-    
-            // Try the standards-based way next
-            // if (document.caretPositionFromPoint) {
-            //     var pos = document.caretPositionFromPoint(x, y);
-            //     range = document.createRange();
-            //     range.setStart(pos.offsetNode, pos.offset);
-            //     range.collapse(true);
-            //     console.log('xxxcxxc')
-            // }
-    
-            // Next, the WebKit way
-            // else if (document.caretRangeFromPoint) {
-            //     range = document.caretRangeFromPoint(x, y);
-            // }
-            
-        }
-    
-        return range;
-    }
+
+
 
 }
