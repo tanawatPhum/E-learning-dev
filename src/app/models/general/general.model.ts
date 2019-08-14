@@ -10,3 +10,8 @@ export class ElementDetailModel{
     public screenDetail = new ScreenDetailModel();
     public postitionDetail  = new PostitionDetailModel();
 }
+
+export class CommonResponseModel{
+    public action:string;
+    public data:any;
+}

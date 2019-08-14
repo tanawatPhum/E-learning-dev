@@ -65,7 +65,7 @@ p {
 }
 
 .content-template {
-    height: 80%;
+    // height: 80%;
     width: 100%;
     word-break: break-all;
     overflow-y: auto;
@@ -96,7 +96,8 @@ p {
 }
 
 //css content in box
-.content-box {
+.content-box,
+.content-box-readonly {
     width: 100%;
     height: 100%;
     border: solid 1px #ccc;
@@ -113,13 +114,30 @@ p {
     &.content-box-active {
         box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
     }
+    // &.box-initial-size {
+    //     min-width: 30% !important;
+    //     min-height: 30% !important;
+    // }
     &.box-browse-file-size {
-        min-width: 300px !important;
-        min-height: 300px !important;
+        min-width: 30% !important;
+        min-height: 45% !important;
+    }
+    &.box-progress-bar-size {
+        min-width: 50% !important;
+        min-height: 1%!important;
+        max-height: 15%!important;
     }
     &.box-browse-video-size {
-        min-width: 540px !important;
-        min-height: 300px !important;
+        min-width: 50% !important;
+        min-height: 45% !important;
+    }
+    &.box-subform-size {
+        min-width: 50% !important;
+        min-height: 50% !important;
+    }
+    &.box-comment-size {
+        min-width: 50% !important;
+        min-height: 27% !important;
     }
     &.box-subform {
         display: initial;
@@ -134,18 +152,6 @@ p {
 .nav-footer-custome {
     position: absolute;
     bottom: 4%;
-}
-
-.template-doc {
-    width: 100%;
-    min-height: 100%;
-    // z-index: 10;
-    // background: red;
-    // position: relative;
-    // top: 0;
-    // left: 0;
-    // right: 0;
-    // bottom: 0;
 }
 
 // video::-webkit-media-controls-fullscreen-button,

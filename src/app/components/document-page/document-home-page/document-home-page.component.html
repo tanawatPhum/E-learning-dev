@@ -1,6 +1,9 @@
 <!--component html goes here -->
 <nav class="document-navbar navbar navbar-expand-sm bg-primary-2">
     <ul class="nav navbar-nav mr-auto pl-2">
+        <li class="nav-item item-middle cursor-pointer">
+            <i (click)="goToHome()" style="font-size:2em" class="fa fa-angle-left  arrow-custome text-white"></i>
+        </li>
         <li class="nav-item">
             <a class="nav-link text-white bg-primary-2 pr-4 pl-4" (click)="newDocument()" href="javascript:void(0)">New</a>
         </li>
@@ -23,7 +26,9 @@
             </a>
         </li> -->
         <li class="nav-item">
-            <span class="text-white">{{currentDocumentName}}</span>
+            <span class="text-white">
+                <input style="background: transparent;border: none" class="text-white" type="text" [(ngModel)]="currentDocumentName">
+            </span>
             <!-- <div class="navbar-form pull-left">
                 <select (ngModelChange)="changeDocument($event)" [(ngModel)]="currentDocumentName" class="form-control text-white shadow-none document-select-custome">
                     <option class="text-dark" *ngIf="currentDocumentName =='Blank document'" value="Blank document">Please Select</option>
@@ -75,9 +80,9 @@
         <div class="document-sidetool">
             <div class="document-sidenav-btnNav p-3 pl-4"><span class="text-lightGrey2"></span> </div>
             <div class="document-sidetool-content pt-4">
-                <li class="nav-item d-flex justify-content-center pb-2 pt-2">
+                <!-- <li class="nav-item d-flex justify-content-center pb-2 pt-2">
                     <img document-data="text-area" draggable="true" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/text-area.svg">
-                </li>
+                </li> -->
                 <li class="nav-item d-flex justify-content-center pb-2 pt-2">
                     <img document-data="file-browse" draggable="true" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/image-picker.svg">
                 </li>
@@ -86,6 +91,12 @@
                 </li>
                 <li class="nav-item d-flex justify-content-center pb-2 pt-2">
                     <img document-data="subform" draggable="true" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/subform.svg">
+                </li>
+                <li class="nav-item d-flex justify-content-center pb-2 pt-2">
+                    <img class="w-50" document-data="progress-bar" draggable="true" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/progress-bar.png">
+                </li>
+                <li class="nav-item d-flex justify-content-center pb-2 pt-2">
+                    <img document-data="comment" draggable="true" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/comment.svg">
                 </li>
             </div>
         </div>

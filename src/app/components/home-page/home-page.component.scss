@@ -50,6 +50,13 @@
             margin: 1em 1em 1.5em 1em;
             border: solid 0.5px #C6C6C6;
         }
+        & .document-icon {
+            width: 6%;
+            top: 1.5%;
+            right: 10%;
+            position: absolute;
+            &.minus {}
+        }
         & .document-text {
             cursor: pointer;
             font-size: 0.9rem;

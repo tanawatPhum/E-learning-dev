@@ -44,7 +44,10 @@ export class CommonService {
     return streamId;
   }
   public getPatternId(string:string){
-    return  string.replace(/\s/g,'').toLowerCase();
+    // string = string.replace(/\s/g,'').toLowerCase();
+    // let numberOfDoc = string.match(/(?<=\().+?(?=\))/) || ['']
+    // string = string.replace(/\(\d\)/g,numberOfDoc[0])
+    return string &&string.replace(/\s/g,'').toLowerCase()
   }
   public calPositionCenter(parenteElement, targetElement:JQuery<Element>):PostitionDetailModel{
     let positionElement = new PostitionDetailModel();

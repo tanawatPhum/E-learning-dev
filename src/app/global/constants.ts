@@ -17,7 +17,8 @@ export class Constants {
                 new:'new'
             },
             load:{
-                success:'success'
+                success:'success',
+                html:'html'
             }
         },
         element :{
@@ -31,8 +32,8 @@ export class Constants {
                 box:{
                     bgNoneColor: 'transparent',
                     bgWhiteColor: '#fff',
-                    height:300,
-                    width:300
+                    height:"40%",
+                    width:"40%"
                 },
                 navBar:{
                     height:55
@@ -42,8 +43,16 @@ export class Constants {
         },
         style:{
             fontSizeList:[8,9,10,11,12,14,16,18,20,22,24,26,28,36,48,72]
+        },
+        message:{
+            status:{
+                success:{id:1,text:'success'},
+                fail:{id:2,text:'fail'},
+                notFound: {id:3,text:'notFound'},
+                created:{id:4,text:'created'}
+            }
+  
         }
-
     }
     public static readonly document = {
         contents: {
@@ -59,23 +68,28 @@ export class Constants {
             types:{
                 saveDocument:{name:'saveDocument',id:1},
                 newDocument:{name:'newDocument',id:2},
+                deleteDocument:{name:'deleteDocument',id:3},
             },
             events:{
                 saveNewDocument:{name:'saveNewDocument',id:1},
                 saveOldDocument:{name:'saveOldDocument',id:2},
+                deleteDocument:{name:'deleteDocument',id:3},
                 cancelSaveDocument:{name:'cancelSaveDocument',id:3}
             }
         },
         tools:{
             types:{
                 trash: {name : 'trash', id: 1 },
-                textArea: {name : 'text-area', id: 1 },
-                videoBrowse: {name : 'video-browse', id: 1 },
-                subform: {name : 'subform', id: 1 },
-                fileBrowse: {name : 'file-browse', id: 1 },
+                textArea: {name : 'text-area', id: 2 },
+                videoBrowse: {name : 'video-browse', id: 3 },
+                subform: {name : 'subform', id: 4 },
+                fileBrowse: {name : 'file-browse', id: 5 },
+                progressBar: {name : 'progress-bar', id: 6 },
+                comment: {name : 'comment', id: 7 },
             }
         }
     };
+
     // public static readonly key = {
     //     encode: {
     //         elearning: 'dreamza002'

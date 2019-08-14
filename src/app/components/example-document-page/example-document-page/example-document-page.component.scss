@@ -1,0 +1,28 @@
+.container1 {
+    height: 30%;
+    width: 30%;
+    background: red;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container2 {
+    height: 60%;
+    width: 60%;
+    background: green;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.box1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    font-size: 5vw;
+    width: 10vmin;
+    height: 10vmin;
+    background: blue;
+}

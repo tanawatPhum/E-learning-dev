@@ -1,4 +1,4 @@
-<div class="modal fade" id="create_document_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+<!-- <div class="modal fade" id="create_document_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -16,7 +16,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 
 <div class="modal fade" id="save_document_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -29,11 +29,33 @@
           </button>
             </div>
             <div class="modal-body">
-                Do you want to save changes to "{{oldDocument}}"
+                Do you want to save changes to "{{documentName}}"
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="closeModal('save_document_modal')">Close</button>
-                <button type="button" class="btn btn-danger" (click)="saveDocument('old')">Save</button>
+                <button type="button" class="btn btn-danger" (click)="documentEvent('save')">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="delete_document_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">E-learning</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+            </div>
+            <div class="modal-body">
+                Are you sure to delete to "{{documentName}}" ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="closeModal('delete_document_modal')">Close</button>
+                <button type="button" class="btn btn-danger" (click)="documentEvent('delete')">Delete</button>
             </div>
         </div>
     </div>

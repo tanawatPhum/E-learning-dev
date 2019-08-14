@@ -7,7 +7,7 @@ import { DocumentNavigatorModel } from 'src/app/models/document/document.model';
 
 @Injectable()
 export class DocumentDataControlService {
-    private _currentDocument: string = "New Document(7)";
+    private _currentDocument: string = "";
     private _contentSize: ScreenDetailModel = new ScreenDetailModel();
     private _documentNavList: DocumentNavigatorModel[] = new Array<DocumentNavigatorModel>();
     private _documentList: DocumentModel[] = new Array<DocumentModel>();

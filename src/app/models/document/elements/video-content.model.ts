@@ -8,5 +8,5 @@ export class VideoConetentDataModel{
     public channelStream:string;
     public streamId:string;
     public duration:number;
-    public currentWatchingTime:number;
+    public currentWatchingTime:number = 0;
 }

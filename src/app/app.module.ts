@@ -18,6 +18,7 @@ import { DocumentDataControlService } from './services/document/document-data-co
 import { LoadingPageComponent } from './components/plugin-page/loading-page/loading-page.component';
 import { ExampleDocumentPageComponent } from './components/example-document-page/example-document-page/example-document-page.component';
 import { CKEditorModule } from 'ckeditor4-angular';
+import { RouterModule } from '@angular/router';
 
 
 
@@ -40,7 +41,7 @@ export const MODULES: any[] = [
   AppRoutingModule,
   CKEditorModule,
   BrowserModule,
-  FormsModule
+  FormsModule,
 ];
 export const SERVICES: any[] = [
   CommonService,

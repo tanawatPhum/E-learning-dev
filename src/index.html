@@ -18,7 +18,11 @@
         }
     </script>
     <script>
-        var electron = require('electron');
+        try {
+            var electron = require('electron');
+        } catch (e) {
+
+        }
     </script>
     <script type="text/javascript" src="assets/plugins/jquery/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="assets/plugins/jquery-ui/jquery-ui.min.js"></script>

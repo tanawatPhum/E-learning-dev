@@ -13,7 +13,7 @@ import { ExampleDocumentPageComponent } from './components/example-document-page
 
 
 const routes: Routes = [
-  { path: '', redirectTo: '/exampleDoc', pathMatch: 'full' },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'documentHome', component: DocumentHomePageComponent },
   { path: 'documentPreview', component: DocumentPreviewPageComponent },
   { path: 'content', component: CreateContentPageComponent },

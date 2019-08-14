@@ -1,18 +1,18 @@
-<nav class="document-navbar navbar navbar-expand-sm bg-darkGrey">
+<!-- <nav class="document-navbar navbar navbar-expand-sm bg-primary-2">
 
     <ul class="nav navbar-nav mr-auto">
         <li class="nav-item">
             <a class="nav-link text-white" (click)="backToDocumentHome()" href="javascript:void(0)">
-                <i style="font-size:2em" class="fa fa-angle-left  arrow-custome text-white"></i>
+                <i *ngIf="!isUrlChannel" style="font-size:2em" class="fa fa-angle-left  arrow-custome text-white"></i>
             </a>
         </li>
     </ul>
-</nav>
+</nav> -->
 <div #documentPreviewContent class="document-preview-content">
 
 </div>
-<!-- 
-<div class="document-preview-comment">
+
+<!-- <div class="document-preview-comment">
     <div class="row comment-form submit">
         <div class="col-12">
             <p class="text-darkGrey comment-header">Comments</p>

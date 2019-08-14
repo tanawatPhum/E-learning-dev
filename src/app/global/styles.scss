@@ -38,6 +38,12 @@ li {
     list-style-type: none;
 }
 
+//custome bootstap
+.carousel-control-next,
+.carousel-control-prev {
+    width: 8%;
+}
+
 // css here go
 .bg-primary-1 {
     background-color: $color-primary1;
@@ -130,6 +136,10 @@ li {
 
 .max-height {
     height: 100% !important;
+}
+
+.half-height {
+    height: 50% !important;
 }
 
 .nav-footer {
@@ -231,9 +241,10 @@ input:focus {
     &.toolbar-browse-file {
         height: 100%;
         img {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 25px;
+            width: 40%;
+            max-width: 90px;
+            // height: 50%;
+            margin-bottom: 5%;
         }
     }
     &.toolbar-browse-video {
@@ -241,9 +252,13 @@ input:focus {
         padding: 0 1em 0 1em;
         display: flexbox;
         img {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 25px;
+            // width: 80px;
+            // height: 80px;
+            // margin-bottom: 25px;
+            width: 40%;
+            max-width: 90px;
+            // height: 50%;
+            margin-bottom: 5%;
         }
         .toolbar-drag {}
     }
@@ -261,7 +276,15 @@ input:focus {
     &.toolbar-subform {
         display: initial;
         height: 100%;
-        position: relative;
+        & .subform-col {
+            height: 65%;
+            overflow-y: auto;
+        }
+        // & .subform-preview {
+        //     display: flex;
+        //     justify-content: center;
+        //     align-items: center;
+        // }
     }
 }
 
@@ -284,10 +307,11 @@ input:focus {
     object-fit: fill;
     width: 100%;
     height: 100%;
-    // pointer-events: none;
+    pointer-events: none;
 }
 
 .content-browse-file,
+.comment-browse-file,
 .content-browse-video {
     display: none;
 }
@@ -295,6 +319,126 @@ input:focus {
 .content-subform {
     width: 100%;
     text-align: left;
+}
+
+.content-comment {
+    height: 100%;
+    width: 100%;
+    // padding-left: 8rem;
+    // padding-right: 8rem;
+    // padding-top: 1rem;
+    & .comment-header {
+        font-size: 1.6rem;
+        margin-bottom: 2rem;
+    }
+    & .comment-form {
+        // padding-bottom: 3%;
+        height: 100%;
+        &.submit {
+            border-bottom: solid 1.5px #EDEDED;
+        }
+    }
+    & .comment-profile,
+    .comment-profile-reply {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 40px;
+        height: 40px;
+        margin-top: 40%;
+        &.icon {
+            border-radius: 50%;
+            background: #E6E7E2;
+        }
+        & img {
+            width: 60%;
+        }
+    }
+    .comment-profile-reply {
+        width: 35px;
+        height: 35px;
+    }
+    & .comment-textarea {
+        border: none;
+        width: 100%;
+        height: auto;
+        font-size: 1.2rem;
+        &::placeholder {
+            color: #D9D9D9;
+        }
+    }
+    & .comment-massege-img {
+        display: block;
+        & img {
+            width: 50%;
+            height: 50%;
+        }
+    }
+    & .comment-tool {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 30px;
+        height: 30px;
+        float: left;
+        cursor: pointer;
+        margin-left: 2%;
+        &.attach {
+            border-radius: 50%;
+            background: #E6E7E2;
+        }
+        &.question {
+            border-radius: 50%;
+            background: transparent;
+            & img {
+                width: 95%;
+            }
+        }
+        & img {
+            width: 70%;
+        }
+    }
+    & .comment-reply,
+    .comment-reply-current {
+        &.comment-reply-child {
+            margin-left: 14% !important;
+        }
+        & .reply-user-name {
+            font-weight: bold;
+            font-size: 1.2em;
+            text-align: left;
+        }
+        & .reply-user-massege {
+            font-size: 1em;
+            text-align: left;
+        }
+        & .reply-tool {
+            & span {
+                margin-right: 10%;
+                color: #25B7D3;
+                cursor: pointer;
+            }
+        }
+        & .reply-user-massege-img {
+            display: block;
+            & img {
+                width: 50%;
+                height: 50%;
+            }
+        }
+    }
+}
+
+.template-doc {
+    width: 100%;
+    min-height: 100%;
+    // z-index: 10;
+    // background: red;
+    // position: relative;
+    // top: 0;
+    // left: 0;
+    // right: 0;
+    // bottom: 0;
 }
 
 video::-webkit-media-controls-fullscreen-button,

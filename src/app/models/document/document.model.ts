@@ -1,4 +1,4 @@
-import { SubFormContentModel } from './elements/subForm-content.model';
+import { SubFormContentModel, SubFormContentDetailModel } from './elements/subForm-content.model';
 
 export class TriggerEventModel {
     public action:string;
@@ -7,5 +7,6 @@ export class TriggerEventModel {
 export class DocumentNavigatorModel{
     public nameDocument:string;
     public id:string;
-    public childDocuments:SubFormContentModel[];
+    public status:string;
+    public childDocuments:SubFormContentDetailModel[];
 }

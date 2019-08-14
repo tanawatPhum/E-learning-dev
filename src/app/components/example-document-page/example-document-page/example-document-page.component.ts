@@ -21,45 +21,59 @@ export class ExampleDocumentPageComponent implements OnInit,AfterViewInit {
     ){
 
     }
-    // public onChange( event: CKEditor4.EventInfo ) {
-    //     cons
-    //     console.log( event.editor.getData() );
-    // }
-    ngOnInit(){
-    
 
-   
-    // this.rootTemplateDoc  =$( '#template-doc' )
-    // CKEDITOR.inline( 'editable', {
-    //     removePlugins: 'toolbar'
-    // } );
-        
+    ngOnInit(){
+        let w = $('.container2').width() / $('.container1').width();
+        let h = $('.container2').height() / $('.container1').height();
+        $('.container2').append(' <div id="box2" class="box1">'+$('#box1').text() +'</div>')
+             $('#box2').css({
+            transform:"scale("+w+','+h+")"
+          });
+console.log('w',w)
+console.log('h',h)
+
+
+        // console.log($('#box1').width());
+        // console.log($('#box1').height());
+        // let scale = Math.min(
+        //     $('.container1').width()/$('#box1').width(),
+        //     $('.container1').height()/$('#box1').height()
+        // );
+        // $('.container2').append(' <div id="box2" class="box1">'+$('#box1').text() +'</div>')
+        // $('#box2').css({
+        //     transform:"scale(" + scale + ")"
+        //   });
+
+
+        // let maxWidth  = $('.container1').width();
+        // let maxHeight = $('.container1').height()
+
+        // //   let $window = $(window);
+        //   let width = $('.container2').width();
+        //   let height =$('.container2').height();
+        //   let scale;
+      
+        //   // early exit
+        //   if(width >= maxWidth && height >= maxHeight) {
+        //       $('#outer').css({'-webkit-transform': ''});
+        //       $('#wrap').css({ width: '', height: '' });
+        //       return;
+        //   }
+      
+        //   scale = Math.min(width/maxWidth, height/maxHeight);
+      
+        //   $('.container2').css({'-webkit-transform': 'scale(' + scale + ')'});
+        //   $('#box2').css({ width: maxWidth * scale, height: maxHeight * scale });
    
 
     }
     ngAfterViewInit(){
-        // this.documentService.initCKeditor();
-        // setTimeout(() => {
-        //     $('#option-color').colorPalettePicker();
-        // }, 1000);
+
       
     }
 
-    changeTextSize(fontsize){
-        let style = 'font-size:'+fontsize +'px'
-      
-        this.documentService.compileStyles(style);
-        
-        // let editor = CKEDITOR.instances['template-doc'];
-        // var selectedText = editor.getSelection().getSelectedText(); 
-        // var newElement = new CKEDITOR.dom.element('span');    
-        // newElement.setAttributes({style: 'font-size:'+ fontsize +'px'})             
-        // newElement.setText(selectedText);                         
-        // editor.insertElement(newElement);  
+ 
 
-
-    }
-    
 
 
 
