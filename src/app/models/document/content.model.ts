@@ -4,6 +4,8 @@ import { ImgContentModel } from './elements/img-content.model';
 import { VideoContentModel } from './elements/video-content.model';
 import { SubFormContentModel } from './elements/subForm-content.model';
 import { commentContentModel } from './elements/comment-content.model';
+import { ToDoListContentModel } from './elements/todoList-content.model';
+import { ProgressBarContentModel } from './elements/progressBar-content-model';
 
 
 export class DocumentModel {
@@ -12,15 +14,17 @@ export class DocumentModel {
     public status:string;
     public id: string;
     public html: string;
-    public elements: ElementsModel; 
+    public contents: ContentsModel; 
 }
 
-export class ElementsModel {
+export class ContentsModel {
     public boxes: BoxContentModel[];
     public textAreas: TextAreaContentModel[];
     public imgs: ImgContentModel[];
     public videos: VideoContentModel[];
     public subFroms:SubFormContentModel[];
-    public comments:commentContentModel[]
+    public comments:commentContentModel[];
+    public todoList:ToDoListContentModel[];
+    public progressBar:ProgressBarContentModel[];
 }
 

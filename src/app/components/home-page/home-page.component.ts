@@ -69,6 +69,7 @@ export class HomePageComponent implements OnInit , AfterViewInit{
                 this.getDocumentList()
             });
     }
+    
     public  getDocumentList(){
         this.documentList = new  Array<DocumentModel>();
         this.homeDocumentList.html(null);

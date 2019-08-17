@@ -18,7 +18,7 @@ p {
 
 .list-group input[type="checkbox"]+.list-group-item:before {
     content: "\2713";
-    color: transparent;
+    color: #cfd2d5;
     font-weight: bold;
     margin-right: 1em;
 }
@@ -30,6 +30,7 @@ p {
 }
 
 .list-group input[type="checkbox"]:checked+.list-group-item:before {
+    content: "\2713";
     color: inherit;
 }
 
@@ -92,6 +93,29 @@ p {
                 width: 16px;
             }
         }
+        & .option-toDoList {
+            height: auto;
+            & .toDoList-btnPlus {
+                img {
+                    width: 50%;
+                }
+            }
+            & .toDoList-taskList-text,
+            .toDoList-componentList-text,
+            .toDoList-label-text {
+                height: 40px;
+                & p {
+                    font-weight: bold;
+                }
+            }
+            & .list-group {
+                min-height: 50px;
+            }
+            & .task-active {
+                color: white;
+                background-color: #0275D8;
+            }
+        }
     }
 }
 
@@ -141,6 +165,14 @@ p {
     }
     &.box-subform {
         display: initial;
+    }
+    & .content-box-label {
+        width: 100%;
+        text-align: center;
+        position: absolute;
+        top: -10%;
+        color: #CCCC;
+        font-size: 0.9em;
     }
 }
 

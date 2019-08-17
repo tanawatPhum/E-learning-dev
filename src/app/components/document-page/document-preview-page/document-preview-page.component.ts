@@ -15,6 +15,9 @@ import { VideoContentModel } from '../../../models/document/elements/video-conte
 import { SubFormContentModel } from '../../../models/document/elements/subForm-content.model';
 import { Observable, Subscriber } from 'rxjs';
 import { async } from 'q';
+import { ToDoListContentModel } from '../../../models/document/elements/todoList-content.model';
+import { ProgressBarContentModel } from '../../../models/document/elements/progressBar-content-model';
+import { DocumentTrackModel } from '../../../models/document/document.model';
 declare var electron: any;
 declare var Wistia:any;
 @Component({
@@ -28,6 +31,7 @@ export class DocumentPreviewPageComponent implements OnInit {
     private currentResult:DocumentModel = new DocumentModel();
     private contentTemplateSize:ScreenDetailModel = new ScreenDetailModel();
     private currentScreenSize:ScreenDetailModel = new ScreenDetailModel();
+    private documentTrack:DocumentTrackModel = new DocumentTrackModel();
     // private currentCommentIsChild:boolean = false;
     // private currentMessage:string;
     private currentCommentDetail  = {
@@ -53,9 +57,16 @@ export class DocumentPreviewPageComponent implements OnInit {
             handleVideo:'handleVideo',
             handleProgressBar:'handleProgressBar',
             handleComment:'handleComment',
+            handleToDoList:'handleToDoList'
         },
         data:{
             retrieveResultData: 'retrieveResultData',
+            setDocumentTrack:'setDocumentTrack'
+        },
+        template: {
+            setDocument: 'setDocument',
+            setDocumentTrack:'setDocumentTrack'
+            
         }
     }
     public boxes: BoxContentModel[] = new Array<BoxContentModel>();
@@ -64,6 +75,8 @@ export class DocumentPreviewPageComponent implements OnInit {
     public videos: VideoContentModel[] = new Array<VideoContentModel>();
     public subForms: SubFormContentModel[] = new Array<SubFormContentModel>();
     public comments: commentContentModel[] = new Array<commentContentModel>();
+    public toDoLists:ToDoListContentModel[] = new Array<ToDoListContentModel>();
+    public progressBars:ProgressBarContentModel[] =new Array<ProgressBarContentModel>();
     constructor(
         private documentDataService:DocumentDataControlService,
         private documentService:DocumentService,
@@ -75,17 +88,7 @@ export class DocumentPreviewPageComponent implements OnInit {
         
     }
     ngAfterContentInit() {
-        this.contentTemplateSize = JSON.parse(localStorage.getItem('contentTemplateSize'));
-        this.rootElement = $(this.documentPreviewContent.nativeElement);
-        // - Constants.general.element.css.navBar.height
-        this.rootElement.css('height',$(window).height())  
-        this.currentScreenSize.height = $(this.rootElement).outerHeight();
-        this.currentScreenSize.width = $(this.rootElement).outerWidth();
-        $(window).resize((event)=>{
-            this.currentScreenSize.height = $(this.rootElement).outerHeight();
-            this.currentScreenSize.width = $(this.rootElement).outerWidth();
-            this.setElements(this.actions.element.ratioElement);
-        });
+
         // $(window).resize((event)=>{
         //     $('.document-preview-content').css('height',event.currentTarget.innerHeight - Constants.general.element.css.navBar.height) 
         //     this.currentScreenSize.height = event.currentTarget.innerHeight -Constants.general.element.css.navBar.height;
@@ -93,6 +96,7 @@ export class DocumentPreviewPageComponent implements OnInit {
         //     this.rootElement.html(this.currentResult.html)
         //     this.setElements(this.actions.element.previewElement);
         // });
+        this.setTemplate(this.actions.template.setDocument);
         this.route.queryParams.subscribe((params)=>{
             this.isUrlChannel = true;
             this.documentDataService.currentDocumentName  = params['documentName'];
@@ -108,6 +112,7 @@ export class DocumentPreviewPageComponent implements OnInit {
                 console.log(' ❏ Object Document :', result);
                 if(result){
                     this.setElements(this.actions.element.setResultElement,null,result);
+                    this.setTemplate(this.actions.template.setDocumentTrack);
                     // this.currentResult =  result;
                     // let html ='<div style="width:'+this.contentTemplateSize.width +'px;height:'+this.contentTemplateSize.height +'px">'+result.html+'</div>'
                     // this.rootElement.html(html);
@@ -123,6 +128,26 @@ export class DocumentPreviewPageComponent implements OnInit {
                 this.setElements(this.actions.element.setResultElement,null,result);
             });
         };
+    }
+    public setTemplate(action) {
+        if (action === this.actions.template.setDocument) {
+            this.contentTemplateSize = JSON.parse(localStorage.getItem('contentTemplateSize'));
+            this.rootElement = $(this.documentPreviewContent.nativeElement);
+            // - Constants.general.element.css.navBar.height
+            this.rootElement.css('height',$(window).height())  
+            this.currentScreenSize.height = $(this.rootElement).outerHeight();
+            this.currentScreenSize.width = $(this.rootElement).outerWidth();
+            $(window).resize((event)=>{
+                this.currentScreenSize.height = $(this.rootElement).outerHeight();
+                this.currentScreenSize.width = $(this.rootElement).outerWidth();
+                this.setElements(this.actions.element.ratioElement);
+            });
+        }
+        else if (action === this.actions.template.setDocumentTrack) {
+            this.documentService.loadDocTrackFromDB(this.commonService.getPatternId(this.documentDataService.currentDocumentName)).subscribe((documentTrack)=>{
+                this.documentTrack =  documentTrack;
+            })
+        }
     }
     public setElements(action,elment?:JQuery<Element>,data?:any){
         if(action === this.actions.element.setResultElement){
@@ -147,7 +172,7 @@ export class DocumentPreviewPageComponent implements OnInit {
             this.rootElement.find('.content-box').find('.content-toolbar').remove();
             this.rootElement.find('.content-box').find('.content-video').css('pointer-events','initial');
             this.rootElement.find('.content-box').find('.content-textarea').each((index,element)=>{
-               let targetTextArea = this.currentResult.elements.textAreas.find((textArea)=>textArea.id == $(element).attr('id'));
+               let targetTextArea = this.currentResult.contents.textAreas.find((textArea)=>textArea.id == $(element).attr('id'));
                $('[id="' + $(element).attr('id') + '"]').val(targetTextArea.value);
                $('[id="' + $(element).attr('id') + '"]').attr('disabled','true');
             });
@@ -350,29 +375,6 @@ export class DocumentPreviewPageComponent implements OnInit {
         }
 
     }
-    dataURLToBlob = function(dataURL) {
-        var BASE64_MARKER = ';base64,';
-        if (dataURL.indexOf(BASE64_MARKER) == -1) {
-          var parts = dataURL.split(',');
-          var contentType = parts[0].split(':')[1];
-          var raw = parts[1];
-
-          return new Blob([raw], {type: contentType});
-        }
-
-        var parts = dataURL.split(BASE64_MARKER);
-        var contentType = parts[0].split(':')[1];
-        var raw:any = window.atob(parts[1]);
-        var rawLength = raw.length;
-
-        var uInt8Array = new Uint8Array(rawLength);
-
-        for (var i = 0; i < rawLength; ++i) {
-          uInt8Array[i] = raw.charCodeAt(i);
-        }
-
-        return new Blob([uInt8Array], {type: contentType});
-    }
     private handles(action: string, element?: JQuery<Element>,subaction?:string,data?:any) {
         if(action ===  this.actions.handle.handleSubForm){
             this.rootElement.find('.content-subform').find('li').click((event)=>{
@@ -391,22 +393,24 @@ export class DocumentPreviewPageComponent implements OnInit {
         }
         else if(action === this.actions.handle.handleVideo){
             setTimeout(() => {
-                this.currentResult.elements.videos.forEach(video => {
+                this.currentResult.contents.videos.forEach(video => {
                     let targetvideo = Wistia.api(video.data.streamId);
                     targetvideo.time(video.data.currentWatchingTime);
                 });
             }, 100);
             this.rootElement.find('.content-video').click((event)=>{
-                console.log($(event.currentTarget).attr('id'))
-                let targetVideoIndex = this.currentResult.elements.videos.findIndex((video)=>video.id === $(event.currentTarget).attr('id')+ '-video')
-                let targetVideo =  this.currentResult.elements.videos[targetVideoIndex];
-                console.log(targetVideo);
+                let targetVideoIndex = this.currentResult.contents.videos.findIndex((video)=>video.id === $(event.currentTarget).attr('id')+ '-video')
+                let targetVideo =  this.currentResult.contents.videos[targetVideoIndex];
                 if(targetVideo.data.channelStream==='wistia'){
                     let video = Wistia.api(targetVideo.data.streamId);
                     video.bind("secondchange", ()=> {
-                        console.log(video.time())
-                        this.currentResult.elements.videos[targetVideoIndex].data.currentWatchingTime =  video.time();
+                        this.currentResult.contents.videos[targetVideoIndex].data.currentWatchingTime =  video.time();
+                        
                         this.handles(this.actions.handle.handleProgressBar)
+                        if(video.time() === video.duration()){
+                            let targetParentBox =  $('#'+this.currentResult.contents.videos[targetVideoIndex].parentId);
+                            this.handles(this.actions.handle.handleToDoList,targetParentBox)
+                        }
                     })
                 }
             })
@@ -415,7 +419,7 @@ export class DocumentPreviewPageComponent implements OnInit {
         else if(action === this.actions.handle.handleProgressBar){
             let summaryOfCurrentWatchingTime = 0;
             let totalTime = 0;
-            this.currentResult.elements.videos.forEach((video)=>{
+            this.currentResult.contents.videos.forEach((video)=>{
                 totalTime +=  video.data.duration;
                 summaryOfCurrentWatchingTime  += video.data.currentWatchingTime;
             });
@@ -445,7 +449,6 @@ export class DocumentPreviewPageComponent implements OnInit {
                     const reader = new FileReader();
                     reader.onload = ((event: any) => {
                        let commentImg = '<img  src="' + event.target.result +'"/>'
-                       console.log( this.rootElement.find('#'+parentBoxId).find('.comment-massege-img'));
                        this.rootElement.find('#'+parentBoxId).find('.comment-massege-img').html(commentImg)
                     });
                     reader.readAsDataURL(this.currentCommentDetail.imgData[0]);     
@@ -464,16 +467,13 @@ export class DocumentPreviewPageComponent implements OnInit {
 
                 element.find('.reply-tool').find('.liked-text').unbind().bind('click',(event)=>{
                    let liked =  $(event.currentTarget).attr('data-numberlike')
-                   console.log()
                     $(event.currentTarget).text('Liked '+ (parseInt(liked)+1))
                     $(event.currentTarget).attr('data-numberlike',parseInt(liked)+1)
-                    console.log(element.attr('id'));
-  
+         
                     if($(event.currentTarget).parents('.comment-reply').hasClass('comment-reply-child')){
                         let targetParentBoxRootIndex = this.comments.findIndex(parentBox=>parentBox.id === element.parents('.content-comment').attr('id'));
                         let targetParentBox1Index =  this.comments[targetParentBoxRootIndex].listComment.findIndex((parentBox)=>parentBox.id === element.attr('id'));
                         let targetParentBox2Index =  this.comments[targetParentBoxRootIndex].listComment[targetParentBox1Index].childs.findIndex((parentBox)=>parentBox.id === $(event.currentTarget).parents('.comment-reply').attr('id'));
-                        console.log(targetParentBoxRootIndex)
                         this.comments[targetParentBoxRootIndex].listComment[targetParentBox1Index].childs[targetParentBox2Index].liked  = parseInt(liked)+1;
                     }else{
                         let targetParentBoxIndex =  this.comments.findIndex((parentBox)=>parentBox.id === element.attr('id'));
@@ -517,6 +517,10 @@ export class DocumentPreviewPageComponent implements OnInit {
       
             // this.rootElement.find('.comment-tool attach')
         }
+        else if(action=== this.actions.handle.handleToDoList){
+
+            // element.
+        }
  
     }
     private saveDocument(){
@@ -525,17 +529,19 @@ export class DocumentPreviewPageComponent implements OnInit {
                 previewImg: this.currentResult.previewImg,
                 id:  this.currentResult.id, html: this.currentResult.html,
                 status:this.currentResult.status,
-                elements: {
-                    boxes: this.boxes,
-                    textAreas: this.textAreas,
-                    imgs: this.imgs,
-                    videos: this.videos,
-                    subFroms: this.subForms,
-                    comments: this.comments
+                contents: {
+                    boxes:this.boxes,
+                    textAreas:this.textAreas,
+                    imgs:this.imgs,
+                    videos:this.videos,
+                    subFroms:this.subForms,
+                    comments:this.comments,
+                    todoList:this.toDoLists,
+                    progressBar:this.progressBars
                 }
             }
            
-            this.documentService.saveDocument(this.currentResult.nameDocument,saveobjectTemplate).subscribe((status)=>{
+            this.documentService.saveDocumentTrack(this.currentResult.nameDocument,saveobjectTemplate).subscribe((status)=>{
             })
    
     }
@@ -552,12 +558,13 @@ export class DocumentPreviewPageComponent implements OnInit {
     }
     private retrieveData(action: string,results: DocumentModel,element?: JQuery<Element>) {
         if (action === this.actions.data.retrieveResultData) {
-            this.comments = results.elements.comments;
-            this.boxes = results.elements.boxes;
-            this.textAreas   = results.elements.textAreas;
-            this.imgs =  results.elements.imgs;
-            this.videos = results.elements.videos;
-            this.subForms =  results.elements.subFroms;
+            this.comments = results.contents.comments;
+            this.boxes = results.contents.boxes;
+            this.textAreas   = results.contents.textAreas;
+            this.toDoLists = results.contents.todoList;
+            this.imgs =  results.contents.imgs;
+            this.videos = results.contents.videos;
+            this.subForms =  results.contents.subFroms;
         }
 
     }

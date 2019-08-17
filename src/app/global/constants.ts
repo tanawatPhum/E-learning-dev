@@ -86,6 +86,7 @@ export class Constants {
                 fileBrowse: {name : 'file-browse', id: 5 },
                 progressBar: {name : 'progress-bar', id: 6 },
                 comment: {name : 'comment', id: 7 },
+                toDoList: {name : 'todo-list', id: 8 },
             }
         }
     };

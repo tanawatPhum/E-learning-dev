@@ -303,6 +303,21 @@ input:focus {
     background-size: cover;
 }
 
+.content-toDoList {
+    & .toDoList-list:before {
+        content: attr(data-before);
+        font-size: 1.5em;
+        content: "○";
+        color: #0202E9;
+    }
+    & p {
+        font-size: 1.25em;
+        display: inline;
+        margin: 0;
+        margin-left: 5%;
+    }
+}
+
 .content-video {
     object-fit: fill;
     width: 100%;
