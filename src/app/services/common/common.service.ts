@@ -55,10 +55,53 @@ export class CommonService {
   }
   public getPatternId(string:string){
     // string = string.replace(/\s/g,'').toLowerCase();
-    // let numberOfDoc = string.match(/(?<=\().+?(?=\))/) || ['']
+    let id = string.replace(/\(|\[/g,'_');
+    id = id.replace(/\)|\]/g,'');
+    id = id.replace(/\s/g,'').toLowerCase()
+
     // string = string.replace(/\(\d\)/g,numberOfDoc[0])
-    return string &&string.replace(/\s/g,'').toLowerCase()
+    return id
   }
+  public getPatternAWSName(fileName:string){
+    // let filename = fileName.match(/^.*?([^\\/.]*)[^\\/]*$/);
+    console.log(this.fileNameAndExt(fileName))
+    let arrayFileName = this.fileNameAndExt(fileName)
+    let newFileName;
+    if(arrayFileName.length>0){
+    let currentDate = new Date();
+    let day = currentDate.getDate();
+    let month = currentDate.getMonth() +1;
+    let year = currentDate.getFullYear();
+    let hour = currentDate.getHours();
+    let minute = currentDate.getMinutes();
+    let seconde =  currentDate.getSeconds();
+    newFileName  = arrayFileName[0] +day+month+year+hour+minute+seconde+'.'+arrayFileName[1]
+    return newFileName;
+    }else{
+      return fileName;
+    }
+    // let newFileName;
+    // if(fileName.length>0){
+    //   newFileName = filename[1];
+    // }else{
+    //   newFileName = fileName;
+    // }
+    // let currentDate = new Date();
+    // let day = currentDate.getDay();
+    // let month = currentDate.getMonth();
+    // let year = currentDate.getFullYear();
+    // let hour = currentDate.getHours();
+    // let minute = currentDate.getMinutes();
+    // let seconde =  currentDate.getSeconds();
+    // console.log('day=>',day,'month=>',month,'year=>',year,'hour',hour,'minute',minute,'seconde',seconde)
+    // newFileName  += (day+month+year+hour+minute+seconde+'.'+this.getFileExtension(fileName))
+    // return newFileName;
+  }
+  fileNameAndExt(filName){
+    let newFileName = filName.split('/').pop();
+    return [newFileName.substr(0,newFileName.lastIndexOf('.')),newFileName.substr(newFileName.lastIndexOf('.')+1,newFileName.length)]
+  }
+
   public calPositionCenter(parenteElement, targetElement:JQuery<Element>):PostitionDetailModel{
     let positionElement = new PostitionDetailModel();
     positionElement.top =  Math.max(0, (($(parenteElement).height() - $(targetElement).outerHeight()) / 2) + 

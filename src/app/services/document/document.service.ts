@@ -8,6 +8,10 @@ import html2canvas from 'html2canvas';
 import { CommonService } from '../common/common.service';
 import { CommonResponseModel } from 'src/app/models/general/general.model';
 import { DocumentTrackModel } from '../../models/document/document.model';
+import { FileContentModel } from '../../models/document/elements/file-content.model';
+import Amplify, { Storage, Auth } from 'aws-amplify';
+import { async } from '@angular/core/testing';
+import { constants } from 'os';
 declare var electron: any;
 declare var rangy: any;
 declare var CKEDITOR: any;
@@ -95,7 +99,7 @@ export class DocumentService {
 
         });
     }
-    public loadDocTrackFromDB(documentName): Observable<DocumentTrackModel> {
+    public loadDocTrackFromDB(): Observable<DocumentTrackModel[]> {
         return new Observable(subscriber => {
             if (electron) {
                 // electron.ipcRenderer.send('request-read-target-document', documentName)
@@ -111,35 +115,14 @@ export class DocumentService {
                 });
                 requestDB.onsuccess = (async (event) => {
                     this.indexDB = requestDB.result;
-                    this.getTrack(documentName).subscribe((objectDoc) => {
-                        console.log('☛ Result Document from Database : ', objectDoc);
+                    this.getTrack().subscribe((objectDoc) => {
+                        console.log('☛ Result track from Database : ', objectDoc);
                         subscriber.next(objectDoc);
                         subscriber.complete();
                     });
                 });
             }
 
-        });
-    }
-
-    public loadTempDocumentNavigatorFromDB(): Observable<DocumentNavigatorModel[]> {
-        return new Observable(subscriber => {
-            const requestDB = window.indexedDB.open('e-learning', 1);
-            requestDB.onerror = ((error) => {
-                console.error('error: ', error);
-            });
-            requestDB.onsuccess = (async (event) => {
-                this.indexDB = requestDB.result;
-                this.getNavigator().subscribe((objectNav) => {
-                    console.log('☛ Result Document Navigator from Database : ', objectNav);
-                    subscriber.next(objectNav);
-                    subscriber.complete();
-                });
-            });
-            requestDB.onupgradeneeded = ((event: any) => {
-                const db = event.target.result;
-                db.createObjectStore('temp-navigators', { keyPath: 'id' });
-            });
         });
     }
     public deleteDocument(documentName:string):Observable<string>{
@@ -168,6 +151,19 @@ export class DocumentService {
                         subscriber.next(Constants.general.message.status.success.text);
                     }); 
                 }
+                let dbTrackRequest = window.indexedDB.open("tracks");
+                dbTrackRequest.onsuccess = (event)=> {
+                    const transaction = this.indexDB.transaction(['tracks'], 'readwrite');
+                    const objectStore = transaction.objectStore('tracks');
+                    let request = objectStore.delete(documentName)
+                    request.onerror = ((event) => {
+                        console.error('cannot delete document track !');
+                        subscriber.next(Constants.general.message.status.fail.text);
+                    });
+                    request.onsuccess = ((event) => {
+                        subscriber.next(Constants.general.message.status.success.text);
+                    }); 
+                }
             }
             
         })
@@ -181,6 +177,34 @@ export class DocumentService {
         } else {
             request = objectStore.getAll();
         }
+        return new Observable(subscriber => {
+            request.onerror = ((event) => {
+                console.error('Unable to retrieve daa from database!');
+            });
+
+            request.onsuccess = ((event) => {
+                // Do something with the request.result!
+                if (request.result) {
+                    let result:DocumentModel = request.result;
+                    result.status = Constants.general.message.status.success.text;
+                    subscriber.next(result);
+                    subscriber.complete();
+                } else {
+                    let result:DocumentModel = new DocumentModel();
+                    result.status = Constants.general.message.status.notFound.text;
+                    subscriber.next(result);
+                    subscriber.complete();
+                    //console.error('couldn\'t be found in your database!');
+                }
+            });
+        });
+    }
+
+    public findDoc(documentName): Observable<DocumentModel> {
+        const transaction = this.indexDB.transaction(['documents']);
+        const objectStore = transaction.objectStore('documents');
+        let request = objectStore.get(documentName)
+        
         return new Observable(subscriber => {
             request.onerror = ((event) => {
                 console.error('Unable to retrieve daa from database!');
@@ -233,13 +257,15 @@ export class DocumentService {
             });
         });
     }
-    private getTrack(documentName): Observable<DocumentTrackModel> {
+    private getTrack(): Observable<DocumentTrackModel[]> {
         const transaction = this.indexDB.transaction(['tracks']);
         const objectStore = transaction.objectStore('tracks');
-        let request;
-        if (documentName) {
-            request = objectStore.get(documentName)
-        }
+        let request  = objectStore.getAll();
+        // if (documentName) {
+        //     request = objectStore.get(documentName);
+        // }else{
+        //     request = objectStore.getAll();
+        // }
         return new Observable(subscriber => {
             request.onerror = ((event) => {
                 console.error('Unable to retrieve daa from database!');
@@ -247,13 +273,17 @@ export class DocumentService {
             request.onsuccess = ((event) => {
                 // Do something with the request.result!
                 if (request.result) {
-                    let result:DocumentTrackModel = request.result;
-                    result.status = Constants.general.message.status.success.text;
+                    let result:DocumentTrackModel[] = request.result;
+                    result.forEach(element => {
+                        element.status = Constants.general.message.status.success.text;
+                    });
                     subscriber.next(result);
                     subscriber.complete();
                 } else {
-                    let result:DocumentTrackModel = new DocumentTrackModel();
-                    result.status = Constants.general.message.status.notFound.text;
+                    let result:DocumentTrackModel[] = new Array<DocumentTrackModel>();
+                    result.forEach(element => {
+                        element.status = Constants.general.message.status.notFound.text;
+                    });
                     subscriber.next(result);
                     subscriber.complete();
                     //console.error('couldn\'t be found in your database!');
@@ -261,39 +291,7 @@ export class DocumentService {
             });
         });
     }
-    private getTempNavigator(): Observable<any> {
-        const transaction = this.indexDB.transaction(['temp-navigators']);
-        const objectStore = transaction.objectStore('temp-navigators');
-        let request = objectStore.getAll();
-        return new Observable(subscriber => {
-            request.onerror = ((event) => {
-                console.error('Unable to retrieve daa from database!');
-            });
 
-            request.onsuccess = ((event) => {
-                // Do something with the request.result!
-                if (request.result) {
-                    let result = request.result;
-                    subscriber.next(result);
-                    subscriber.complete();
-                } else {
-                   // console.error('couldn\'t be found in your database!');
-                }
-            });
-        });
-    }
-    
-    // public initCKeditor(){
-    //     CKEDITOR.replace( this.documentDataControlService.nameTemplate, {
-    //         toolbar: [],
-    //         removePlugins :'elementspath,save,font,resize',
-    //         on: {
-    //             loaded: ()=> {
-    //                 $(document).find('#cke_1_top').remove();  
-    //             }
-    //         }
-    //     });
-    // }
     public compileStyles(styles: string, tagElement?: string) {
         let editor = CKEDITOR.instances[this.documentDataControlService.nameTemplate];
         let style = new CKEDITOR.style({
@@ -399,7 +397,7 @@ export class DocumentService {
             }else{
                 const requestTableTrack = this.indexDB.transaction(['tracks'], 'readwrite');
                 const objectStoreTrack = requestTableTrack.objectStore('tracks');
-                    console.log(' ❏ Object for Save :', saveobjectTrack);
+                    // console.log(' ❏ Object for Save :', saveobjectTrack);
                     if (objectStoreTrack.get(nameDocument)) {
                         let storeDoc =  objectStoreTrack.put(saveobjectTrack);
                         storeDoc.onsuccess = (event) => {
@@ -423,6 +421,50 @@ export class DocumentService {
             }
         });
     }
+    public uploadFile(files:FileContentModel[]):Observable<string>{
+        return new Observable((subscriber)=>{
+            Amplify.configure({
+                Auth: {
+                    identityPoolId: 'us-east-2:b1d020f3-2250-4e5f-beed-0fd588b8a01c',
+                    region: 'us-east-2',
+                    userPoolId: 'us-east-2_qCW1BuFYV',
+                    userPoolWebClientId:'663n1uidmi0ao3lrsk7ldsvv3q'
+                },
+                Storage: {
+                    bucket: 'e-learning-dev',
+                }
+            });
+            let numberOfFiles  = 0;
+            if(files.length>0){
+                files.forEach(async (file)=>{
+                    console.log(file)
+                    await Storage.put(file.awsFileName, file.data,{contentType: file.data.type})
+                     .then (result => {
+                         numberOfFiles += 1;
+                         if(numberOfFiles === files.length){
+                             subscriber.next(Constants.general.message.status.success.text);
+                         }
+                     })
+                     .catch(err => console.error('upload file ams error',err));
+                 })  
+            }else{
+                subscriber.next(Constants.general.message.status.success.text);
+            }
+        })
+    }
+    public downloadFile(awsFileName:string):Observable<Blob>{
+        return new Observable((subscriber)=>{
+            Storage.get(awsFileName,{download: true}).then((result:any)=>{
+                let blob=new Blob([result.Body],{type: result.ContentType})
+                subscriber.next(blob)
+               //  $('#test').attr('href',window.URL.createObjectURL(blob))
+               //  $('#test').attr('download',file.fileName)
+               });
+        })
+
+ 
+     }
+    // public getFile
     public captureHTML(id):Observable<string>{
         return new Observable((subscriber)=>{
             html2canvas(document.querySelector('#'+id)).then((canvas)=>{

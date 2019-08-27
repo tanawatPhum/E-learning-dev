@@ -14,3 +14,5 @@ export class commentDetailModel {
     public liked:number;
     public childs:commentDetailModel[] = new Array<commentDetailModel>();
 }
+
+

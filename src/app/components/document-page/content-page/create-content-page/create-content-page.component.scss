@@ -59,7 +59,7 @@ p {
 }
 
 .container-content {
-    padding: 10px;
+    // padding: 10px;
     height: 100%;
     width: 100%;
     background-color: #F8F8F8;
@@ -69,8 +69,9 @@ p {
     // height: 80%;
     width: 100%;
     word-break: break-all;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: auto;
+    // overflow-y: auto;
+    // overflow-x: hidden;
     position: relative;
     &.content-template-create {
         border: 2px dashed #C9C9C9;
@@ -80,6 +81,7 @@ p {
 
 .container-option-content {
     position: absolute;
+    width: 150px;
     top: 0;
     right: 0;
     & .content-option-tool {
@@ -115,6 +117,26 @@ p {
                 color: white;
                 background-color: #0275D8;
             }
+            & .toDoList-taskList {
+                & .taskList-text {
+                    outline: 0;
+                    display: inline;
+                }
+            }
+        }
+        & .option-progressBar {
+            height: auto;
+            & .progressBar-taskList-text,
+            .progressBar-componentList-text,
+            .progressBar-label-text {
+                height: 40px;
+                & p {
+                    font-weight: bold;
+                }
+            }
+            & .list-group {
+                min-height: 50px;
+            }
         }
     }
 }
@@ -142,9 +164,13 @@ p {
     //     min-width: 30% !important;
     //     min-height: 30% !important;
     // }
-    &.box-browse-file-size {
+    &.box-browse-img-size {
         min-width: 30% !important;
         min-height: 45% !important;
+    }
+    &.box-browse-file-size {
+        min-width: 20% !important;
+        min-height: 10% !important;
     }
     &.box-progress-bar-size {
         min-width: 50% !important;

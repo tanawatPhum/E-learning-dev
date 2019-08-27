@@ -19,8 +19,9 @@ import { LoadingPageComponent } from './components/plugin-page/loading-page/load
 import { ExampleDocumentPageComponent } from './components/example-document-page/example-document-page/example-document-page.component';
 import { CKEditorModule } from 'ckeditor4-angular';
 import { RouterModule } from '@angular/router';
-
-
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClientService } from './services/common/httpClient.service';
+import { AmplifyAngularModule, AmplifyService } from 'aws-amplify-angular';
 
 export const COMPONENTS: any[] = [
   AppComponent,
@@ -42,11 +43,15 @@ export const MODULES: any[] = [
   CKEditorModule,
   BrowserModule,
   FormsModule,
+  HttpClientModule,
+  AmplifyAngularModule
 ];
 export const SERVICES: any[] = [
   CommonService,
   DocumentService,
-  DocumentDataControlService
+  DocumentDataControlService,
+  HttpClientService,
+  AmplifyService
 ];
 export const PIPES: any[] = [
 

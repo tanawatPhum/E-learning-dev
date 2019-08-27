@@ -14,7 +14,8 @@ export class Constants {
             click: {
                 add: 'add',
                 save: 'save',
-                new:'new'
+                new:'new',
+                update:'update'
             },
             load:{
                 success:'success',
@@ -83,10 +84,31 @@ export class Constants {
                 textArea: {name : 'text-area', id: 2 },
                 videoBrowse: {name : 'video-browse', id: 3 },
                 subform: {name : 'subform', id: 4 },
-                fileBrowse: {name : 'file-browse', id: 5 },
+                imgBrowse: {name : 'img-browse', id: 5 },
                 progressBar: {name : 'progress-bar', id: 6 },
                 comment: {name : 'comment', id: 7 },
                 toDoList: {name : 'todo-list', id: 8 },
+                fileBrowse: {name : 'file-browse', id: 9 },
+                linkBrowse: {name : 'link-browse', id: 10},
+            }
+        },
+        boxes:{
+            types:{
+                boxInitial: 'box-intial',
+                boxTextarea: 'box-textarea',
+                boxBrowseImg: 'box-browse-img',
+                boxBrowseLink: 'box-browse-link',
+                boxBrowseFile: 'box-browse-file',
+                boxImg: 'box-img',
+                boxVideo: 'box-video',
+                boxFile: 'box-file',
+                boxLink: 'box-link',
+                boxBrowseVideo: 'box-browse-video',
+                boxSubform: 'box-subform',
+                boxAddSubform: 'box-add-subform',
+                boxProgressBar: 'box-progress-bar',
+                boxComment: 'box-comment',
+                boxToDoList: 'box-toDoList'
             }
         }
     };

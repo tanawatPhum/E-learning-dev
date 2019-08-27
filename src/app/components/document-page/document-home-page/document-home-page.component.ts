@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterContentInit, NgZone, ViewEncapsulation, AfterViewInit } from '@angular/core';
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, of } from 'rxjs';
 import { Constants } from 'src/app/global/constants';
 import { DocumentService } from '../../../services/document/document.service';
 import { DocumentModel } from '../../../models/document/content.model';
@@ -32,8 +32,8 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
     public documentNavList: DocumentNavigatorModel[] = new Array<DocumentNavigatorModel>();
     public documentList: DocumentModel[] = new Array<DocumentModel>();
     public showDocumentList: boolean = false;
-    public heightScreen: string;
     public onSuccessCreateDocNav: Subject<boolean> = new Subject<boolean>();
+    public currentScreenSize:ScreenDetailModel = new ScreenDetailModel();
 
     public contents = {
         event: {
@@ -54,6 +54,8 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
     ) { }
 
     ngOnInit() {
+        this.currentScreenSize =  this.documentDataService.currentScreenSize
+     
 
         // if (electron) {
         //     electron.ipcRenderer.send('request-read-document', this.currentDocument)
@@ -169,7 +171,7 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
             this.documentService.loadDocumentNavigatorFromDB().subscribe((result) => {
                 $('.document-sidenav-content').html(null);
                 this.documentNavList = this.documentDataService.documentNavList = result;
-                const targetDocument = this.documentNavList.find((documentNav) => documentNav.nameDocument === this.currentDocumentName);
+                const targetDocument = this.documentNavList.find((documentNav) => documentNav.nameDocument === this.documentDataService.currentDocumentNav);
                 if (targetDocument) {
                     this.createNavigatorDocument(targetDocument, null)
                 }
@@ -219,7 +221,24 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
     public saveDocument(action: string, data?: any) {
         if (action === this.contents.data.savecurrentDoc) {
             this.loadingProgress();
-            this.triggerElement.next({ action: Constants.general.event.click.save, data: data || this.currentDocumentName });
+            if(this.documentDataService.currentDocumentName !== this.currentDocumentName){
+                this.documentService.findDoc(this.commonService.getPatternId(this.currentDocumentName)).subscribe((document)=>{
+                    if(document.status === Constants.general.message.status.success.text){
+                        let rexFindNumberDoc = document.nameDocument.match(/\(([^)\w\s]|\d+)\)[^(]*$/)
+                        if(rexFindNumberDoc){
+                            this.currentDocumentName =  document.nameDocument+'('+rexFindNumberDoc[1]+')'
+                        }else{
+                            this.currentDocumentName =  document.nameDocument+'(1)'
+                        }
+                        this.triggerElement.next({ action: Constants.general.event.click.save, data: data || this.currentDocumentName });
+                    }else{
+                        this.triggerElement.next({ action: Constants.general.event.click.save, data: data || this.currentDocumentName });
+                    }
+                })
+            }else{
+                this.triggerElement.next({ action: Constants.general.event.click.save, data: data || this.currentDocumentName });
+            }
+
         }
         else if (action === this.contents.data.savecurrentDocAndNewDoc) {
             this.triggerElement.next({ action: Constants.general.event.click.new, data: data || this.currentDocumentName });
@@ -279,8 +298,14 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
         }
     }
     public eventFromChild(eventChild: TriggerEventModel) {
-        console.log("eventChild", eventChild);
         if (eventChild.action === Constants.general.event.load.success && eventChild.data === "save") {
+            if(this.currentDocumentName !== this.documentDataService.currentDocumentName){
+                this.documentService.deleteDocument(this.commonService.getPatternId(this.documentDataService.currentDocumentName)).subscribe((status)=>{
+                    if(status===Constants.general.message.status.success.text){
+                        this.documentDataService.currentDocumentName =  this.currentDocumentName;
+                    }
+                })
+            }
             setTimeout(() => {
                 this.ngZone.run(() => {
                     this.loading = false;
@@ -294,6 +319,13 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
         }
         else if (eventChild.action === Constants.general.event.load.success && eventChild.data === "new") {
             this.router.navigate(['home'])
+        }
+        else if (eventChild.action === Constants.general.event.click.update && eventChild.data === "updateDocNav") {
+            let targetDocNav = this.documentDataService.documentNavList.find((docNav)=>docNav.nameDocument ===  this.documentDataService.currentDocumentNav)
+            if(targetDocNav){
+                $('.document-sidenav-content').html(null);
+                this.createNavigatorDocument(targetDocNav, null)
+            }
         }
     }
 
@@ -358,6 +390,7 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
             $('.sidenav-content-text').unbind();
             $('.sidenav-content-text').click((element) => {
                 element.stopPropagation();
+                this.documentDataService.currentDocumentName =  this.currentDocumentName = $(element.target).text();
                 if (electron) {
                     this.loadTargetDoc($(element.target).text());
                 } else {
@@ -369,6 +402,7 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
 
     }
     public dragTool(event) {
+        event.stopPropagation();
         event.dataTransfer.setData("tool-type", $(event.target).attr('document-data'));
         // console.log("drag",$(event.target).attr('document-data'));
 

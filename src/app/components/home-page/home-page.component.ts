@@ -130,7 +130,6 @@ export class HomePageComponent implements OnInit , AfterViewInit{
             element.find('.document-icon').click((event)=>{
                 event.stopPropagation();
                 if($(event.currentTarget).attr('document-action')==='delete'){
-                    console.log(this.modalTypes.deleteDocument)
                     this.triggerModal.next({ action: this.modalTypes.deleteDocument.name, data: $(event.currentTarget).attr('document-data') });
                 }
             })
@@ -156,6 +155,8 @@ export class HomePageComponent implements OnInit , AfterViewInit{
                 }else{
                     this.documentDataService.currentDocumentName  =  $(event.currentTarget).attr('document-data');
                 }
+
+                this.documentDataService.currentDocumentNav = this.documentDataService.currentDocumentName;
                 this.router.navigate(['documentHome'])
             })
         }

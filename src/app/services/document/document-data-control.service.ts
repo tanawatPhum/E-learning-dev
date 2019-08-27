@@ -7,11 +7,19 @@ import { DocumentNavigatorModel } from 'src/app/models/document/document.model';
 
 @Injectable()
 export class DocumentDataControlService {
-    private _currentDocument: string = "New Document";
+    private _currentDocument: string = "New Document1";
+    private _currentDocumentNav: string = "New Document1";
     private _contentSize: ScreenDetailModel = new ScreenDetailModel();
     private _documentNavList: DocumentNavigatorModel[] = new Array<DocumentNavigatorModel>();
     private _documentList: DocumentModel[] = new Array<DocumentModel>();
     private _nameTemplate: string;
+    private _currentScreenSize: ScreenDetailModel = new ScreenDetailModel();
+    public get currentScreenSize(): ScreenDetailModel {
+        return this._currentScreenSize;
+    }
+    public set currentScreenSize(value: ScreenDetailModel) {
+        this._currentScreenSize = value;
+    }
     public get nameTemplate(): string {
         return this._nameTemplate;
     }
@@ -35,6 +43,12 @@ export class DocumentDataControlService {
     }
     public set contentSize(value: ScreenDetailModel) {
         this._contentSize = value;
+    }
+    public get currentDocumentNav(): string {
+        return this._currentDocumentNav;
+    }
+    public set currentDocumentNav(value: string) {
+        this._currentDocumentNav = value;
     }
     public get currentDocumentName(): string {
         return this._currentDocument;
