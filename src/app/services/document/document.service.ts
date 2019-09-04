@@ -6,12 +6,15 @@ import { DocumentNavigatorModel } from 'src/app/models/document/document.model';
 import { DocumentDataControlService } from './document-data-control.service';
 import html2canvas from 'html2canvas';
 import { CommonService } from '../common/common.service';
-import { CommonResponseModel } from 'src/app/models/general/general.model';
+import { CommonResponseModel } from 'src/app/models/common/common.model';
 import { DocumentTrackModel } from '../../models/document/document.model';
 import { FileContentModel } from '../../models/document/elements/file-content.model';
 import Amplify, { Storage, Auth } from 'aws-amplify';
 import { async } from '@angular/core/testing';
 import { constants } from 'os';
+import { SocketIoService } from '../common/socket.service';
+import { CommonDataControlService } from '../common/common-data-control.service';
+
 declare var electron: any;
 declare var rangy: any;
 declare var CKEDITOR: any;
@@ -19,7 +22,9 @@ declare var CKEDITOR: any;
 export class DocumentService {
     constructor(
         private documentDataControlService: DocumentDataControlService,
-        private commonService:CommonService
+        private commonDataService:CommonDataControlService,
+        private commonService:CommonService,
+        private socketIoService:SocketIoService
     ) {
 
     }
@@ -45,32 +50,46 @@ export class DocumentService {
     }
     public loadDocFromDB(documentName): Observable<DocumentModel> {
         return new Observable(subscriber => {
+            let requestObjDoc =  {
+                id:this.commonService.getPatternId(documentName),
+                userId:this.commonDataService.userId
+            }
             if (electron) {
                 electron.ipcRenderer.send('request-read-target-document', documentName)
                 electron.ipcRenderer.once('reponse-read-target-document', (event, objectDoc) => {
-                    console.log('☛ Result Document from Flie : ', objectDoc);
+                    // console.log('☛ Result Document from Flie : ', objectDoc);
                     subscriber.next(objectDoc);
                     subscriber.complete();
                 })
             } else {
-                const requestDB = window.indexedDB.open('e-learning', 1);
-                requestDB.onerror = ((error) => {
-                    console.error('error: ', error);
-                });
-                requestDB.onsuccess = (async (event) => {
-                    this.indexDB = requestDB.result;
-                    this.getDoc(documentName).subscribe((objectDoc) => {
-                        console.log('☛ Result Document from Database : ', objectDoc);
-                        subscriber.next(objectDoc);
+                this.socketIoService.sendData(Constants.document.connect.type.documentRead,requestObjDoc).subscribe((objectDoc)=>{
+                    console.log("objectDoc",objectDoc)
+                   this.creaetDocumentModel(objectDoc).subscribe((result)=>{
+                        subscriber.next(result);
                         subscriber.complete();
-                    });
+                   });
                 });
+                // const requestDB = window.indexedDB.open('e-learning', 1);
+                // requestDB.onerror = ((error) => {
+                //     console.error('error: ', error);
+                // });
+                // requestDB.onsuccess = (async (event) => {
+                //     this.indexDB = requestDB.result;
+                //     this.getDoc(documentName).subscribe((objectDoc) => {
+                //         console.log('☛ Result Document from Database : ', objectDoc);
+                //         subscriber.next(objectDoc);
+                //         subscriber.complete();
+                //     });
+                // });
             }
 
         });
     }
     public loadDocumentNavigatorFromDB(): Observable<DocumentNavigatorModel[]> {
         return new Observable(subscriber => {
+            let requestObjDocNav =  {
+                userId:this.commonDataService.userId
+            }
             if (electron) {
                 electron.ipcRenderer.send('request-read-document-list', null)
                 electron.ipcRenderer.once('reponse-read-document-list', (event, objectNav) => {
@@ -78,18 +97,29 @@ export class DocumentService {
                     subscriber.complete();
                 });
             } else {
-                const requestDB = window.indexedDB.open('e-learning', 1);
-                requestDB.onerror = ((error) => {
-                    console.error('error: ', error);
-                });
-                requestDB.onsuccess = (async (event) => {
-                    this.indexDB = requestDB.result;
-                    this.getNavigator().subscribe((objectNav) => {
-                        console.log('☛ Result Document Navigator from Database : ', objectNav);
-                        subscriber.next(objectNav);
+                this.socketIoService.sendData(Constants.document.connect.type.documentNavRead,requestObjDocNav).subscribe((objectDocNav)=>{
+                    console.log('objectDocNav',objectDocNav)
+                    if(!objectDocNav){
+                        objectDocNav = new Array<DocumentNavigatorModel>();
+                    }
+                        subscriber.next(objectDocNav);
                         subscriber.complete();
-                    });
-                });
+                 });
+                // this.creaetDocumentModel(objectDoc).subscribe((result)=>{
+                //     subscriber.next(result);
+                // })
+                // const requestDB = window.indexedDB.open('e-learning', 1);
+                // requestDB.onerror = ((error) => {
+                //     console.error('error: ', error);
+                // });
+                // requestDB.onsuccess = (async (event) => {
+                //     this.indexDB = requestDB.result;
+                //     this.getNavigator().subscribe((objectNav) => {
+                //         console.log('☛ Result Document Navigator from Database : ', objectNav);
+                //         subscriber.next(objectNav);
+                //         subscriber.complete();
+                //     });
+                // });
                 // requestDB.onupgradeneeded = ((event: any) => {
                 //     const db = event.target.result;
                 //     db.createObjectStore('navigators', { keyPath: 'id' });
@@ -101,6 +131,9 @@ export class DocumentService {
     }
     public loadDocTrackFromDB(): Observable<DocumentTrackModel[]> {
         return new Observable(subscriber => {
+            let requestObjDocTrack =  {
+                userId:this.commonDataService.userId
+            }
             if (electron) {
                 // electron.ipcRenderer.send('request-read-target-document', documentName)
                 // electron.ipcRenderer.once('reponse-read-target-document', (event, objectDoc) => {
@@ -109,18 +142,23 @@ export class DocumentService {
                 //     subscriber.complete();
                 // })
             } else {
-                const requestDB = window.indexedDB.open('e-learning', 1);
-                requestDB.onerror = ((error) => {
-                    console.error('error: ', error);
+                this.socketIoService.sendData(Constants.document.connect.type.documentTrackRead,requestObjDocTrack).subscribe((objectDocNav)=>{
+                    subscriber.next(objectDocNav);
+                    subscriber.complete();
                 });
-                requestDB.onsuccess = (async (event) => {
-                    this.indexDB = requestDB.result;
-                    this.getTrack().subscribe((objectDoc) => {
-                        console.log('☛ Result track from Database : ', objectDoc);
-                        subscriber.next(objectDoc);
-                        subscriber.complete();
-                    });
-                });
+
+                // const requestDB = window.indexedDB.open('e-learning', 1);
+                // requestDB.onerror = ((error) => {
+                //     console.error('error: ', error);
+                // });
+                // requestDB.onsuccess = (async (event) => {
+                //     this.indexDB = requestDB.result;
+                //     this.getTrack().subscribe((objectDoc) => {
+                //         console.log('☛ Result track from Database : ', objectDoc);
+                //         subscriber.next(objectDoc);
+                //         subscriber.complete();
+                //     });
+                // });
             }
 
         });
@@ -145,10 +183,10 @@ export class DocumentService {
                     let request = objectStore.delete(documentName)
                     request.onerror = ((event) => {
                         console.error('cannot delete document navigator !');
-                        subscriber.next(Constants.general.message.status.fail.text);
+                        subscriber.next(Constants.common.message.status.fail.text);
                     });
                     request.onsuccess = ((event) => {
-                        subscriber.next(Constants.general.message.status.success.text);
+                        subscriber.next(Constants.common.message.status.success.text);
                     }); 
                 }
                 let dbTrackRequest = window.indexedDB.open("tracks");
@@ -158,10 +196,10 @@ export class DocumentService {
                     let request = objectStore.delete(documentName)
                     request.onerror = ((event) => {
                         console.error('cannot delete document track !');
-                        subscriber.next(Constants.general.message.status.fail.text);
+                        subscriber.next(Constants.common.message.status.fail.text);
                     });
                     request.onsuccess = ((event) => {
-                        subscriber.next(Constants.general.message.status.success.text);
+                        subscriber.next(Constants.common.message.status.success.text);
                     }); 
                 }
             }
@@ -186,12 +224,12 @@ export class DocumentService {
                 // Do something with the request.result!
                 if (request.result) {
                     let result:DocumentModel = request.result;
-                    result.status = Constants.general.message.status.success.text;
+                    result.status = Constants.common.message.status.success.text;
                     subscriber.next(result);
                     subscriber.complete();
                 } else {
                     let result:DocumentModel = new DocumentModel();
-                    result.status = Constants.general.message.status.notFound.text;
+                    result.status = Constants.common.message.status.notFound.text;
                     subscriber.next(result);
                     subscriber.complete();
                     //console.error('couldn\'t be found in your database!');
@@ -214,12 +252,12 @@ export class DocumentService {
                 // Do something with the request.result!
                 if (request.result) {
                     let result:DocumentModel = request.result;
-                    result.status = Constants.general.message.status.success.text;
+                    result.status = Constants.common.message.status.success.text;
                     subscriber.next(result);
                     subscriber.complete();
                 } else {
                     let result:DocumentModel = new DocumentModel();
-                    result.status = Constants.general.message.status.notFound.text;
+                    result.status = Constants.common.message.status.notFound.text;
                     subscriber.next(result);
                     subscriber.complete();
                     //console.error('couldn\'t be found in your database!');
@@ -241,14 +279,14 @@ export class DocumentService {
                 if (request.result) {
                     let result:DocumentNavigatorModel[] = request.result;
                     if(result.length > 0){
-                        result[0].status = Constants.general.message.status.success.text; 
+                        result[0].status = Constants.common.message.status.success.text; 
                     }
                     subscriber.next(result);
                     subscriber.complete();
                 } else {
                     let result:DocumentNavigatorModel[] = new Array<DocumentNavigatorModel>();
                     if(result.length > 0){
-                        result[0].status  = Constants.general.message.status.notFound.text;
+                        result[0].status  = Constants.common.message.status.notFound.text;
                     }
                     subscriber.next(result);
                     subscriber.complete();
@@ -275,14 +313,14 @@ export class DocumentService {
                 if (request.result) {
                     let result:DocumentTrackModel[] = request.result;
                     result.forEach(element => {
-                        element.status = Constants.general.message.status.success.text;
+                        element.status = Constants.common.message.status.success.text;
                     });
                     subscriber.next(result);
                     subscriber.complete();
                 } else {
                     let result:DocumentTrackModel[] = new Array<DocumentTrackModel>();
                     result.forEach(element => {
-                        element.status = Constants.general.message.status.notFound.text;
+                        element.status = Constants.common.message.status.notFound.text;
                     });
                     subscriber.next(result);
                     subscriber.complete();
@@ -308,34 +346,39 @@ export class DocumentService {
                 console.log(' ❏ Object for Save :', saveobjectTemplate);
                 electron.ipcRenderer.send('request-save-document', JSON.stringify(saveobjectTemplate))
                 electron.ipcRenderer.once('reponse-save-document', (event, status) => {
-                    subscriber.next(Constants.general.event.load.success)
+                    subscriber.next(Constants.common.event.load.success)
                     console.log('data has been saved to your file.');
                     //this.eventToParent.emit({ action: Constants.general.event.load.success, data: event })
                 });
             }else{
-                console.log("saveobjectTemplate",saveobjectTemplate)
-                const requestTableDoc = this.indexDB.transaction(['documents'], 'readwrite');
-                const objectStoreDoc = requestTableDoc.objectStore('documents');
-                    console.log(' ❏ Object for Save :', saveobjectTemplate);
-                    if (objectStoreDoc.get(nameDocument)) {
-                        let storeDoc =  objectStoreDoc.put(saveobjectTemplate);
-                        storeDoc.onsuccess = (event) => {
-                            subscriber.next(Constants.general.event.load.success)
-                            console.log('data has been updated to your database.');
-                        };
-                        storeDoc.onerror = (error) => {
-                            console.log('data has error',error);
-                        };
-                    } else {
-                        let storeDoc = objectStoreDoc.add(saveobjectTemplate);
-                        storeDoc.onsuccess = (event) => {
-                            subscriber.next(Constants.general.event.load.success)
-                            console.log('data has been added to your database.');
-                        };
-                        storeDoc.onerror = (error) => {
-                            console.log('data has error',error);
-                        };
-                    }
+                // console.log("saveobjectTemplate",saveobjectTemplate)
+                // const requestTableDoc = this.indexDB.transaction(['documents'], 'readwrite');
+                // const objectStoreDoc = requestTableDoc.objectStore('documents');
+                //     console.log(' ❏ Object for Save :', saveobjectTemplate);
+                //     if (objectStoreDoc.get(nameDocument)) {
+                //         let storeDoc =  objectStoreDoc.put(saveobjectTemplate);
+                //         storeDoc.onsuccess = (event) => {
+                //             subscriber.next(Constants.common.event.load.success)
+                //             console.log('data has been updated to your database.');
+                //         };
+                //         storeDoc.onerror = (error) => {
+                //             console.log('data has error',error);
+                //         };
+                //     } else {
+                //         let storeDoc = objectStoreDoc.add(saveobjectTemplate);
+                //         storeDoc.onsuccess = (event) => {
+                //             subscriber.next(Constants.common.event.load.success)
+                //             console.log('data has been added to your database.');
+                //         };
+                //         storeDoc.onerror = (error) => {
+                //             console.log('data has error',error);
+                //         };
+                //     }
+                    this.socketIoService.sendData(Constants.document.connect.type.documentSave, saveobjectTemplate).subscribe((result)=>{
+                        subscriber.next(Constants.common.event.load.success)
+                    })
+
+                
 
             }
         });
@@ -364,22 +407,25 @@ export class DocumentService {
                     };
                 });
                 electron.ipcRenderer.once('response-save-document-list', (event, status) => {
-                    subscriber.next(Constants.general.event.load.success)
+                    subscriber.next(Constants.common.event.load.success)
                 });
             }else{
-                const requestTableNav = this.indexDB.transaction(['navigators'], 'readwrite');
-                const objectStoreNav = requestTableNav.objectStore('navigators');
-                if (objectStoreNav.get(nameDocument)) {
-                    objectStoreNav.put(saveobjectNavTemplate).onsuccess = (event) => {
-                        subscriber.next(Constants.general.event.load.success)
-                        console.log('data has been updated to your database.');
-                    };
-                } else {
-                    objectStoreNav.add(saveobjectNavTemplate).onsuccess = (event) => {
-                        subscriber.next(Constants.general.event.load.success)
-                        console.log('data has been added to your database.');
-                    };
-                }
+                this.socketIoService.sendData(Constants.document.connect.type.documentNavSave,saveobjectNavTemplate).subscribe((result)=>{
+                    subscriber.next(Constants.common.event.load.success)
+                })
+                // const requestTableNav = this.indexDB.transaction(['navigators'], 'readwrite');
+                // const objectStoreNav = requestTableNav.objectStore('navigators');
+                // if (objectStoreNav.get(nameDocument)) {
+                //     objectStoreNav.put(saveobjectNavTemplate).onsuccess = (event) => {
+                //         subscriber.next(Constants.common.event.load.success)
+                //         console.log('data has been updated to your database.');
+                //     };
+                // } else {
+                //     objectStoreNav.add(saveobjectNavTemplate).onsuccess = (event) => {
+                //         subscriber.next(Constants.common.event.load.success)
+                //         console.log('data has been added to your database.');
+                //     };
+                // }
             }
         });
         
@@ -395,28 +441,31 @@ export class DocumentService {
                 //     //this.eventToParent.emit({ action: Constants.general.event.load.success, data: event })
                 // });
             }else{
-                const requestTableTrack = this.indexDB.transaction(['tracks'], 'readwrite');
-                const objectStoreTrack = requestTableTrack.objectStore('tracks');
-                    // console.log(' ❏ Object for Save :', saveobjectTrack);
-                    if (objectStoreTrack.get(nameDocument)) {
-                        let storeDoc =  objectStoreTrack.put(saveobjectTrack);
-                        storeDoc.onsuccess = (event) => {
-                            subscriber.next(Constants.general.event.load.success)
-                            console.log('data has been updated to your database.');
-                        };
-                        storeDoc.onerror = (error) => {
-                            console.log('data has error',error);
-                        };
-                    } else {
-                        let storeDoc = objectStoreTrack.add(saveobjectTrack);
-                        storeDoc.onsuccess = (event) => {
-                            subscriber.next(Constants.general.event.load.success)
-                            console.log('data has been added to your database.');
-                        };
-                        storeDoc.onerror = (error) => {
-                            console.log('data has error',error);
-                        };
-                    }
+                this.socketIoService.sendData(Constants.document.connect.type.documentTrackSave,saveobjectTrack).subscribe((result)=>{
+                    subscriber.next(Constants.common.event.load.success)
+                })
+                // const requestTableTrack = this.indexDB.transaction(['tracks'], 'readwrite');
+                // const objectStoreTrack = requestTableTrack.objectStore('tracks');
+                //     // console.log(' ❏ Object for Save :', saveobjectTrack);
+                //     if (objectStoreTrack.get(nameDocument)) {
+                //         let storeDoc =  objectStoreTrack.put(saveobjectTrack);
+                //         storeDoc.onsuccess = (event) => {
+                //             subscriber.next(Constants.common.event.load.success)
+                //             console.log('data has been updated to your database.');
+                //         };
+                //         storeDoc.onerror = (error) => {
+                //             console.log('data has error',error);
+                //         };
+                //     } else {
+                //         let storeDoc = objectStoreTrack.add(saveobjectTrack);
+                //         storeDoc.onsuccess = (event) => {
+                //             subscriber.next(Constants.common.event.load.success)
+                //             console.log('data has been added to your database.');
+                //         };
+                //         storeDoc.onerror = (error) => {
+                //             console.log('data has error',error);
+                //         };
+                //     }
 
             }
         });
@@ -442,13 +491,13 @@ export class DocumentService {
                      .then (result => {
                          numberOfFiles += 1;
                          if(numberOfFiles === files.length){
-                             subscriber.next(Constants.general.message.status.success.text);
+                             subscriber.next(Constants.common.message.status.success.text);
                          }
                      })
                      .catch(err => console.error('upload file ams error',err));
                  })  
             }else{
-                subscriber.next(Constants.general.message.status.success.text);
+                subscriber.next(Constants.common.message.status.success.text);
             }
         })
     }
@@ -472,6 +521,25 @@ export class DocumentService {
                 subscriber.next(imgdata)             
             });
         });
+    }
+
+    public creaetDocumentModel(value):Observable<DocumentModel>{
+        return new Observable((subscriber)=>{
+            // console.log('☛ Result Document from Flie : ', value);
+            let result:DocumentModel;
+            if(value){
+                result = value;
+                result.status = Constants.common.message.status.success.text;
+            }else{
+                result=  new DocumentModel();
+                result.status = Constants.common.message.status.notFound.text;
+            }
+            subscriber.next(result);
+            subscriber.complete();
+            subscriber.next()
+
+        })
+
     }
     
 }

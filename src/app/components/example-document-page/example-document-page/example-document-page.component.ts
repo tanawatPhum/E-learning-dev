@@ -7,6 +7,7 @@ declare var CKEDITOR:any;
 
 import { AmplifyService } from 'aws-amplify-angular';
 import Amplify, { Storage, Auth } from 'aws-amplify';
+import { SocketIoService } from '../../../services/common/socket.service';
 Amplify.configure({
     Auth: {
         identityPoolId: 'us-east-2:b1d020f3-2250-4e5f-beed-0fd588b8a01c', //REQUIRED - Amazon Cognito Identity Pool ID
@@ -27,8 +28,8 @@ Amplify.configure({
 })
 export class ExampleDocumentPageComponent implements OnInit,AfterViewInit {
     public rootTemplateDoc:JQuery<Element>
-    public textSize =  Constants.general.style.fontSizeList[0];
-    public textSizeList =  Constants.general.style.fontSizeList;
+    public textSize =  Constants.common.style.fontSizeList[0];
+    public textSizeList =  Constants.common.style.fontSizeList;
 
     public signedIn: boolean;
     public user: any;
@@ -36,20 +37,21 @@ export class ExampleDocumentPageComponent implements OnInit,AfterViewInit {
     constructor(
         public documentService:DocumentService,
         public http:HttpClientService,
-        private amplifyService: AmplifyService
+        private amplifyService: AmplifyService,
+        private socketIoService:SocketIoService
        
     ){
 
     }
 
     ngOnInit(){
- 
-        $("#custom").spectrum({
-            showPalette: true,
-            palette: [ ],
-            showSelectionPalette: true, // true by default
-            selectionPalette: ["red", "green", "blue"]
-        });
+        this.socketIoService.connectSocketIo();
+        // $("#custom").spectrum({
+        //     showPalette: true,
+        //     palette: [ ],
+        //     showSelectionPalette: true, // true by default
+        //     selectionPalette: ["red", "green", "blue"]
+        // });
 
         // let boxtest1 =  $('.boxtest1')
 
@@ -163,6 +165,10 @@ export class ExampleDocumentPageComponent implements OnInit,AfterViewInit {
     ngAfterViewInit(){
 
       
+    }
+    testSocket(){
+   
+        this.socketIoService.sendData('document','hello world')
     }
     downloadFile(){
 

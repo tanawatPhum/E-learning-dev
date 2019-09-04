@@ -3,7 +3,7 @@ import { DocumentDataControlService } from '../../../services/document/document-
 import { DocumentService } from '../../../services/document/document.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DocumentModel } from '../../../models/document/content.model';
-import { ScreenDetailModel } from 'src/app/models/general/general.model';
+import { ScreenDetailModel } from 'src/app/models/common/common.model';
 import { Constants } from '../../../global/constants';
 import { CommonService } from '../../../services/common/common.service';
 import { find } from 'rxjs/operators';
@@ -303,14 +303,14 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                     this.currentCommentDetail.message = comment.message;
                     this.currentCommentDetail.imgData = comment.imgData;
                     this.currentCommentDetail.liked = comment.liked;
-                    await this.addElements(this.actions.element.addElReplyCommentBox, $('#' + parentBox.id), Constants.general.event.load.html).then(async (status)=>{
+                    await this.addElements(this.actions.element.addElReplyCommentBox, $('#' + parentBox.id), Constants.common.event.load.html).then(async (status)=>{
                         for await(const child of comment.childs){
                             this.currentCommentDetail.id = child.id;
                             this.currentCommentDetail.message = child.message;
                             this.currentCommentDetail.imgData = child.imgData;
                             this.currentCommentDetail.isChild = child.isChild;
                             this.currentCommentDetail.liked = child.liked;
-                            await this.addElements(this.actions.element.addElReplyCommentBox, $('#' + comment.id), Constants.general.event.load.html)
+                            await this.addElements(this.actions.element.addElReplyCommentBox, $('#' + comment.id), Constants.common.event.load.html)
                         }
                     })
                 }
@@ -405,14 +405,14 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                 liked: 0,
                 childs: []
             }
-            if (subaction == "replyChild" || subaction == Constants.general.event.load.html) {
+            if (subaction == "replyChild" || subaction == Constants.common.event.load.html) {
                 element.find('#comment-box-current').remove();
                 if (this.currentCommentDetail.isChild) {
                     element.find('#' + 'comment-reply-' + $('.comment-reply').length).addClass('comment-reply-child');
                 }
                 targetCommentIndex = this.comments.findIndex((parentBox) => parentBox.id === (element.parents('.content-comment').attr('id')||element.attr('id')))  ;
                 
-            } else if (subaction != "replyChild" && subaction != Constants.general.event.load.html) {
+            } else if (subaction != "replyChild" && subaction != Constants.common.event.load.html) {
                 targetCommentIndex = this.comments.findIndex((parentBox) => parentBox.id === element.attr('id'));
             }
             // console.log(targetCommentIndex)
@@ -429,7 +429,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                             element.find('#'+this.currentCommentDetail.id ).find('.reply-user-massege-img').html(commentImg)
                             replyComment.imgData = this.currentCommentDetail.imgData
                             // this.currentCommentDetail.imgData = null;
-                            if (subaction != "replyChild" && subaction != Constants.general.event.load.html) {
+                            if (subaction != "replyChild" && subaction != Constants.common.event.load.html) {
                                 if (!this.comments[targetCommentIndex].listComment.find((comment) => comment.id == replyComment.id)) {
                                     this.comments[targetCommentIndex].listComment.push(replyComment);
                                 }
@@ -440,11 +440,11 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
     
                             }
     
-                            if (subaction === Constants.general.event.click.save || subaction == "replyChild") {
+                            if (subaction === Constants.common.event.click.save || subaction == "replyChild") {
                                 this.saveDocument();
                             }
                             this.handles(this.actions.handle.handleComment, element)
-                            resovle(Constants.general.message.status.success.text)
+                            resovle(Constants.common.message.status.success.text)
                         });
                         // console.log("this.currentCommentDetail.imgData[0]",this.currentCommentDetail.imgData[0])
           
@@ -452,7 +452,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                     })
 
                 } else {
-                    if (subaction != "replyChild" && subaction != Constants.general.event.load.html) {
+                    if (subaction != "replyChild" && subaction != Constants.common.event.load.html) {
 
                         if (!this.comments[targetCommentIndex].listComment.find((comment) => comment.id == replyComment.id)) {
                             this.comments[targetCommentIndex].listComment.push(replyComment);
@@ -462,7 +462,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                         let targetCommentReply = this.comments[targetCommentIndex].listComment.findIndex((comment) => comment.id === element.attr('id'))
                         this.comments[targetCommentIndex].listComment[targetCommentReply].childs.push(replyComment)
                     }
-                    if (subaction === Constants.general.event.click.save || subaction == "replyChild") {
+                    if (subaction === Constants.common.event.click.save || subaction == "replyChild") {
                         this.saveDocument();
                     }
                 }
@@ -634,7 +634,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                 this.currentCommentDetail.isChild = false;
                 this.currentCommentDetail.message = this.rootElement.find('.content-comment').find('textarea').val().toString();
                 if (this.currentCommentDetail.message || this.currentCommentDetail.imgData) {
-                    this.addElements(this.actions.element.addElReplyCommentBox, $('#' + $(event.currentTarget).attr('data-commentId')), Constants.general.event.click.save)
+                    this.addElements(this.actions.element.addElReplyCommentBox, $('#' + $(event.currentTarget).attr('data-commentId')), Constants.common.event.click.save)
 
                 }
             })
@@ -863,6 +863,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         let saveobjectTemplate: DocumentModel = {
             nameDocument: this.currentResult.nameDocument,
             previewImg: this.currentResult.previewImg,
+            userId:Constants.common.user.id,
             id: this.currentResult.id, html: this.currentResult.html,
             status: this.currentResult.status,
             contents: {
@@ -888,7 +889,8 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         let saveObjectTrackTemplate: DocumentTrackModel = {
             id: this.commonService.getPatternId(nameDocument),
             nameDocument: nameDocument,
-            status: Constants.general.message.status.created.text,
+            userId:Constants.common.user.id,
+            status: Constants.common.message.status.created.text,
             isTrackProgress: this.currentDocumentTrack.contents.length > 0 ? true : false,
             progress: this.currentDocumentTrack.contents.length === 0 ? 100 : this.currentDocumentTrack.progress,
             contents: this.currentDocumentTrack.contents

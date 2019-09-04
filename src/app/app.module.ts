@@ -22,6 +22,8 @@ import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClientService } from './services/common/httpClient.service';
 import { AmplifyAngularModule, AmplifyService } from 'aws-amplify-angular';
+import { SocketIoService } from './services/common/socket.service';
+import { CommonDataControlService } from './services/common/common-data-control.service';
 
 export const COMPONENTS: any[] = [
   AppComponent,
@@ -49,9 +51,11 @@ export const MODULES: any[] = [
 export const SERVICES: any[] = [
   CommonService,
   DocumentService,
+  CommonDataControlService,
   DocumentDataControlService,
   HttpClientService,
-  AmplifyService
+  AmplifyService,
+  SocketIoService
 ];
 export const PIPES: any[] = [
 

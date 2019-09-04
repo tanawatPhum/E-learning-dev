@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Constants } from '../../global/constants';
 import { Observable } from 'rxjs';
 import { DocumentModel } from '../../models/document/content.model';
-import { ScreenDetailModel } from 'src/app/models/general/general.model';
+import { ScreenDetailModel } from 'src/app/models/common/common.model';
 import { DocumentNavigatorModel } from 'src/app/models/document/document.model';
 
 @Injectable()

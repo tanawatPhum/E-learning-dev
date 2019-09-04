@@ -6,9 +6,10 @@ import { DocumentDataControlService } from '../../services/document/document-dat
 import { DocumentModel } from '../../models/document/content.model';
 import { async } from '@angular/core/testing';
 import { CommonService } from '../../services/common/common.service';
-import { ScreenDetailModel } from '../../models/general/general.model';
+import { ScreenDetailModel } from '../../models/common/common.model';
 import { Subject } from 'rxjs';
 import { Constants } from 'src/app/global/constants';
+import { SocketIoService } from 'src/app/services/common/socket.service';
 
 
 
@@ -44,8 +45,10 @@ export class HomePageComponent implements OnInit , AfterViewInit{
         private documentDataService:DocumentDataControlService,
         private commonService:CommonService,
         private router: Router,
+        private socketIoService:SocketIoService
     ) { }
     ngOnInit(){
+        // this.socketIoService.connectSocketIo();
         this.getDocumentNavigator();
   
     }
@@ -65,30 +68,38 @@ export class HomePageComponent implements OnInit , AfterViewInit{
         this.loading =true;
             this.documentService.loadDocumentNavigatorFromDB().subscribe((result) => {
                 this.documentNavList = this.documentDataService.documentNavList = result;
+                console.log("this.documentNavList",this.documentNavList)
                 this.documentDataService.documentList =  new Array<DocumentModel>();
                 this.getDocumentList()
             });
     }
     
-    public  getDocumentList(){
+    public getDocumentList(){
         this.documentList = new  Array<DocumentModel>();
         this.homeDocumentList.html(null);
         if(this.documentNavList.length ==0){
             this.loading = false;
         }else{
+        
+
             this.documentNavList.forEach(async (documentNav)=>{
-                this.documentService.loadDocFromDB(documentNav.id).subscribe((documentObj)=>{
-                    this.createHTMLDocList(documentObj)
-                });
+                this.createHTMLDocList(documentNav)
+                // this.documentService.loadDocFromDB(documentNav.nameDocument).subscribe((documentObj)=>{
+                //     if(documentObj){
+                //         this.createHTMLDocList(documentObj)
+                //     }else{
+                //         this.loading = false;
+                //     }
+                // });
             });
         }
     }
-    public createHTMLDocList(documentObj:DocumentModel){
+    public createHTMLDocList(documentNavObj:DocumentNavigatorModel){
         this.homeDocumentList.append(
-            '<div class="document-container" document-data="'+documentObj.nameDocument+'" id="document-container-'+documentObj.id+'">'
-            +'<img document-action="delete"  document-data="'+documentObj.nameDocument+'" class="document-icon" src="assets/imgs/homePage/delete.svg">'
-            +'<img src="'+documentObj.previewImg+'" class="document-paper" scrolling="no" id="iframe-'+documentObj.id+'"/>'
-            +'<span class="document-text">'+ documentObj.nameDocument+'</span>'
+            '<div class="document-container" document-data="'+documentNavObj.nameDocument+'" id="document-container-'+documentNavObj.id+'">'
+            +'<img document-action="delete"  document-data="'+documentNavObj.nameDocument+'" class="document-icon" src="assets/imgs/homePage/delete.svg">'
+            +'<img src="'+documentNavObj.previewImg+'" class="document-paper" scrolling="no" id="iframe-'+documentNavObj.id+'"/>'
+            +'<span class="document-text">'+ documentNavObj.nameDocument+'</span>'
             +'</div>'
             );
         // this.homeDocumentList.append('<div class="document-container" document-data="'+documentObj.nameDocument+'"  id="document-container-'+documentObj.id+'"><iframe class="document-paper" scrolling="no" id="iframe-'+documentObj.id+'"/><span class="document-text">'+ documentObj.nameDocument+'</span></div>')
@@ -109,7 +120,7 @@ export class HomePageComponent implements OnInit , AfterViewInit{
         //                 $(contentBox).css('top',elementDetail.postitionDetail.top + "%" );
         //             })
         // })
-        this.triggerElements(this.contents.event.triggerDoc,$('#document-container-'+documentObj.id));
+        this.triggerElements(this.contents.event.triggerDoc,$('#document-container-'+documentNavObj.id));
         setTimeout(() => {
             this.loading =false;
         }, 500);

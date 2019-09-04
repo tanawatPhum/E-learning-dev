@@ -4,7 +4,10 @@ export class Constants {
         device: 'device',
         browser: 'browser'
     };
-    public static readonly general = {
+    public static readonly common = {
+        user:{
+            id:'system'
+        },
         key:{
             encode: {
                 elearning: 'dreamza002'
@@ -110,8 +113,25 @@ export class Constants {
                 boxComment: 'box-comment',
                 boxToDoList: 'box-toDoList'
             }
+        },
+        connect:{
+                type:{
+                    documentSave:'documentSave',
+                    documentRead:'documentRead',
+                    documentNavSave:'documentNavSave',
+                    documentNavRead:'documentNavRead',
+                    documentTrackSave:'documentTrackSave',
+                    documentTrackRead:'documentTrackRead'
+                }
+        },
+        object:{
+            type:{
+                document:'document',
+                documentNav:'documentNav',
+                documentTrack:'documentTrack'
+            }
         }
-    };
+    }
 
     // public static readonly key = {
     //     encode: {

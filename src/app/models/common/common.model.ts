@@ -14,4 +14,5 @@ export class ElementDetailModel{
 export class CommonResponseModel{
     public action:string;
     public data:any;
+    public status:string;
 }

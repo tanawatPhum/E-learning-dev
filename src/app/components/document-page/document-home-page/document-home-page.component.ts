@@ -6,7 +6,7 @@ import { DocumentModel } from '../../../models/document/content.model';
 import { TriggerEventModel, DocumentNavigatorModel } from 'src/app/models/document/document.model';
 import { DocumentDataControlService } from '../../../services/document/document-data-control.service';
 import { Router } from '@angular/router';
-import { ScreenDetailModel } from '../../../models/general/general.model';
+import { ScreenDetailModel } from '../../../models/common/common.model';
 import { async } from 'q';
 import { CommonService } from '../../../services/common/common.service';
 declare var electron: any;
@@ -223,25 +223,25 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
             this.loadingProgress();
             if(this.documentDataService.currentDocumentName !== this.currentDocumentName){
                 this.documentService.findDoc(this.commonService.getPatternId(this.currentDocumentName)).subscribe((document)=>{
-                    if(document.status === Constants.general.message.status.success.text){
+                    if(document.status === Constants.common.message.status.success.text){
                         let rexFindNumberDoc = document.nameDocument.match(/\(([^)\w\s]|\d+)\)[^(]*$/)
                         if(rexFindNumberDoc){
                             this.currentDocumentName =  document.nameDocument+'('+rexFindNumberDoc[1]+')'
                         }else{
                             this.currentDocumentName =  document.nameDocument+'(1)'
                         }
-                        this.triggerElement.next({ action: Constants.general.event.click.save, data: data || this.currentDocumentName });
+                        this.triggerElement.next({ action: Constants.common.event.click.save, data: data || this.currentDocumentName });
                     }else{
-                        this.triggerElement.next({ action: Constants.general.event.click.save, data: data || this.currentDocumentName });
+                        this.triggerElement.next({ action: Constants.common.event.click.save, data: data || this.currentDocumentName });
                     }
                 })
             }else{
-                this.triggerElement.next({ action: Constants.general.event.click.save, data: data || this.currentDocumentName });
+                this.triggerElement.next({ action: Constants.common.event.click.save, data: data || this.currentDocumentName });
             }
 
         }
         else if (action === this.contents.data.savecurrentDocAndNewDoc) {
-            this.triggerElement.next({ action: Constants.general.event.click.new, data: data || this.currentDocumentName });
+            this.triggerElement.next({ action: Constants.common.event.click.new, data: data || this.currentDocumentName });
         }
 
     }
@@ -298,10 +298,10 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
         }
     }
     public eventFromChild(eventChild: TriggerEventModel) {
-        if (eventChild.action === Constants.general.event.load.success && eventChild.data === "save") {
+        if (eventChild.action === Constants.common.event.load.success && eventChild.data === "save") {
             if(this.currentDocumentName !== this.documentDataService.currentDocumentName){
                 this.documentService.deleteDocument(this.commonService.getPatternId(this.documentDataService.currentDocumentName)).subscribe((status)=>{
-                    if(status===Constants.general.message.status.success.text){
+                    if(status===Constants.common.message.status.success.text){
                         this.documentDataService.currentDocumentName =  this.currentDocumentName;
                     }
                 })
@@ -317,10 +317,10 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
             // this.loadHtml(this.currentDocument);
 
         }
-        else if (eventChild.action === Constants.general.event.load.success && eventChild.data === "new") {
+        else if (eventChild.action === Constants.common.event.load.success && eventChild.data === "new") {
             this.router.navigate(['home'])
         }
-        else if (eventChild.action === Constants.general.event.click.update && eventChild.data === "updateDocNav") {
+        else if (eventChild.action === Constants.common.event.click.update && eventChild.data === "updateDocNav") {
             let targetDocNav = this.documentDataService.documentNavList.find((docNav)=>docNav.nameDocument ===  this.documentDataService.currentDocumentNav)
             if(targetDocNav){
                 $('.document-sidenav-content').html(null);

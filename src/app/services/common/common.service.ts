@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Constants } from '../../global/constants';
-import { PostitionDetailModel, ScreenDetailModel, ElementDetailModel } from '../../models/general/general.model';
+import { PostitionDetailModel, ScreenDetailModel, ElementDetailModel } from '../../models/common/common.model';
 import { Observable } from 'rxjs';
 import { VideoConetentDataModel } from 'src/app/models/document/elements/video-content.model';
 

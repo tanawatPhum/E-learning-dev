@@ -14,7 +14,7 @@ import 'splitting/dist/splitting-cells.css';
 import Splitting from 'splitting';
 import { TriggerEventModel, DocumentNavigatorModel, DocumentTrackContentCondition } from 'src/app/models/document/document.model';
 import { SubFormContentModel, SubFormContentDetailModel, SubFormContentConditionModel, SubFormContentLinkModel } from '../../../../models/document/elements/subForm-content.model';
-import { ScreenDetailModel } from '../../../../models/general/general.model';
+import { ScreenDetailModel } from '../../../../models/common/common.model';
 import { DocumentDataControlService } from '../../../../services/document/document-data-control.service';
 import { element } from 'protractor';
 import html2canvas from 'html2canvas';
@@ -212,7 +212,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.rootElement.html(result.html);
             this.setTemplate(this.actions.template.setDocument);
             this.setTemplate(this.actions.template.setDocumentTrack);
-            if (result.status!== Constants.general.message.status.notFound.text) {
+            if (result.status!== Constants.common.message.status.notFound.text) {
                 this.addElements(this.actions.event.addEventBox).then(() => {
                     this.removeData(this.actions.data.removeAllContentObj);
                     this.retrieveData(this.actions.data.retrieveBoxData, result);
@@ -269,16 +269,16 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             }
         })
         this.triggerElement.subscribe((event) => {
-            if (event.action === Constants.general.event.click.add) {
+            if (event.action === Constants.common.event.click.add) {
                 this.addElements(this.actions.event.addElBox).then(() => {
                     this.addElements(this.actions.style.addStyleBoxCurrent, this.currentBox);
                 });
-            } else if (event.action === Constants.general.event.click.save) {
-                this.saveDocument(event.data, Constants.general.event.click.save);
-            } else if (event.action === Constants.general.event.click.new) {
+            } else if (event.action === Constants.common.event.click.save) {
+                this.saveDocument(event.data, Constants.common.event.click.save);
+            } else if (event.action === Constants.common.event.click.new) {
                 // this.removeData(this.contents.data.removeAllContentObj);
                 // this.rootElement.html(null);
-                this.saveDocument(event.data, Constants.general.event.click.new);
+                this.saveDocument(event.data, Constants.common.event.click.new);
             }
 
         });
@@ -302,7 +302,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         }
         else if (action === this.actions.template.setDocumentTrack) {
             this.documentService.loadDocTrackFromDB().subscribe((documentTrack) => {
-               if(documentTrack.length>0){
+               if(documentTrack&&documentTrack.length>0){
                 this.documentTrack = documentTrack.find((documentTrack)=>documentTrack.id === this.commonService.getPatternId(this.documentDataService.currentDocumentName)) || new DocumentTrackModel();
                 //remove progress preview
                 this.removeData(this.actions.data.removeDocTrackProgress);
@@ -355,12 +355,12 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                             this.commonService.calPositionCenter(this.rootElement, $('[id="box-' + numberOfBox + '"]')).left
                         });
                     }
-                    $('[id="box-' + numberOfBox + '"]').css('width', Constants.general.element.css.box.width);
-                    $('[id="box-' + numberOfBox + '"]').css('height', Constants.general.element.css.box.height);
+                    $('[id="box-' + numberOfBox + '"]').css('width', Constants.common.element.css.box.width);
+                    $('[id="box-' + numberOfBox + '"]').css('height', Constants.common.element.css.box.height);
                 } else if (this.currentContentType.name === this.contentTypes.oneLayout.name) {
                     this.rootElement.append('<div style=""id=box-' + numberOfBox + ' class="content-box ' + this.boxType.boxInitial + ' one-layout"></div>');
                     $('[id="box-' + numberOfBox + '"]').css('cursor', 'default')
-                    $('[id="box-' + numberOfBox + '"]').css('height', Constants.general.element.css.box.height)
+                    $('[id="box-' + numberOfBox + '"]').css('height', Constants.common.element.css.box.height)
                 } else if (this.currentContentType.name === this.contentTypes.twoLayout.name) {
                     this.rootElement.append(
                         '<div class="row">' +
@@ -659,8 +659,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             element.css('display', 'initial');
             element.css('text-align', 'initial');
             element.removeClass('box-subform-size');
-            element.css('width', Constants.general.element.css.box.width);
-            element.css('height', Constants.general.element.css.box.height);
+            element.css('width', Constants.common.element.css.box.width);
+            element.css('height', Constants.common.element.css.box.height);
             element.append(htmlSubform);
             element.find('#template-doc').attr('contenteditable', false);
             element.find('#template-doc').css('cursor', 'move');
@@ -1898,7 +1898,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     private async addOptionToolBar() {
         let htmlOptionToolBar;
         if (this.currentToolbar === this.actions.toolbar.addTextareaTool || this.currentToolbar === this.actions.toolbar.templateDocTool) {
-            const constFontSizeList = Constants.general.style.fontSizeList
+            const constFontSizeList = Constants.common.style.fontSizeList
             let htmlFontSizeList = "";
             constFontSizeList.forEach((fontsize) => {
                 htmlFontSizeList += '<option>' + fontsize + '</option>'
@@ -2301,31 +2301,35 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
 
                 }
                 let saveobjectTemplate: DocumentModel = {
+                    userId:Constants.common.user.id,
                     nameDocument: nameDocument,
                     previewImg: imgData,
                     id: this.commonService.getPatternId(nameDocument), html: this.rootElement.html(),
-                    status: Constants.general.message.status.created.text,
+                    status: Constants.common.message.status.created.text,
                     contents: contents
                 }
                 let saveobjectNavTemplate: DocumentNavigatorModel = {
+                    userId:Constants.common.user.id,
                     id: this.commonService.getPatternId(nameDocument),
                     nameDocument: nameDocument,
-                    status: Constants.general.message.status.created.text,
+                    previewImg: imgData,
+                    status: Constants.common.message.status.created.text,
                     childDocuments: this.childDocuments
                 }
                 let saveObjectTrackTemplate: DocumentTrackModel = {
+                    userId:Constants.common.user.id,
                     id: this.commonService.getPatternId(nameDocument),
                     nameDocument: nameDocument,
-                    status: Constants.general.message.status.created.text,
+                    status: Constants.common.message.status.created.text,
                     isTrackProgress: this.documentTrack.contents.length > 0 ? true : false,
                     progress: this.findData(this.actions.data.findProgressDocumentTrack),
                     contents: this.documentTrack.contents
                 }
                 // console.log(saveObjectTrackTemplate);
                 this.documentService.uploadFile(this.files).subscribe((status)=>{
-                    if (status ===Constants.general.message.status.success.text) {
+                    if (status ===Constants.common.message.status.success.text) {
                         this.documentService.saveDocument(nameDocument, saveobjectTemplate).subscribe((status) => {
-                            if (status === Constants.general.event.load.success) {
+                            if (status === Constants.common.event.load.success) {
                                 this.documentService.saveDocumentNav(nameDocument, saveobjectNavTemplate).subscribe((status) => {
                                     this.documentService.saveDocumentTrack(nameDocument, saveObjectTrackTemplate).subscribe((status) => {
                                         this.eventToParent.emit({ action: status, data: eventAction })
@@ -2606,7 +2610,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             let targetDocNavIndex = this.documentDataService.documentNavList.findIndex((docNav)=>docNav.nameDocument ===  this.documentDataService.currentDocumentNav);
             if(targetDocNavIndex>=0){
                 this.documentDataService.documentNavList[targetDocNavIndex].childDocuments = this.childDocuments;
-                this.eventToParent.emit({ action: Constants.general.event.click.update, data: 'updateDocNav' })
+                this.eventToParent.emit({ action: Constants.common.event.click.update, data: 'updateDocNav' })
             }
 
         }

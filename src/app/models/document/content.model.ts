@@ -11,6 +11,7 @@ import { LinkContentModel } from './elements/link-content.model';
 
 
 export class DocumentModel {
+    public userId:string;
     public nameDocument:string;
     public previewImg:string;
     public status:string;

@@ -7,12 +7,15 @@ export class TriggerEventModel {
     public data:any;
 }
 export class DocumentNavigatorModel{
+    public userId:string;
     public nameDocument:string;
     public id:string;
     public status:string;
+    public previewImg:any;
     public childDocuments:SubFormContentDetailModel[];
 }
 export class DocumentTrackModel{
+    public userId:string;
     public id:string;
     public nameDocument:string;
     public isTrackProgress:boolean;
@@ -22,6 +25,7 @@ export class DocumentTrackModel{
 }
 
 export class DocumentTrackContent{
+    public userId:string;
     public parentId:string;
     public id:string;
     public data:any;
