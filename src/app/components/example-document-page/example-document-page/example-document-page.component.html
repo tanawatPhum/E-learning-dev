@@ -36,4 +36,16 @@
 
 <!-- <input type='text' id="custom" /> -->
 
-<button class="button" (click)="testSocket()">test</button>
+<!-- <button class="button" (click)="testSocket()">test</button> -->
+
+
+<div *ngFor="let i of testList;let xx = index">
+
+    <select (ngModelChange)="changeSelect1($event,xx)" [(ngModel)]="i.stringValue1">
+        <option *ngFor="let j of optionList1" [value]="j.value">{{j.text}}</option>
+    </select>
+    <select [(ngModel)]="i.stringValue2">
+        <option *ngFor="let j of optionList2[xx]" [value]="j.value">{{j.text}}</option>
+    </select>
+
+</div>

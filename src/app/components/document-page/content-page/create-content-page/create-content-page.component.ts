@@ -22,13 +22,14 @@ import { commentContentModel } from 'src/app/models/document/elements/comment-co
 import { ToDoListBoxListModel, ObjectToDoList, ToDoListCurrentModel as ToDoListSelectCurrentModel } from 'src/app/models/document/elements/todoList-content.model';
 import { ToDoListContentModel, ToDoListContentOrderModel } from '../../../../models/document/elements/todoList-content.model';
 import { IfStmt } from '@angular/compiler';
-import { ProgressBarContentModel } from 'src/app/models/document/elements/progressBar-content-model';
+import { ProgressBarContentModel, ProgressBoxListModel } from 'src/app/models/document/elements/progressBar-content-model';
 import { DocumentTrackModel, DocumentTrackContent } from '../../../../models/document/document.model';
 import { content } from 'html2canvas/dist/types/css/property-descriptors/content';
 import { ProgressBarContentObjectModel } from '../../../../models/document/elements/progressBar-content-model';
 import { HttpClientService } from 'src/app/services/common/httpClient.service';
 import { FileContentModel } from 'src/app/models/document/elements/file-content.model';
 import { LinkContentModel } from 'src/app/models/document/elements/link-content.model';
+import { ExamContentModel } from 'src/app/models/document/elements/exam-content.model';
 declare var electron: any;
 declare var rangy: any;
 declare var CKEDITOR: any;
@@ -55,6 +56,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     public currentContentType: any
     public currentBrowseFile: any;
     public currentBrowseLink:string;
+    public currentinput:string;
     public currentElementTool: any;
     public currentColorCode:string;
     public currentDocument: DocumentModel = new DocumentModel();
@@ -68,6 +70,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     public contentTemplateSize: ScreenDetailModel = new ScreenDetailModel();
     public childDocuments: SubFormContentDetailModel[] = new Array<SubFormContentDetailModel>();
     public toDoListBoxList: ToDoListBoxListModel[] = new Array<ToDoListBoxListModel>();
+    public progressBoxList: ProgressBoxListModel[] = new Array<ProgressBoxListModel>();
     public documentTrack: DocumentTrackModel = new DocumentTrackModel();
     public boxType = Constants.document.boxes.types;
 
@@ -78,6 +81,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             addElImg: 'addElImg',
             addElVideo: 'addElVideo',
             addElFile: 'addElFile',
+            addElExam:'addElExam',
             addElLink:'addElLink',
             addElProgressBar: 'addElProgressBar',
             addElToDoList: 'addElToDoList',
@@ -95,11 +99,13 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             handleBrowseLink: 'handleBrowseLink',
             handleBrowseVideo: 'handleBrowseVideo',
             handleSubForm: 'handleSubForm',
+            handleBrowseExam: 'handleBrowseExam',
             handleTemplateDoc: 'handleTemplateDoc',
             handleWistia: 'handleWistia',
             handleOptionToolTextArea: 'handleOptionToolTextArea',
             handleOptionToolToDoList: 'handleOptionToolToDoList',
             handleOptionToolVideo: 'handleOptionToolVideo',
+            handleOptionToolExam: 'handleOptionToolExam',
             handleOptionToolLink: 'handleOptionToolLink',
             handleOptionToolProgressBar:'handleOptionToolProgressBar',
             handleOptionToolSubform: 'handleOptionToolSubform',
@@ -116,6 +122,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             updateNavigatorData: 'createNavigatorData',
             createChildDocument: 'createChildDocument',
             createToDoListBoxList: 'createToDoListBoxList',
+            createProgressBoxList:'createProgressBoxList',
             createDocumentTrack:'createDocumentTrack',
             retrieveBoxData: 'retrieveBoxData',
             retrieveContentsData: 'retrieveContentsData',
@@ -140,6 +147,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             addBrowseImgTool: 'addBrowseImgTool',
             addBrowseFileTool: 'addBrowseFileTool',
             addBrowseLinkTool:'addBrowseLinkTool',
+            addExamTool:'addExamTool',
+            addBrowseExamTool:'addBrowseExamTool',
             addBrowseVideoTool: 'addBrowseVideoTool',
             addProgressBarTool: 'addProgressBarTool',
             addToDoListTool: 'addToDoListTool',
@@ -194,6 +203,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     public progressBars: ProgressBarContentModel[] = new Array<ProgressBarContentModel>();
     public toDoLists: ToDoListContentModel[] = new Array<ToDoListContentModel>();
     public links:LinkContentModel[] =new Array<LinkContentModel>();
+    public exams:ExamContentModel[]  = new Array<ExamContentModel>(); 
 
 
 
@@ -256,6 +266,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 }
                 else if (tool.data.toolType === this.toolTypes.linkBrowse.name) {
                     this.setCurrentToolbar(this.actions.toolbar.addBrowseLinkTool);
+                }
+                else if (tool.data.toolType === this.toolTypes.exam.name) {
+                    this.setCurrentToolbar(this.actions.toolbar.addBrowseExamTool);
                 }
                 
 
@@ -411,7 +424,10 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     else if (this.currentToolbar === this.actions.toolbar.addToDoListTool) {
                         this.removeStyleElements(this.actions.style.removeStyleBoxType);
                         this.currentBox.addClass(this.boxType.boxToDoList);
-                        //this.addElements(this.actions.event.addElProgressBar, this.currentBox);
+                    }
+                    else if (this.currentToolbar === this.actions.toolbar.addBrowseExamTool) {
+                        this.removeStyleElements(this.actions.style.removeStyleBoxType);
+                        this.currentBox.addClass(this.boxType.boxBrowseExam);
                     }
                 } else {
                     this.setCurrentToolbar();
@@ -559,6 +575,35 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             });
             element.append('<a  data-name="'+hostname+'" id="' + element.attr('id') + '-link" class="content-link cursor-pointer ">'+hostname+'</a>');
         }
+        else if (action === this.actions.event.addElExam) {
+
+            let hostname = (new URL(this.currentBrowseLink)).hostname;
+            console.log(hostname)
+            if(!this.currentinput){
+                this.currentinput = 'Title'
+            }
+            this.exams.push({
+                parentId:element.attr('id'),
+                id:element.attr('id') + '-exam',
+                path:this.currentBrowseLink,
+                title:this.currentinput,
+                name:hostname,
+                score:'0'
+            });
+            let htmlExam  = '<div class="row content-exam"  id="' + element.attr('id') + '-exam">' 
+            +'<div class="col-12 mb-3">' 
+            +'<input class="mb-3 exam-input-title" id="exam-input-title" type="text" value="'+this.currentinput+'" > '     
+            +'<a id="exam-input-url" data-name="'+hostname+'" class="content-link cursor-pointer ">'+hostname+'</a>'
+            + '<h5 id="text-exam-score" class="mt-3">Score:0</h5>'
+            +'</div>'
+            +'</div>'
+            element.html(htmlExam);
+            // element.css('display','initial')
+
+
+            //element.append('<a  data-name="'+hostname+'" id="' + element.attr('id') + '-link" class="content-link cursor-pointer ">'+hostname+'</a>');
+        }
+
         else if (action === this.actions.event.addElVideo) {
             let streamData: VideoConetentDataModel = data;
             let condition:VideoConetentConditionModel = new VideoConetentConditionModel();
@@ -897,9 +942,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
 
                 this.addElements(this.actions.event.addElImg, element,'fromBrowse');
             });
-            element.find('.toolbar-browse-img').find('#input-img-url').click(() => {
-                element.find('.toolbar-browse-img').find('#input-img-url').focus();
-                element.find('.toolbar-browse-img').find('#input-img-url').on('input', this.commonService.debounce((event) => {
+            element.find('.toolbar-browse-img').find('#img-input-url').click(() => {
+                element.find('.toolbar-browse-img').find('#img-input-url').focus();
+                element.find('.toolbar-browse-img').find('#img-input-url').on('input', this.commonService.debounce((event) => {
                     if (event.target.value) {
 
                         this.removeStyleElements(this.actions.style.removeStyleBoxType);
@@ -984,15 +1029,20 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
 
                 this.addElements(this.actions.event.addElVideo, element, 'videoSource');
             });
-            element.find('.toolbar-browse-video').find('#input-video-url').click(() => {
-                element.find('.toolbar-browse-video').find('#input-video-url').focus();
-                element.find('.toolbar-browse-video').find('#input-video-url').on('input', this.commonService.debounce((event) => {
+            element.find('.toolbar-browse-video').find('#video-input-url').click(() => {
+                element.find('.toolbar-browse-video').find('#video-input-url').focus();
+                element.find('.toolbar-browse-video').find('#video-input-url').on('input', this.commonService.debounce((event) => {
                     if (event.target.value) {
 
 
                         const url = event.target.value;
                         let dataStreaming = new VideoConetentDataModel();
-                        const streamId = this.commonService.getStreamId(url);
+                        let streamId = event.target.value;
+                        
+                        this.currentBrowseFile = streamId;
+                        dataStreaming.streamId = streamId;
+                        dataStreaming.channelStream = 'wistia';
+                       // const streamId = this.commonService.getStreamId(url);
 
 
                         // if (streamId.streamId != null && streamId.channelStream == 'youtube') {
@@ -1000,17 +1050,17 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                         //     dataStreaming.streamId = streamId.streamId;
                         //     dataStreaming.channelStream = streamId.channelStream;
                         // }
-                        if (streamId.streamId != null && streamId.channelStream == 'wistia') {
-                            this.currentBrowseFile = streamId.streamId;
-                            dataStreaming.streamId = streamId.streamId;
-                            dataStreaming.channelStream = streamId.channelStream;
-                        } else {
-                            let streamId = event.target.value;
-                            this.currentBrowseFile = streamId;
-                            let dataStreaming = new VideoConetentDataModel();
-                            dataStreaming.streamId = streamId;
-                            dataStreaming.channelStream = 'wistia';
-                        }
+                        // if (streamId.streamId != null && streamId.channelStream == 'wistia') {
+                        //     this.currentBrowseFile = streamId.streamId;
+                        //     dataStreaming.streamId = streamId.streamId;
+                        //     dataStreaming.channelStream = streamId.channelStream;
+                        // } else {
+                        //     let streamId = event.target.value;
+                        //     this.currentBrowseFile = streamId;
+                        //     let dataStreaming = new VideoConetentDataModel();
+                        //     dataStreaming.streamId = streamId;
+                        //     dataStreaming.channelStream = 'wistia';
+                        // }
                         // else {
                         //     console.log('The youtube url is not valid.');
                         //     this.currentBrowseFile = event.target.value;
@@ -1358,13 +1408,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 let listBox = '';
                 this.toDoListBoxList.forEach((box, index) => {
                     listBox += '<input data-taskId="' + $(element.currentTarget).attr('id') + '" type="checkbox" value="' + box.id + '" id="compontentList-box-' + box.id + '" />';
-                    let boxType
-                    if (box.boxType === this.boxType.boxSubform) {
-                        boxType = "Subform"
-                    } else if (box.boxType === this.boxType.boxVideo) {
-                        boxType = "Video"
-                    }
-                    listBox += '<label class="list-group-item border-0" for="compontentList-box-' + box.id + '">' + box.name + '(' + boxType + ')' + '</label>';
+                    listBox += '<label class="list-group-item border-0" for="compontentList-box-' + box.id + '">' + box.name + '(' + box.boxTypeName + ')' + '</label>';
                 });
 
                 if (listBox) {
@@ -1487,7 +1531,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         }
 
         else if (action === this.actions.event.handleOptionToolLink) {
-            $('.option-link').find('#link-inputLink').unbind().bind('input', (element) => {
+            $('.option-link').find('#link-input-url').unbind().bind('input', (element) => {
                 console.log(element)
                 let targetLinkIndex = this.links.findIndex(link=>link.parentId === this.currentBox.attr('id'))
                 if(targetLinkIndex>=0){
@@ -1504,6 +1548,52 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             });
 
         }
+
+        else if (action === this.actions.event.handleOptionToolExam) {
+            $('.option-exam').find('#exam-input-url').unbind().bind('input', (element) => {
+                let targetExamIndex = this.exams.findIndex(exam=>exam.parentId === this.currentBox.attr('id'));
+                console.log(targetExamIndex)
+                if(targetExamIndex>=0){
+                    this.exams[targetExamIndex].name =  $(element.currentTarget).val().toString();
+                    console.log(this.currentBox.find('.content-exam').find('#exam-input-url'))
+                    this.currentBox.find('.content-exam').find('#exam-input-url').text($(element.currentTarget).val().toString());
+                }
+            })
+            $('.option-exam').find('#exam-input-title').unbind().bind('input', (element) => {
+                let targetExamIndex = this.exams.findIndex(exam=>exam.parentId === this.currentBox.attr('id'));
+                console.log(targetExamIndex)
+                if(targetExamIndex>=0){
+                    this.exams[targetExamIndex].name =  $(element.currentTarget).val().toString();
+                    this.currentBox.find('.content-exam').find('#exam-input-title').val($(element.currentTarget).val().toString());
+                }
+            })
+            $('.option-exam').find('.option-action-trash').unbind().bind('click', () => {
+                this.removeData(this.actions.data.removeBoxData);
+                this.removeStyleElements(this.actions.option.removeOptionTool);
+                this.removeStyleElements(this.actions.event.removeElBox);
+            });
+
+        }
+
+        // else if (action === this.actions.event.handleOptionToolLink) {
+        //     $('.option-link').find('#link-input-url').unbind().bind('input', (element) => {
+        //         console.log(element)
+        //         let targetLinkIndex = this.links.findIndex(link=>link.parentId === this.currentBox.attr('id'))
+        //         if(targetLinkIndex>=0){
+        //             this.links[targetLinkIndex].name =  $(element.currentTarget).val().toString();
+        //             this.currentBox.find('.content-link').text($(element.currentTarget).val().toString());
+        //             this.currentBox.find('.content-link').attr('data-name',$(element.currentTarget).val().toString());
+        //         }
+
+        //     })
+        //     $('.option-link').find('.option-action-trash').unbind().bind('click', () => {
+        //         this.removeData(this.actions.data.removeBoxData);
+        //         this.removeStyleElements(this.actions.option.removeOptionTool);
+        //         this.removeStyleElements(this.actions.event.removeElBox);
+        //     });
+
+        // }
+
         else if (action === this.actions.event.handleOptionToolSubform) {
             // $('.option-subform').find('.subform-tracker').unbind().bind('click', (element) => {
             //     let targetDocumentTrackContentIndex =  this.documentTrack.contents.findIndex(content=>content.parentId === this.currentBox.attr('id'));
@@ -1563,7 +1653,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         else if (action === this.actions.event.handleOptionToolProgressBar) {
             $('.option-progressBar').find('.progressBar-componentList').find('input[type="checkbox"]').unbind().bind('click', (element) => {
                 let targetProgressBarIndex  =  this.progressBars.findIndex(progressBar=>progressBar.parentId  === this.currentBox.attr('id'));
-                let targetdocumentTrack= this.documentTrack.contents.find(content => content.id  === $(element.currentTarget).val().toString())
+                let targetdocumentTrack= this.documentTrack.contents.find(content => content.parentId  === $(element.currentTarget).val().toString())
+                console.log(targetdocumentTrack)
                 // console.log(targetdocumentTrack)
                 if(targetProgressBarIndex>=0){
                     if($(element.currentTarget).prop('checked')){
@@ -1576,8 +1667,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                                 //     }
                                 // });
                             // })
-                          let targetDocTrack =  this.documentTrack.contents.find((content)=>content.id === $(element.currentTarget).val().toString())
-                            let progressBarContentObj:ProgressBarContentObjectModel = {
+                          let targetDocTrack =  this.documentTrack.contents.find((content)=>content.parentId === $(element.currentTarget).val().toString())
+                         console.log("targetDocTrack", $(element.currentTarget).val().toString())
+                          let progressBarContentObj:ProgressBarContentObjectModel = {
                                 id:targetDocTrack.id,
                                 parentId:targetDocTrack.parentId,
                                 boxType:targetdocumentTrack.boxType
@@ -1599,9 +1691,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
 
         }
         else if(action === this.actions.event.handleBrowseLink){
-            element.find('.toolbar-browse-link').find('#input-link-url').click(() => {
-                element.find('.toolbar-browse-link').find('#input-link-url').focus();
-                element.find('.toolbar-browse-link').find('#input-link-url').on('input', this.commonService.debounce((event) => {
+            element.find('.toolbar-browse-link').find('#link-input-url').click(() => {
+                element.find('.toolbar-browse-link').find('#link-input-url').focus();
+                element.find('.toolbar-browse-link').find('#link-input-url').on('input', this.commonService.debounce((event) => {
                     if (event.target.value) {
                         this.currentBrowseLink = event.target.value;
                         this.removeStyleElements(this.actions.style.removeStyleBoxType);
@@ -1611,6 +1703,29 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                         this.addElements(this.actions.event.addElLink, element);
                         // console.log(' ❏ Video :', this.currentBrowseFile);
                         // this.addElements(this.actions.event.add, element);
+                    }
+                }, 500));
+            });
+        }
+
+        else if(action === this.actions.event.handleBrowseExam){
+
+            element.find('.toolbar-browse-exam').find('#exam-input-title').unbind().bind('click',(event)=>{
+                element.find('.toolbar-browse-exam').find('#exam-input-title').focus();
+                element.find('.toolbar-browse-exam').find('#exam-input-title').unbind().bind('input',(event)=>{
+                    this.currentinput = event.target.value;
+                })
+            });
+            element.find('.toolbar-browse-exam').find('#exam-input-url').unbind().bind('click',()=> {
+                element.find('.toolbar-browse-exam').find('#exam-input-url').focus();
+                element.find('.toolbar-browse-exam').find('#exam-input-url').on('input', this.commonService.debounce((event) => {
+                    if (event.target.value) {
+                        this.currentBrowseLink = event.target.value;
+                        this.removeStyleElements(this.actions.style.removeStyleBoxType);
+                        this.currentBox.addClass(this.boxType.boxExam);
+                        this.setCurrentToolbar(this.actions.toolbar.addExamTool);
+                        this.addToolBarBox(this.actions.toolbar.addExamTool, element);
+                        this.addElements(this.actions.event.addElExam, element);
                     }
                 }, 500));
             });
@@ -1676,6 +1791,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.currentBox.removeClass(this.boxType.boxProgressBar);
             this.currentBox.removeClass(this.boxType.boxBrowseLink);
             this.currentBox.removeClass(this.boxType.boxLink);
+            this.currentBox.removeClass(this.boxType.boxBrowseExam);
+            this.currentBox.removeClass(this.boxType.boxExam);
         } else if (action === this.actions.event.removeContent) {
             this.currentBox.find('.content-textarea').remove();
             this.currentBox.find('.content-img').remove();
@@ -1770,7 +1887,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             + '</div>'
             + '<div class="col-5 toolbar-drag">'
             + '<div class="form-group">'
-            + '<input placeholder="https://example.com" type="text" class="form-control" id="input-img-url">'
+            + '<input placeholder="https://example.com" type="text" class="form-control" id="img-input-url">'
             + '</div>'
             + '<p class="content-font-title1">Get your URL</p>'
             + '</div>'
@@ -1815,7 +1932,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 + '</div>'
                 + '<div class="col-5 toolbar-drag">'
                 + '<div class="form-group">'
-                + '<input placeholder="https://example.com" type="text" class="form-control" id="input-video-url">'
+                + '<input placeholder="https://example.com" type="text" class="form-control" id="video-input-url">'
                 + '</div>'
                 + '<p class="content-font-title1">Get your URL</p>'
                 + '</div>'
@@ -1829,7 +1946,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
 
                 + '<div class="col-12 toolbar-drag">'
                 + '<div class="w-70 form-group m-auto">'
-                + '<input placeholder="https://example.com" type="text" class="form-control mb-3" id="input-link-url">'
+                + '<input placeholder="https://example.com" type="text" class="form-control mb-3" id="link-input-url">'
                 + '</div>'
                 + '<p class="content-font-title1">Get your URL</p>'
                 + '</div>'
@@ -1838,6 +1955,21 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.handles(this.actions.event.handleBrowseLink, element);
 
         }
+        else if (action === this.actions.toolbar.addBrowseExamTool) {
+            htmlTootBar = '<div class="row content-toolbar toolbar-browse-exam">'
+                + '<div class="col-12 toolbar-drag">'
+                + '<div class="w-70 form-group m-auto">'
+                + '<input class="mb-4 exam-input-title" placeholder="Title" type="text" id="exam-input-title">'
+                + '<input placeholder="https://example.com" type="text" class="form-control mb-3" id="exam-input-url">'
+                + '</div>'
+                + '<p class="content-font-title1">Get your URL</p>'
+                + '</div>'
+                + '</div>';
+            this.rootElement.find(element).append(htmlTootBar);
+            this.handles(this.actions.event.handleBrowseExam, element);
+
+        }
+
         else if (action === this.actions.toolbar.addTextareaTool) {
             htmlTootBar = '<div class="row content-toolbar toolbar-textarea">'
                 + '<div class="col-12">'
@@ -1969,6 +2101,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             || this.currentToolbar === this.actions.toolbar.addBrowseVideoTool
             || this.currentToolbar === this.actions.toolbar.addCommentTool
             || this.currentToolbar === this.actions.toolbar.addBrowseLinkTool
+            || this.currentToolbar === this.actions.toolbar.addBrowseExamTool
             || this.currentToolbar === this.actions.toolbar.cancelTool) {
             htmlOptionToolBar =
                 '<div class="row p-0 m-0 mt-3 option-cancle">'
@@ -2027,7 +2160,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 + '<div class="col-12 d-flex justify-content-center border-bottom">'
                 + '<div class="form-group text-center w-70">'
                 + '<label>Property</label>'
-               + '<input id="link-inputLink" type="text" class="form-control " placeholder="LinkName">'
+               + '<input id="link-input-url" type="text" class="form-control text-center" placeholder="LinkName">'
                 + '</div>'
                 + '</div>'
 
@@ -2044,10 +2177,43 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.rootOptionTool.html(htmlOptionToolBar)
             let targetLink = this.links.find((link)=>link.parentId === this.currentBox.attr('id'))
             if(targetLink){
-                $('.option-link').find('#link-inputLink').val(targetLink.name);
+                $('.option-link').find('#link-input-url').val(targetLink.name);
             }
             this.handles(this.actions.event.handleOptionToolLink);
         }
+
+
+        else if (this.currentToolbar === this.actions.toolbar.addExamTool) {
+
+            htmlOptionToolBar =
+                '<div class="row p-0 m-0 mt-3 option-exam">'
+                + '<div class="col-12 d-flex justify-content-center border-bottom">'
+                + '<div class="form-group text-center w-70">'
+                + '<label>Property</label>'
+               + '<input id="exam-input-title" type="text" class="form-control text-center" placeholder="Title">'
+               + '<input id="exam-input-url" type="text" class="form-control text-center" placeholder="LinkName">'
+                + '</div>'
+                + '</div>'
+                + '<div class="col-12 d-flex justify-content-center border-bottom">'
+                + '<div class="form-group text-center">'
+                + '<label>Action</label>'
+                + '<div >'
+                + '<img  class="option-action-trash" src="assets/imgs/contentPage/trash.svg">'
+                + '</div>'
+                + '</div>'
+                + '</div>'
+
+                + '</div>'
+            this.rootOptionTool.html(htmlOptionToolBar)
+            let targetExam = this.exams.find((exam)=>exam.parentId === this.currentBox.attr('id'))
+            if(targetExam){
+                $('.option-exam').find('#exam-input-title').val(targetExam.title);
+                $('.option-exam').find('#exam-input-url').val(targetExam.name);
+            }
+            this.handles(this.actions.event.handleOptionToolExam);
+        }
+
+
         else if (this.currentToolbar === this.actions.toolbar.addSubformTool) {
             let targetParentBox =  this.subForms.find(parentBox=>parentBox.parentBoxId === this.currentBox.attr('id'))
             let subformList = '';
@@ -2156,13 +2322,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     let listBox = '';
                     this.toDoListBoxList.forEach((box, index) => {
                         listBox += '<input data-taskId="' + targetBox.taskId + '" type="checkbox" value="' + box.id + '" id="compontentList-box-' + box.id + '" />';
-                        let boxType
-                        if (box.boxType === this.boxType.boxSubform) {
-                            boxType = "Subform"
-                        } else if (box.boxType === this.boxType.boxVideo) {
-                            boxType = "Video"
-                        }
-                        listBox += '<label class="list-group-item border-top-0 border-left-0 border-right-0" for="compontentList-box-' + box.id + '">' + box.name + '(' + boxType + ')' + '</label>';
+                        listBox += '<label class="list-group-item border-top-0 border-left-0 border-right-0" for="compontentList-box-' + box.id + '">' + box.name + '(' + box.boxTypeName + ')' + '</label>';
                     });
 
                     if (listBox) {
@@ -2185,18 +2345,12 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         }
         else if (this.currentToolbar === this.actions.toolbar.addProgressBarTool) {
             let listBox = '';
-            let targetProgressBar = this.progressBars.find((parentBox)=>parentBox.parentId === this.currentBox.attr('id'))
-
-            this.documentTrack.contents.forEach((box, index) => {
+            //let targetProgressBar = this.progressBars.find((parentBox)=>parentBox.parentId === this.currentBox.attr('id'))
+            this.createData(this.actions.data.createProgressBoxList)
+            this.progressBoxList.forEach((box, index)=>{
                 listBox += '<input  type="checkbox" value="' + box.id + '" id="compontentList-box-' + box.id + '" />';
-                let boxType
-                if (box.boxType === this.boxType.boxSubform) {
-                    boxType = "Subform"
-                } else if (box.boxType === this.boxType.boxVideo) {
-                    boxType = "Video"
-                }
-                listBox += '<label class="list-group-item border-0" for="compontentList-box-' + box.id + '">' + box.name + '(' + boxType + ')' + '</label>';
-            });
+                listBox += '<label class="list-group-item border-0" for="compontentList-box-' + box.id + '">' + box.name + '(' + box.boxTypeName + ')' + '</label>';
+            })
             htmlOptionToolBar =
             '<div class="row p-0 m-0 mt-3 option-progressBar">'
             + '<div class="col-12 mt-3">'
@@ -2217,7 +2371,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             $('.option-progressBar').find('.progressBar-componentList').find('input[type="checkbox"]').each((index,element)=>{
                 let targetProgressBarIndex  =  this.progressBars.findIndex(progressBar=>progressBar.parentId  === this.currentBox.attr('id'));
                 if(targetProgressBarIndex>=0){
-                   if(this.progressBars[targetProgressBarIndex].contentList.find(content=>content.id === $(element).val().toString())){
+                   if(this.progressBars[targetProgressBarIndex].contentList.find(content=>content.parentId === $(element).val().toString())){
                          $(element).prop('checked',true);
                     // let progressBarContentObj  =  new  ProgressBarContentObjectModel();
                     // progressBarContentObj.parentId =  $(element.currentTarget).val().toString();
@@ -2262,6 +2416,12 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             else if(this.currentBox.hasClass(this.boxType.boxLink)){
                 this.currentToolbar = this.actions.toolbar.addLinkTool;
             }
+            else if(this.currentBox.hasClass(this.boxType.boxBrowseExam)){
+                this.currentToolbar = this.actions.toolbar.addBrowseExamTool;
+            }
+            else if(this.currentBox.hasClass(this.boxType.boxExam)){
+                this.currentToolbar = this.actions.toolbar.addExamTool;
+            }
             else if (this.currentBox.hasClass(this.boxType.boxProgressBar)){
                 this.currentToolbar = this.actions.toolbar.addProgressBarTool;
             }
@@ -2289,6 +2449,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.createData(this.actions.data.createDataToSave).then(() => {
                 let contents: ContentsModel = {
                     boxes: this.boxes,
+                    exams:this.exams,
                     textAreas: this.textAreas,
                     files:this.files,
                     imgs: this.imgs,
@@ -2449,6 +2610,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.files =   results.contents.files ||  new Array<FileContentModel>();
             this.textAreas = results.contents.textAreas ||  new Array<TextAreaContentModel>();
             this.links = results.contents.links ||  new Array<LinkContentModel>();
+            this.exams  = results.contents.exams ||  new Array<ExamContentModel>();
             this.textAreas.forEach((textArea) => {
                 if (element) {
                     $(element).find('[id="' + textArea.id + '"]').val(textArea.value);
@@ -2536,6 +2698,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     else if (element.hasClass(this.boxType.boxLink)) {
                         this.boxes[targetBoxIndex].boxType = this.boxType.boxLink;
                     }
+                    else if (element.hasClass(this.boxType.boxExam)) {
+                        this.boxes[targetBoxIndex].boxType = this.boxType.boxExam;
+                    }
                     // else if (element.hasClass(this.boxType.)) {
                     //     this.boxes[targetBoxIndex].boxType = this.boxType.boxFile;
                     // }
@@ -2546,12 +2711,46 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         else if (action === this.actions.data.createToDoListBoxList) {
             this.toDoListBoxList = new Array<ToDoListBoxListModel>();
             this.boxes.forEach((box) => {
-                if (box.boxType === this.boxType.boxVideo || box.boxType === this.boxType.boxSubform) {
+                if (box.boxType === this.boxType.boxVideo || box.boxType === this.boxType.boxSubform || box.boxType === this.boxType.boxExam) {
+                    let boxTypeName;
+                    if (box.boxType === this.boxType.boxSubform) {
+                        boxTypeName = "Subform"
+                    } else if (box.boxType === this.boxType.boxVideo) {
+                        boxTypeName = "Video"
+                    }
+                    else if (box.boxType === this.boxType.boxExam) {
+                        boxTypeName = "Exam"
+                    }
+                    
                     this.toDoListBoxList.push({
                         id: box.id,
                         name: box.name,
                         boxType: box.boxType,
+                        boxTypeName:boxTypeName,
                         isChecked: false
+                    });
+                }
+            })
+        }
+        else if (action === this.actions.data.createProgressBoxList) {
+            this.progressBoxList = new Array<ProgressBoxListModel>();
+            this.boxes.forEach((box) => {
+                if (box.boxType === this.boxType.boxVideo || box.boxType === this.boxType.boxSubform || box.boxType === this.boxType.boxExam) {
+                    let boxTypeName;
+                    if (box.boxType === this.boxType.boxSubform) {
+                        boxTypeName = "Subform"
+                    } else if (box.boxType === this.boxType.boxVideo) {
+                        boxTypeName = "Video"
+                    }
+                    else if (box.boxType === this.boxType.boxExam) {
+                        boxTypeName = "Exam"
+                    }
+                    
+                    this.progressBoxList.push({
+                        id: box.id,
+                        name: box.name,
+                        boxType: box.boxType,
+                        boxTypeName:boxTypeName,
                     });
                 }
             })
@@ -2559,9 +2758,12 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         else if (action === this.actions.data.createDocumentTrack) {
             if(this.currentBox&&this.boxes.length >0){
                 let targetBox = this.boxes.find(box=>box.id=== this.currentBox.attr('id'));
+
                 if(targetBox &&
                     (targetBox.boxType === this.boxType.boxSubform||
-                    targetBox.boxType === this.boxType.boxVideo)
+                    targetBox.boxType === this.boxType.boxVideo || 
+                    targetBox.boxType === this.boxType.boxExam
+                    )
                     &&  !this.documentTrack.contents.find(content=>content.parentId ===targetBox.id )
                 ){
                     let documentTrackContent = new DocumentTrackContent;
@@ -2592,6 +2794,10 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                             })
                         }
                         // documentTrackContent.conditions.subformCondition.isClickLink
+                    }
+                    else if(this.currentBox.hasClass(this.boxType.boxExam)){
+                        documentTrackContent.conditions.examCondition.isSubmitted = false;
+
                     }
                     documentTrackContent.boxType  = targetBox.boxType;
         
@@ -2626,6 +2832,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.progressBars = new Array<ProgressBarContentModel>();
             this.toDoLists = new Array<ToDoListContentModel>();
             this.links =  new Array<LinkContentModel>();
+            this.exams  = new  Array<ExamContentModel>();
         }
         else if (action === this.actions.data.removeAllContentObj) {
         }
@@ -2659,6 +2866,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             }
             else if (this.currentBox.hasClass(this.boxType.boxLink)) {
                 this.links = this.links.filter((link) => link.id !== currentBoxId + '-link');
+            }
+            else if (this.currentBox.hasClass(this.boxType.boxExam)) {
+                this.exams = this.exams.filter((exam) => exam.id !== currentBoxId + '-exam');
             }
             this.removeData(this.actions.data.removeDocumentTrackData);
             this.removeData(this.actions.data.removeObjInTodoList);

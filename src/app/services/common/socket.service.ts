@@ -11,20 +11,9 @@ export class SocketIoService {
     }
 
     public connectSocketIo(){
-        this.socket = io.connect('http://localhost:3000',
-
-        
-        );
+        this.socket = io.connect('http://localhost:3000');
         // this.socket = io.connect();
     }
-    // public sendData(nameSocket,data):Observable<CommonResponseModel>{
-    //     return new Observable((subscriber)=>{
-    //         this.socket.emit(nameSocket, {
-    //             data: data
-    //         });
-    //     })
-
-    // }
     public sendData(nameSocket,data):Observable<any>{
         return new Observable((subscriber)=>{
             this.socket.emit(nameSocket, {

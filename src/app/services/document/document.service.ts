@@ -62,25 +62,25 @@ export class DocumentService {
                     subscriber.complete();
                 })
             } else {
-                this.socketIoService.sendData(Constants.document.connect.type.documentRead,requestObjDoc).subscribe((objectDoc)=>{
-                    console.log("objectDoc",objectDoc)
-                   this.creaetDocumentModel(objectDoc).subscribe((result)=>{
-                        subscriber.next(result);
-                        subscriber.complete();
-                   });
-                });
-                // const requestDB = window.indexedDB.open('e-learning', 1);
-                // requestDB.onerror = ((error) => {
-                //     console.error('error: ', error);
-                // });
-                // requestDB.onsuccess = (async (event) => {
-                //     this.indexDB = requestDB.result;
-                //     this.getDoc(documentName).subscribe((objectDoc) => {
-                //         console.log('☛ Result Document from Database : ', objectDoc);
-                //         subscriber.next(objectDoc);
+                // this.socketIoService.sendData(Constants.document.connect.type.documentRead,requestObjDoc).subscribe((objectDoc)=>{
+                //     console.log("objectDoc",objectDoc)
+                //    this.creaetDocumentModel(objectDoc).subscribe((result)=>{
+                //         subscriber.next(result);
                 //         subscriber.complete();
-                //     });
+                //    });
                 // });
+                const requestDB = window.indexedDB.open('e-learning', 1);
+                requestDB.onerror = ((error) => {
+                    console.error('error: ', error);
+                });
+                requestDB.onsuccess = (async (event) => {
+                    this.indexDB = requestDB.result;
+                    this.getDoc(documentName).subscribe((objectDoc) => {
+                        console.log('☛ Result Document from Database : ', objectDoc);
+                        subscriber.next(objectDoc);
+                        subscriber.complete();
+                    });
+                });
             }
 
         });
@@ -97,34 +97,34 @@ export class DocumentService {
                     subscriber.complete();
                 });
             } else {
-                this.socketIoService.sendData(Constants.document.connect.type.documentNavRead,requestObjDocNav).subscribe((objectDocNav)=>{
-                    console.log('objectDocNav',objectDocNav)
-                    if(!objectDocNav){
-                        objectDocNav = new Array<DocumentNavigatorModel>();
-                    }
-                        subscriber.next(objectDocNav);
-                        subscriber.complete();
-                 });
+                // this.socketIoService.sendData(Constants.document.connect.type.documentNavRead,requestObjDocNav).subscribe((objectDocNav)=>{
+                //     console.log('objectDocNav',objectDocNav)
+                //     if(!objectDocNav){
+                //         objectDocNav = new Array<DocumentNavigatorModel>();
+                //     }
+                //         subscriber.next(objectDocNav);
+                //         subscriber.complete();
+                //  });
                 // this.creaetDocumentModel(objectDoc).subscribe((result)=>{
                 //     subscriber.next(result);
                 // })
-                // const requestDB = window.indexedDB.open('e-learning', 1);
-                // requestDB.onerror = ((error) => {
-                //     console.error('error: ', error);
-                // });
-                // requestDB.onsuccess = (async (event) => {
-                //     this.indexDB = requestDB.result;
-                //     this.getNavigator().subscribe((objectNav) => {
-                //         console.log('☛ Result Document Navigator from Database : ', objectNav);
-                //         subscriber.next(objectNav);
-                //         subscriber.complete();
-                //     });
-                // });
-                // requestDB.onupgradeneeded = ((event: any) => {
-                //     const db = event.target.result;
-                //     db.createObjectStore('navigators', { keyPath: 'id' });
-                //     db.createObjectStore('documents', { keyPath: 'id' });
-                // });
+                const requestDB = window.indexedDB.open('e-learning', 1);
+                requestDB.onerror = ((error) => {
+                    console.error('error: ', error);
+                });
+                requestDB.onsuccess = (async (event) => {
+                    this.indexDB = requestDB.result;
+                    this.getNavigator().subscribe((objectNav) => {
+                        console.log('☛ Result Document Navigator from Database : ', objectNav);
+                        subscriber.next(objectNav);
+                        subscriber.complete();
+                    });
+                });
+                requestDB.onupgradeneeded = ((event: any) => {
+                    const db = event.target.result;
+                    db.createObjectStore('navigators', { keyPath: 'id' });
+                    db.createObjectStore('documents', { keyPath: 'id' });
+                });
             }
 
         });
@@ -142,23 +142,23 @@ export class DocumentService {
                 //     subscriber.complete();
                 // })
             } else {
-                this.socketIoService.sendData(Constants.document.connect.type.documentTrackRead,requestObjDocTrack).subscribe((objectDocNav)=>{
-                    subscriber.next(objectDocNav);
-                    subscriber.complete();
-                });
+                // this.socketIoService.sendData(Constants.document.connect.type.documentTrackRead,requestObjDocTrack).subscribe((objectDocNav)=>{
+                //     subscriber.next(objectDocNav);
+                //     subscriber.complete();
+                // });
 
-                // const requestDB = window.indexedDB.open('e-learning', 1);
-                // requestDB.onerror = ((error) => {
-                //     console.error('error: ', error);
-                // });
-                // requestDB.onsuccess = (async (event) => {
-                //     this.indexDB = requestDB.result;
-                //     this.getTrack().subscribe((objectDoc) => {
-                //         console.log('☛ Result track from Database : ', objectDoc);
-                //         subscriber.next(objectDoc);
-                //         subscriber.complete();
-                //     });
-                // });
+                const requestDB = window.indexedDB.open('e-learning', 1);
+                requestDB.onerror = ((error) => {
+                    console.error('error: ', error);
+                });
+                requestDB.onsuccess = (async (event) => {
+                    this.indexDB = requestDB.result;
+                    this.getTrack().subscribe((objectDoc) => {
+                        console.log('☛ Result track from Database : ', objectDoc);
+                        subscriber.next(objectDoc);
+                        subscriber.complete();
+                    });
+                });
             }
 
         });
@@ -351,32 +351,32 @@ export class DocumentService {
                     //this.eventToParent.emit({ action: Constants.general.event.load.success, data: event })
                 });
             }else{
-                // console.log("saveobjectTemplate",saveobjectTemplate)
-                // const requestTableDoc = this.indexDB.transaction(['documents'], 'readwrite');
-                // const objectStoreDoc = requestTableDoc.objectStore('documents');
-                //     console.log(' ❏ Object for Save :', saveobjectTemplate);
-                //     if (objectStoreDoc.get(nameDocument)) {
-                //         let storeDoc =  objectStoreDoc.put(saveobjectTemplate);
-                //         storeDoc.onsuccess = (event) => {
-                //             subscriber.next(Constants.common.event.load.success)
-                //             console.log('data has been updated to your database.');
-                //         };
-                //         storeDoc.onerror = (error) => {
-                //             console.log('data has error',error);
-                //         };
-                //     } else {
-                //         let storeDoc = objectStoreDoc.add(saveobjectTemplate);
-                //         storeDoc.onsuccess = (event) => {
-                //             subscriber.next(Constants.common.event.load.success)
-                //             console.log('data has been added to your database.');
-                //         };
-                //         storeDoc.onerror = (error) => {
-                //             console.log('data has error',error);
-                //         };
-                //     }
-                    this.socketIoService.sendData(Constants.document.connect.type.documentSave, saveobjectTemplate).subscribe((result)=>{
-                        subscriber.next(Constants.common.event.load.success)
-                    })
+                console.log("saveobjectTemplate",saveobjectTemplate)
+                const requestTableDoc = this.indexDB.transaction(['documents'], 'readwrite');
+                const objectStoreDoc = requestTableDoc.objectStore('documents');
+                    console.log(' ❏ Object for Save :', saveobjectTemplate);
+                    if (objectStoreDoc.get(nameDocument)) {
+                        let storeDoc =  objectStoreDoc.put(saveobjectTemplate);
+                        storeDoc.onsuccess = (event) => {
+                            subscriber.next(Constants.common.event.load.success)
+                            console.log('data has been updated to your database.');
+                        };
+                        storeDoc.onerror = (error) => {
+                            console.log('data has error',error);
+                        };
+                    } else {
+                        let storeDoc = objectStoreDoc.add(saveobjectTemplate);
+                        storeDoc.onsuccess = (event) => {
+                            subscriber.next(Constants.common.event.load.success)
+                            console.log('data has been added to your database.');
+                        };
+                        storeDoc.onerror = (error) => {
+                            console.log('data has error',error);
+                        };
+                    }
+                    // this.socketIoService.sendData(Constants.document.connect.type.documentSave, saveobjectTemplate).subscribe((result)=>{
+                    //     subscriber.next(Constants.common.event.load.success)
+                    // })
 
                 
 
@@ -410,22 +410,22 @@ export class DocumentService {
                     subscriber.next(Constants.common.event.load.success)
                 });
             }else{
-                this.socketIoService.sendData(Constants.document.connect.type.documentNavSave,saveobjectNavTemplate).subscribe((result)=>{
-                    subscriber.next(Constants.common.event.load.success)
-                })
-                // const requestTableNav = this.indexDB.transaction(['navigators'], 'readwrite');
-                // const objectStoreNav = requestTableNav.objectStore('navigators');
-                // if (objectStoreNav.get(nameDocument)) {
-                //     objectStoreNav.put(saveobjectNavTemplate).onsuccess = (event) => {
-                //         subscriber.next(Constants.common.event.load.success)
-                //         console.log('data has been updated to your database.');
-                //     };
-                // } else {
-                //     objectStoreNav.add(saveobjectNavTemplate).onsuccess = (event) => {
-                //         subscriber.next(Constants.common.event.load.success)
-                //         console.log('data has been added to your database.');
-                //     };
-                // }
+                // this.socketIoService.sendData(Constants.document.connect.type.documentNavSave,saveobjectNavTemplate).subscribe((result)=>{
+                //     subscriber.next(Constants.common.event.load.success)
+                // })
+                const requestTableNav = this.indexDB.transaction(['navigators'], 'readwrite');
+                const objectStoreNav = requestTableNav.objectStore('navigators');
+                if (objectStoreNav.get(nameDocument)) {
+                    objectStoreNav.put(saveobjectNavTemplate).onsuccess = (event) => {
+                        subscriber.next(Constants.common.event.load.success)
+                        console.log('data has been updated to your database.');
+                    };
+                } else {
+                    objectStoreNav.add(saveobjectNavTemplate).onsuccess = (event) => {
+                        subscriber.next(Constants.common.event.load.success)
+                        console.log('data has been added to your database.');
+                    };
+                }
             }
         });
         
@@ -441,31 +441,31 @@ export class DocumentService {
                 //     //this.eventToParent.emit({ action: Constants.general.event.load.success, data: event })
                 // });
             }else{
-                this.socketIoService.sendData(Constants.document.connect.type.documentTrackSave,saveobjectTrack).subscribe((result)=>{
-                    subscriber.next(Constants.common.event.load.success)
-                })
-                // const requestTableTrack = this.indexDB.transaction(['tracks'], 'readwrite');
-                // const objectStoreTrack = requestTableTrack.objectStore('tracks');
-                //     // console.log(' ❏ Object for Save :', saveobjectTrack);
-                //     if (objectStoreTrack.get(nameDocument)) {
-                //         let storeDoc =  objectStoreTrack.put(saveobjectTrack);
-                //         storeDoc.onsuccess = (event) => {
-                //             subscriber.next(Constants.common.event.load.success)
-                //             console.log('data has been updated to your database.');
-                //         };
-                //         storeDoc.onerror = (error) => {
-                //             console.log('data has error',error);
-                //         };
-                //     } else {
-                //         let storeDoc = objectStoreTrack.add(saveobjectTrack);
-                //         storeDoc.onsuccess = (event) => {
-                //             subscriber.next(Constants.common.event.load.success)
-                //             console.log('data has been added to your database.');
-                //         };
-                //         storeDoc.onerror = (error) => {
-                //             console.log('data has error',error);
-                //         };
-                //     }
+                // this.socketIoService.sendData(Constants.document.connect.type.documentTrackSave,saveobjectTrack).subscribe((result)=>{
+                //     subscriber.next(Constants.common.event.load.success)
+                // })
+                const requestTableTrack = this.indexDB.transaction(['tracks'], 'readwrite');
+                const objectStoreTrack = requestTableTrack.objectStore('tracks');
+                    // console.log(' ❏ Object for Save :', saveobjectTrack);
+                    if (objectStoreTrack.get(nameDocument)) {
+                        let storeDoc =  objectStoreTrack.put(saveobjectTrack);
+                        storeDoc.onsuccess = (event) => {
+                            subscriber.next(Constants.common.event.load.success)
+                            console.log('data has been updated to your database.');
+                        };
+                        storeDoc.onerror = (error) => {
+                            console.log('data has error',error);
+                        };
+                    } else {
+                        let storeDoc = objectStoreTrack.add(saveobjectTrack);
+                        storeDoc.onsuccess = (event) => {
+                            subscriber.next(Constants.common.event.load.success)
+                            console.log('data has been added to your database.');
+                        };
+                        storeDoc.onerror = (error) => {
+                            console.log('data has error',error);
+                        };
+                    }
 
             }
         });

@@ -9,6 +9,7 @@ export class ToDoListBoxListModel {
     public name:string;
     public isChecked:boolean;
     public boxType:string;
+    public boxTypeName:string;
 }
 export class ToDoListContentOrderModel {
     id:string;

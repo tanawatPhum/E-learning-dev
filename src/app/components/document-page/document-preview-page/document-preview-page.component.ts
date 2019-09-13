@@ -21,6 +21,8 @@ import { DocumentTrackModel } from '../../../models/document/document.model';
 import { runInThisContext } from 'vm';
 import { FileContentModel } from '../../../models/document/elements/file-content.model';
 import { LinkContentModel } from 'src/app/models/document/elements/link-content.model';
+import { ExamContentModel } from 'src/app/models/document/elements/exam-content.model';
+import { CommonDataControlService } from '../../../services/common/common-data-control.service';
 
 
 declare var electron: any;
@@ -62,6 +64,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             handleToDoList: 'handleToDoList',
             handleFile: 'handleFile',
             handleLink: 'handleLink',
+            handleExam: 'handleExam',
             handleDocumentTrack:'handleDocumentTrack'
         },
         data: {
@@ -83,11 +86,14 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
     public toDoLists: ToDoListContentModel[] = new Array<ToDoListContentModel>();
     public files:FileContentModel[] = new Array<FileContentModel>();
     public links:LinkContentModel[] = new Array<LinkContentModel>();
+    public exams:ExamContentModel[]  = new  Array<ExamContentModel>(); 
     public progressBars: ProgressBarContentModel[] = new Array<ProgressBarContentModel>();
     private documentTrackInterval:any;
+    private currentUrlParam:any;
     constructor(
         private documentDataService: DocumentDataControlService,
         private documentService: DocumentService,
+        private CommonDataService:CommonDataControlService,
         private commonService: CommonService,
         private router: Router,
         private route: ActivatedRoute
@@ -125,8 +131,13 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         // });
         this.setTemplate(this.actions.template.setDocument);
         this.route.queryParams.subscribe((params) => {
+            this.currentUrlParam = params
             this.isUrlChannel = true;
-            this.documentDataService.currentDocumentName = params['documentName'];
+            this.documentDataService.currentDocumentName = this.currentUrlParam['documentName'];
+            if(this.currentUrlParam['userId']){
+                this.CommonDataService.userId =  this.currentUrlParam['userId'];
+            }
+            
         })
         this.loadHtml(this.documentDataService.currentDocumentName);
 
@@ -169,6 +180,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         else if (action === this.actions.template.setDocumentTrack) {
             this.documentService.loadDocTrackFromDB().subscribe((documentTrack) => {
                 this.documentTracks = documentTrack;
+                console.log('documentTrack',documentTrack)
                 if (this.documentTracks.length > 0) {
                     this.currentDocumentTrack = documentTrack.find((documentTrack) => documentTrack.id === this.commonService.getPatternId(this.documentDataService.currentDocumentName));
                     this.handles(this.actions.handle.handleDocumentTrack);
@@ -176,7 +188,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                     this.handles(this.actions.handle.handleProgressBar);
                    this.documentTrackInterval = setInterval(()=>{
                         this.handles(this.actions.handle.handleDocumentTrack);
-                    },10000)
+                    },2000)
                 };
             })
             
@@ -199,6 +211,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             this.handles(this.actions.handle.handleComment);
             this.handles(this.actions.handle.handleFile);
             this.handles(this.actions.handle.handleLink);
+            this.handles(this.actions.handle.handleExam);
            // this.handles(this.actions.handle.handleToDoList);
             this.setElements(this.actions.element.setCommentElement);
         }
@@ -584,6 +597,11 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                                 numberOfContentProgress += 1;
                             });
                         } 
+                        else if(targetDocumentTrack.boxType === this.boxType.boxExam){
+                            summaryOfPercent += targetDocumentTrack.progress
+                            numberOfContentProgress += 1;
+                        }
+
                     }
                     // this.currentDocumentTrack.contents.forEach((contentTrack)=>{
                     //     if(content.id === contentTrack.id){
@@ -736,7 +754,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                           if( targetContent.boxType === this.boxType.boxVideo && !targetContent.conditions.videoCondition.isMustWatchingEnd&&targetContent.conditions.videoCondition.isClickPlay ){
                                 summaryOfProgress += 100;
                           }else {
-                            summaryOfProgress += targetContent.progress ;
+                            summaryOfProgress += targetContent.progress;
                           }
                       } 
                     });
@@ -772,7 +790,6 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             let numberOfProgress =0;
             // console.log(this.currentDocumentTrack.contents[targetVideoTrackIndex])
             this.currentDocumentTrack.contents.forEach((content) => {
-
                 if(content.boxType === this.boxType.boxVideo){
                     if(content.conditions.videoCondition.isMustWatchingEnd){
                         numberOfProgress +=content.progress
@@ -797,6 +814,14 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                     numberOfProgress += numberOfProgressLink/numberOfLinks;
                 }
             });
+            if(this.currentUrlParam['typeUrl']==='survey' && this.currentUrlParam['status']===Constants.common.message.status.submitted.text){
+               let targetExamIndex =   this.currentDocumentTrack.contents.findIndex((content)=>content.id === this.currentUrlParam['examId'])
+               if(targetExamIndex>=0){
+                this.currentDocumentTrack.contents[targetExamIndex].conditions.examCondition.isSubmitted = true;
+                this.currentDocumentTrack.contents[targetExamIndex].progress = 100;
+                numberOfProgress +=100
+               }
+            }
             // this.currentDocumentTrack.contents.forEach((content) => {
             //     if()
             // })
@@ -850,8 +875,35 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             this.rootElement.find('.content-link').unbind().bind('click',(element)=>{
                 let targetLink = this.links.find((link)=>link.id === $(element.currentTarget).attr('id'))
                 if(targetLink){
-                    console.log(targetLink.path)
                     window.open(targetLink.path)
+                }
+  
+            })
+        }
+        else if (action === this.actions.handle.handleExam) {
+            this.rootElement.find('.content-exam').each((index,element)=>{
+                if(this.currentUrlParam['typeUrl']==='survey' && this.currentUrlParam['status']===Constants.common.message.status.submitted.text){
+                    let targetExamIndex = this.exams.findIndex((exam)=>exam.id === $(element).attr('id'))
+                    if(targetExamIndex>=0){
+                        this.exams[targetExamIndex].score = this.currentUrlParam['score']
+                    }
+                 }
+                let targetExam = this.exams.find((exam)=>exam.id === $(element).attr('id'))
+                if(targetExam){
+                    $(element).find('#text-exam-score').text('Score:'+(targetExam.score || '0'))
+                }
+            })
+            this.rootElement.find('.content-exam').find('#exam-input-url').unbind().bind('click',(element)=>{
+                let targetExam = this.exams.find((exam)=>exam.id === $(element.currentTarget).parents('.content-exam').attr('id'))
+                if(targetExam){
+                    let param = '?forward_url='+ Constants.common.host.smartDoc +'/documentPreview?'
+                    param += 'documentName=' + this.documentDataService.currentDocumentName +'&'
+                    param += 'userId=' + this.CommonDataService.userId +'&'
+                    param += 'examId=' + targetExam.id +'&'
+                    param += 'status=' + Constants.common.message.status.submitted.text +'&'
+                    param += 'typeUrl=' +'survey'
+                    console.log(targetExam.path + param)
+                    location.assign(targetExam.path + param)
                 }
   
             })
@@ -876,10 +928,10 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                 subFroms: this.subForms,
                 comments: this.comments,
                 todoList: this.toDoLists,
+                exams:this.exams,
                 progressBar: this.progressBars
             }
         }
-
         this.documentService.saveDocument(this.currentResult.nameDocument, saveobjectTemplate).subscribe((status) => {
 
         })
@@ -949,6 +1001,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             this.imgs = results.contents.imgs||  new Array<ImgContentModel>();
             this.comments = results.contents.comments ||  new Array<commentContentModel>();
             this.toDoLists = results.contents.todoList ||  new Array<ToDoListContentModel>();
+            this.exams =  results.contents.exams ||  new Array<ExamContentModel>()
             this.videos = results.contents.videos ||  new Array<VideoContentModel>();
             this.progressBars = results.contents.progressBar ||  new Array<ProgressBarContentModel>();
             this.files =   results.contents.files ||  new Array<FileContentModel>();

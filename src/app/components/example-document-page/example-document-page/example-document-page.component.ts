@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewEncapsulation, NgZone } from '@angular/core';
 import { CKEditor4 } from 'ckeditor4-angular/ckeditor';
 import { DocumentService } from '../../../services/document/document.service';
 import { Constants } from '../../../global/constants';
@@ -8,6 +8,8 @@ declare var CKEDITOR:any;
 import { AmplifyService } from 'aws-amplify-angular';
 import Amplify, { Storage, Auth } from 'aws-amplify';
 import { SocketIoService } from '../../../services/common/socket.service';
+import { StringValue } from 'aws-sdk/clients/elbv2';
+import { SelectModel } from 'src/app/models/test.model';
 Amplify.configure({
     Auth: {
         identityPoolId: 'us-east-2:b1d020f3-2250-4e5f-beed-0fd588b8a01c', //REQUIRED - Amazon Cognito Identity Pool ID
@@ -34,11 +36,22 @@ export class ExampleDocumentPageComponent implements OnInit,AfterViewInit {
     public signedIn: boolean;
     public user: any;
     public greeting: string;
+    public testList:SelectModel[] = new Array<SelectModel>();
+
+
+    public optionList1 =[
+        {text:'x',value:'1'},
+        {text:'y',value:'2'},
+    ]
+
+    public optionList2 = []
+
     constructor(
         public documentService:DocumentService,
         public http:HttpClientService,
         private amplifyService: AmplifyService,
-        private socketIoService:SocketIoService
+        private socketIoService:SocketIoService,
+        private zone:NgZone
        
     ){
 
@@ -46,6 +59,22 @@ export class ExampleDocumentPageComponent implements OnInit,AfterViewInit {
 
     ngOnInit(){
         this.socketIoService.connectSocketIo();
+
+        this.testList.push({
+            stringValue1:null,
+            stringValue2:null,
+            
+        })
+        
+        this.testList.push({
+            stringValue1:null,
+            stringValue2:null,
+        })
+
+
+        this.optionList2.push([])
+
+
         // $("#custom").spectrum({
         //     showPalette: true,
         //     palette: [ ],
@@ -192,7 +221,32 @@ export class ExampleDocumentPageComponent implements OnInit,AfterViewInit {
 
     // }
 
+public changeSelect1(proviceCode,index){
 
+
+
+
+
+    // this.optionList2[index] =  respose
+  
+        if(proviceCode==='1'){
+            let respose =[
+                {text:'aa',value:'1'},
+                {text:'bb',value:'2'},
+            ]
+            this.optionList2[index] =  respose
+        }else{
+            let respose =[
+                {text:'cc',value:'3'},
+                {text:'dd',value:'4'}
+            ]
+            this.optionList2[index] =  respose
+        }
+        console.log(this.optionList2)
+    
+
+
+}
 
 
 

@@ -8,6 +8,7 @@ import { ToDoListContentModel } from './elements/todoList-content.model';
 import { ProgressBarContentModel } from './elements/progressBar-content-model';
 import { FileContentModel } from './elements/file-content.model';
 import { LinkContentModel } from './elements/link-content.model';
+import { ExamContentModel } from './elements/exam-content.model';
 
 
 export class DocumentModel {
@@ -25,6 +26,7 @@ export class ContentsModel {
     public files:FileContentModel[];
     public textAreas: TextAreaContentModel[];
     public imgs: ImgContentModel[];
+    public exams: ExamContentModel[];
     public videos: VideoContentModel[];
     public subFroms:SubFormContentModel[];
     public comments:commentContentModel[];

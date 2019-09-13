@@ -1,6 +1,7 @@
 import { SubFormContentModel, SubFormContentDetailModel, SubFormContentConditionModel } from './elements/subForm-content.model';
 import {  ContentsModel } from './content.model';
 import { VideoConetentConditionModel } from './elements/video-content.model';
+import {  ExamContentConditionModel } from './elements/exam-content.model';
 
 export class TriggerEventModel {
     public action:string;
@@ -37,5 +38,6 @@ export class DocumentTrackContent{
 export class DocumentTrackContentCondition{
     public videoCondition:VideoConetentConditionModel = new VideoConetentConditionModel();
     public subformCondition:SubFormContentConditionModel = new SubFormContentConditionModel();
+    public examCondition:ExamContentConditionModel = new ExamContentConditionModel();
 
 }

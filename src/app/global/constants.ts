@@ -53,9 +53,13 @@ export class Constants {
                 success:{id:1,text:'success'},
                 fail:{id:2,text:'fail'},
                 notFound: {id:3,text:'notFound'},
-                created:{id:4,text:'created'}
+                created:{id:4,text:'created'},
+                submitted:{id:5,text:'submitted'}
             }
   
+        },
+        host:{
+            smartDoc:'http://localhost:4200'
         }
     }
     public static readonly document = {
@@ -93,6 +97,7 @@ export class Constants {
                 toDoList: {name : 'todo-list', id: 8 },
                 fileBrowse: {name : 'file-browse', id: 9 },
                 linkBrowse: {name : 'link-browse', id: 10},
+                exam: {name : 'exam', id: 11},
             }
         },
         boxes:{
@@ -101,6 +106,7 @@ export class Constants {
                 boxTextarea: 'box-textarea',
                 boxBrowseImg: 'box-browse-img',
                 boxBrowseLink: 'box-browse-link',
+                boxBrowseExam:'boxBrowseExam',
                 boxBrowseFile: 'box-browse-file',
                 boxImg: 'box-img',
                 boxVideo: 'box-video',
@@ -111,7 +117,9 @@ export class Constants {
                 boxAddSubform: 'box-add-subform',
                 boxProgressBar: 'box-progress-bar',
                 boxComment: 'box-comment',
-                boxToDoList: 'box-toDoList'
+                boxToDoList: 'box-toDoList',
+                boxExam:'box-exam'
+
             }
         },
         connect:{

@@ -10,3 +10,10 @@ export class ProgressBarContentObjectModel{
     public id:string;
     public boxType:string;
 }
+
+export class ProgressBoxListModel {
+    public id:string;
+    public name:string;
+    public boxType:string;
+    public boxTypeName:string;
+}

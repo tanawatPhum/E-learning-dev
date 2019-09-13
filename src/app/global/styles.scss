@@ -251,7 +251,8 @@ input:focus {
     }
     &.toolbar-browse-video,
     &.toolbar-browse-img,
-    .toolbar-browse-link {
+    &.toolbar-browse-exam,
+    &.toolbar-browse-link {
         height: 100%;
         padding: 0 1em 0 1em;
         display: flexbox;
@@ -265,6 +266,13 @@ input:focus {
             margin-bottom: 5%;
         }
         .toolbar-drag {}
+    }
+    &.toolbar-browse-exam {
+        & .exam-input-title {
+            text-align: center;
+            border: none;
+            outline: 0;
+        }
     }
     &.toolbar-cancel {
         height: 50px;
@@ -345,6 +353,22 @@ input:focus {
 .content-subform {
     width: 100%;
     text-align: left;
+}
+
+.content-exam {
+    display: flex;
+    text-align: center;
+    align-items: center;
+    height: 100% !important;
+    width: 100% !important;
+    & .exam-input-title {
+        text-align: center;
+        border: none;
+        outline: 0;
+        margin: auto;
+        font-size: 1.6em;
+        display: block;
+    }
 }
 
 .content-comment {
