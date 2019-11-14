@@ -9,6 +9,7 @@ import { ProgressBarContentModel } from './elements/progressBar-content-model';
 import { FileContentModel } from './elements/file-content.model';
 import { LinkContentModel } from './elements/link-content.model';
 import { ExamContentModel } from './elements/exam-content.model';
+import { ScreenDetailModel } from '../common/common.model';
 
 
 export class DocumentModel {
@@ -19,6 +20,7 @@ export class DocumentModel {
     public id: string;
     public html: string;
     public contents: ContentsModel; 
+    public otherDetail:OtherDetailModel =  new OtherDetailModel();
 }
 
 export class ContentsModel {
@@ -34,4 +36,9 @@ export class ContentsModel {
     public progressBar:ProgressBarContentModel[];
     public links:LinkContentModel[];
 }
+
+export class OtherDetailModel{
+    public screenDevDetail:ScreenDetailModel = new ScreenDetailModel();
+}
+
 

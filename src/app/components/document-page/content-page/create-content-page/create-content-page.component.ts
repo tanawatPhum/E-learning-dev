@@ -4,7 +4,7 @@ import { Observable, of, Subject, empty, fromEvent, VirtualTimeScheduler } from 
 import { Constants } from 'src/app/global/constants';
 import { BoxContentModel } from 'src/app/models/document/elements/box-content.model';
 import { CommonService } from '../../../../services/common/common.service';
-import { DocumentModel, ContentsModel } from 'src/app/models/document/content.model';
+import { DocumentModel, ContentsModel, OtherDetailModel } from 'src/app/models/document/content.model';
 import { TextAreaContentModel } from '../../../../models/document/elements/textarea-content.model';
 import { ImgContentModel } from 'src/app/models/document/elements/img-content.model';
 import { VideoContentModel, VideoConetentDataModel, VideoConetentConditionModel } from 'src/app/models/document/elements/video-content.model';
@@ -1033,15 +1033,21 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 element.find('.toolbar-browse-video').find('#video-input-url').focus();
                 element.find('.toolbar-browse-video').find('#video-input-url').on('input', this.commonService.debounce((event) => {
                     if (event.target.value) {
-
-
                         const url = event.target.value;
                         let dataStreaming = new VideoConetentDataModel();
-                        let streamId = event.target.value;
-                        
-                        this.currentBrowseFile = streamId;
-                        dataStreaming.streamId = streamId;
-                        dataStreaming.channelStream = 'wistia';
+                       // let streamId = event.target.value;
+                       const streamId = this.commonService.getStreamId(url);
+
+                        if (streamId.streamId != null && streamId.channelStream == 'youtube') {
+                            this.currentBrowseFile = 'https://www.youtube.com/embed/' + streamId.streamId;
+                            dataStreaming.streamId = streamId.streamId;
+                            dataStreaming.channelStream = streamId.channelStream;
+                        }else{
+                            this.currentBrowseFile = streamId.streamId;
+                            dataStreaming.streamId = streamId.streamId;
+                            dataStreaming.channelStream = streamId.channelStream;
+                        }
+    
                        // const streamId = this.commonService.getStreamId(url);
 
 
@@ -2461,13 +2467,17 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     progressBar: this.progressBars
 
                 }
+                let otherDetail:OtherDetailModel = new OtherDetailModel();
+                otherDetail.screenDevDetail.height = this.contentTemplateSize.height;
+                otherDetail.screenDevDetail.width = this.contentTemplateSize.width;
                 let saveobjectTemplate: DocumentModel = {
                     userId:Constants.common.user.id,
                     nameDocument: nameDocument,
                     previewImg: imgData,
                     id: this.commonService.getPatternId(nameDocument), html: this.rootElement.html(),
                     status: Constants.common.message.status.created.text,
-                    contents: contents
+                    contents: contents,
+                    otherDetail:otherDetail
                 }
                 let saveobjectNavTemplate: DocumentNavigatorModel = {
                     userId:Constants.common.user.id,

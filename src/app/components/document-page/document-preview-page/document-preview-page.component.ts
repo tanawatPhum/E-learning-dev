@@ -164,7 +164,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
     }
     public setTemplate(action) {
         if (action === this.actions.template.setDocument) {
-            this.contentTemplateSize = JSON.parse(localStorage.getItem('contentTemplateSize'));
+           // this.contentTemplateSize = JSON.parse(localStorage.getItem('contentTemplateSize'))|| new ScreenDetailModel();
             this.rootElement = $(this.documentPreviewContent.nativeElement);
             // - Constants.general.element.css.navBar.height
             this.rootElement.css('height', $(window).height())
@@ -202,6 +202,14 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
     public setElements(action, elment?: JQuery<Element>, data?: any) {
         if (action === this.actions.element.setResultElement) {
             this.currentResult = data;
+            this.contentTemplateSize =  this.currentResult.otherDetail.screenDevDetail;
+         //   console.log("contentTemplateSize",this.contentTemplateSize)
+            // if(!this.contentTemplateSize.width){
+            //     this.contentTemplateSize.width = this.currentResult.otherDetail.screenDevDetail.width;
+            // }
+            // if(!this.contentTemplateSize.height){
+            //     this.contentTemplateSize.height = this.currentResult.otherDetail.screenDevDetail.height;
+            // }
          let html = '<div id="contentTemplate" style="overflow-x:hidden;overflow-y:auto;position:relative; width:' + this.contentTemplateSize.width + 'px;height:' + this.contentTemplateSize.height + 'px">' + data.html + '</div>'
             this.rootElement.html(html);
             this.retrieveData(this.actions.data.retrieveResultData, data);
@@ -233,7 +241,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             this.rootElement.find('.content-box').find('.content-subform').find('li').attr('contenteditable', 'false');
             this.rootElement.find('.content-box').find('.content-box-label').remove();
             this.rootElement.find('.template-doc').attr('contenteditable', 'false');
-
+            
             // this.rootElement.find('.template-doc').css('width', this.documentDataService.currentScreenSize.width +'px');
             this.rootElement.find('.content-box').find('.content-progress-bar').find('.progress-bar').css('width', 0)
             this.rootElement.find('.content-comment').css('height', 'auto');
@@ -257,23 +265,39 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             //     transform: 'scale( '+ scale + ')',
             //     transformOrigin: 'left top'
             // });
+
+
+            
             let ratioW = this.documentDataService.currentScreenSize.width / this.contentTemplateSize.width;
-            let ratioH = this.documentDataService.currentScreenSize.height / (this.contentTemplateSize.height+93)
+//         let ratioH = this.documentDataService.currentScreenSize.height / (this.contentTemplateSize.height)
+//             // let ratioH = this.documentDataService.currentScreenSize.width / this.contentTemplateSize.width;
+// console.log(Math.min(ratioW,ratioH))
+
+           //let ratioH = this.documentDataService.currentScreenSize.height / (this.contentTemplateSize.height+93)
 
 
             // console.log("currentScreen",this.documentDataService.currentScreenSize)
             // console.log("contentTemplateSize",this.contentTemplateSize)
             // console.log("ratioW",ratioW)
-            console.log(this.documentDataService.currentScreenSize)
-            // this.rootElement.find('#contentTemplate').css({
-            //     transform: 'scale( ' + ratioW + ')',
-            //     transformOrigin: 'left top'
-            // });
-
+            // console.log(this.documentDataService.currentScreenSize)
             this.rootElement.find('#contentTemplate').css({
-                        transform: 'scale( ' + ratioW +',' + ratioH + ')',
-                        transformOrigin: 'left top'
-                    });
+                transform: 'scale( ' + ratioW + ')',
+                transformOrigin: 'left top'
+            });
+
+
+
+    // this.rootElement.find('#contentTemplate').css({
+    //                     transform: 'scale( '+ratioW+','+Math.min(ratioW,ratioH)+')',
+    //                     transformOrigin: 'left top'
+    //                 });
+
+
+
+            // this.rootElement.find('#contentTemplate').css({
+            //             transform: 'scale( ' + ratioW +',' + ratioH + ')',
+            //             transformOrigin: 'left top'
+            //         });
 
             // this.rootElement.css({
             //     transform: 'scale( ' + ratioW +',' + ratioH + ')',
@@ -918,6 +942,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             userId:Constants.common.user.id,
             id: this.currentResult.id, html: this.currentResult.html,
             status: this.currentResult.status,
+            otherDetail: this.currentResult.otherDetail,
             contents: {
                 boxes: this.boxes,
                 files:this.files,

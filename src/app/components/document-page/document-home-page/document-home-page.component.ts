@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterContentInit, NgZone, ViewEncapsulation, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterContentInit, NgZone, ViewEncapsulation, AfterViewInit, OnDestroy } from '@angular/core';
 import { Subject, Observable, of } from 'rxjs';
 import { Constants } from 'src/app/global/constants';
 import { DocumentService } from '../../../services/document/document.service';
@@ -222,19 +222,20 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
         if (action === this.contents.data.savecurrentDoc) {
             this.loadingProgress();
             if(this.documentDataService.currentDocumentName !== this.currentDocumentName){
-                this.documentService.findDoc(this.commonService.getPatternId(this.currentDocumentName)).subscribe((document)=>{
-                    if(document.status === Constants.common.message.status.success.text){
-                        let rexFindNumberDoc = document.nameDocument.match(/\(([^)\w\s]|\d+)\)[^(]*$/)
-                        if(rexFindNumberDoc){
-                            this.currentDocumentName =  document.nameDocument+'('+rexFindNumberDoc[1]+')'
-                        }else{
-                            this.currentDocumentName =  document.nameDocument+'(1)'
-                        }
-                        this.triggerElement.next({ action: Constants.common.event.click.save, data: data || this.currentDocumentName });
-                    }else{
-                        this.triggerElement.next({ action: Constants.common.event.click.save, data: data || this.currentDocumentName });
-                    }
-                })
+                this.triggerElement.next({ action: Constants.common.event.click.save, data: data || this.currentDocumentName });
+                // this.documentService.findDoc(this.commonService.getPatternId(this.currentDocumentName)).subscribe((document)=>{
+                //     if(document.status === Constants.common.message.status.success.text){
+                //         let rexFindNumberDoc = document.nameDocument.match(/\(([^)\w\s]|\d+)\)[^(]*$/)
+                //         if(rexFindNumberDoc){
+                //             this.currentDocumentName =  document.nameDocument+'('+rexFindNumberDoc[1]+')'
+                //         }else{
+                //             this.currentDocumentName =  document.nameDocument+'(1)'
+                //         }
+                //         this.triggerElement.next({ action: Constants.common.event.click.save, data: data || this.currentDocumentName });
+                //     }else{
+                //         this.triggerElement.next({ action: Constants.common.event.click.save, data: data || this.currentDocumentName });
+                //     }
+                // })
             }else{
                 this.triggerElement.next({ action: Constants.common.event.click.save, data: data || this.currentDocumentName });
             }
@@ -300,7 +301,8 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
     public eventFromChild(eventChild: TriggerEventModel) {
         if (eventChild.action === Constants.common.event.load.success && eventChild.data === "save") {
             if(this.currentDocumentName !== this.documentDataService.currentDocumentName){
-                this.documentService.deleteDocument(this.commonService.getPatternId(this.documentDataService.currentDocumentName)).subscribe((status)=>{
+                let targetDoc =  this.documentNavList.find((documentNav)=>documentNav.nameDocument === eventChild.data)
+                this.documentService.deleteDocument(targetDoc).subscribe((status)=>{
                     if(status===Constants.common.message.status.success.text){
                         this.documentDataService.currentDocumentName =  this.currentDocumentName;
                     }

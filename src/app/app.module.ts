@@ -24,6 +24,7 @@ import { HttpClientService } from './services/common/httpClient.service';
 import { AmplifyAngularModule, AmplifyService } from 'aws-amplify-angular';
 import { SocketIoService } from './services/common/socket.service';
 import { CommonDataControlService } from './services/common/common-data-control.service';
+import { RangeSliderPageComponent } from './components/plugin-page/range-slider-page/range-slider-page.component';
 
 export const COMPONENTS: any[] = [
   AppComponent,
@@ -33,10 +34,12 @@ export const COMPONENTS: any[] = [
  DocumentPreviewPageComponent,
  NoteComponentComponent,
  DocumentModalPageComponent,
- LoadingPageComponent,
  ExampleDocumentPageComponent
 ];
-
+export const PLUGINS: any[] = [
+  LoadingPageComponent,
+  RangeSliderPageComponent,
+];
 export const LAYOUTS: any[] = [
 
 ];
@@ -69,6 +72,7 @@ export const DIRECTIVES: any[] = [
     ...DIRECTIVES,
     ...LAYOUTS,
     ...PIPES,
+    ...PLUGINS,
     NoteComponentComponent
   ],
   imports: [

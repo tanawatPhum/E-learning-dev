@@ -1,4 +1,4 @@
-import { Component,OnInit,AfterViewInit,ViewChild, ElementRef,ViewEncapsulation} from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { DocumentService } from '../../services/document/document.service';
 import { DocumentNavigatorModel, TriggerEventModel } from '../../models/document/document.model';
@@ -21,7 +21,7 @@ declare var electron: any;
     styleUrls: ['home-page.component.scss'],
     encapsulation: ViewEncapsulation.None
 })
-export class HomePageComponent implements OnInit , AfterViewInit{
+export class HomePageComponent implements OnInit , AfterViewInit , OnDestroy{
     @ViewChild('homeDocumentList', { static: true }) contentTemplate: ElementRef;
     private documentNavList:DocumentNavigatorModel[]  =new Array<DocumentNavigatorModel>();
     private documentList:DocumentModel[]  =  new Array<DocumentModel>();
@@ -55,7 +55,11 @@ export class HomePageComponent implements OnInit , AfterViewInit{
     ngAfterViewInit(){
         this.homeDocumentList = $(this.contentTemplate.nativeElement);
     }
+    ngOnDestroy(){
+        console.log('destroy home')
+    }
     public getDocumentNavigator(){
+        
         if(electron){
             this.loadDocumentNavigator();
         }else{
@@ -152,6 +156,7 @@ export class HomePageComponent implements OnInit , AfterViewInit{
                     this.documentNavList.forEach((docNav) => {
                         let regexMatchDocNumber  = RegExp('(?<='+this.documentDataService.currentDocumentName+')\\d+');
                         let findDocNumber = docNav.nameDocument.match(regexMatchDocNumber)
+                        console.log(findDocNumber)
                         if(findDocNumber){
                             let  docNumber  = parseInt(findDocNumber[findDocNumber.length-1]);
                             if(maxNumber<docNumber){
@@ -161,6 +166,12 @@ export class HomePageComponent implements OnInit , AfterViewInit{
                     })
                     if(maxNumber > 0){
                         this.documentDataService.currentDocumentName = this.documentDataService.currentDocumentName + (maxNumber +1);
+                    }else{
+                        let regexMatchDoc  = RegExp(this.documentDataService.currentDocumentName);
+                        if(regexMatchDoc){
+                            maxNumber = 1
+                            this.documentDataService.currentDocumentName = this.documentDataService.currentDocumentName + (maxNumber +1);
+                        }
                     }
                     this.documentNavList.find((docNav)=>docNav.nameDocument === this.documentDataService.currentDocumentName)
                 }else{
@@ -175,8 +186,10 @@ export class HomePageComponent implements OnInit , AfterViewInit{
     }
     public eventModal(eventModal: TriggerEventModel) {
         if (eventModal.action === this.modalEvents.deleteDocument.name) {
-            this.documentService.deleteDocument(this.commonService.getPatternId(eventModal.data)).subscribe(()=>{
-                this.getDocumentNavigator();
+            this.loading = true;
+            let targetDoc =  this.documentNavList.find((documentNav)=>documentNav.nameDocument === eventModal.data)
+            this.documentService.deleteDocument(targetDoc).subscribe((res)=>{
+                this.loadDocumentNavigator();
             })
             //this.saveDocument(this.contents.data.savecurrentDocAndNewDoc, eventModal.data);
         }

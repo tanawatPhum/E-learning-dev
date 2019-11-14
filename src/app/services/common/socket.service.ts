@@ -11,18 +11,21 @@ export class SocketIoService {
     }
 
     public connectSocketIo(){
-        this.socket = io.connect('http://localhost:3000');
+        //this.socket = io.connect('http://localhost:3000');
+        this.socket = io.connect('https://smartdoc.alworks.io');
         // this.socket = io.connect();
     }
-    public sendData(nameSocket,data):Observable<any>{
+    public sendData(nameSocket,data?):Observable<any>{
         return new Observable((subscriber)=>{
-            this.socket.emit(nameSocket, {
-                data: data
-            });
-            this.socket.on(nameSocket,(data)=>{
-                subscriber.next(data);
-                subscriber.complete();
-            })
+                this.socket.emit(nameSocket, {
+                    data: data
+                });
+                this.socket.on(nameSocket,(data)=>{
+                    subscriber.next(data);
+                    subscriber.complete();
+                })
+            
+
         })
 
     }

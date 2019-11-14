@@ -129,7 +129,9 @@ export class Constants {
                     documentNavSave:'documentNavSave',
                     documentNavRead:'documentNavRead',
                     documentTrackSave:'documentTrackSave',
-                    documentTrackRead:'documentTrackRead'
+                    documentTrackRead:'documentTrackRead',
+                    documentReadMongoDBToCacheDB: 'documentReadMongoDBToCacheDB',
+                    documentDelete:'documentDelete'
                 }
         },
         object:{

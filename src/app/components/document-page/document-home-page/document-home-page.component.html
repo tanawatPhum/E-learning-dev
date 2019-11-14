@@ -116,7 +116,7 @@
         </div>
     </div>
     <div class="col">
-        <nav class="document-navbar navbar navbar-expand-sm"></nav>
+        <!-- <nav class="document-navbar navbar navbar-expand-sm"></nav> -->
         <!-- <div class="document-form-select">
             <img src="assets\imgs\documentPage\plus.svg">
             <img src="assets\imgs\documentPage\content1.svg" (click)="createContent(contentTypes.oneLayout)">
@@ -127,6 +127,7 @@
             <img src="assets\imgs\documentPage\content6.svg" (click)="createContent(contentTypes.freedomLayout)">
 
         </div> -->
+
         <create-content-page (drop)="dropTool($event)" (dragover)="$event.preventDefault()" [dropElement]="dropElement" [contentElement]="contentElement" [contentTypeSelected]="contentTypeSelected" [triggerElement]="triggerElement" (eventToParent)="eventFromChild($event)"></create-content-page>
         <document-modal-page [triggerModal]="triggerModal" (eventModal)="eventModal($event)"></document-modal-page>
     </div>

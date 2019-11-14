@@ -44,13 +44,32 @@ export class CommonService {
   }
   public getStreamId(url: string) :VideoConetentDataModel {
     let streamId = new VideoConetentDataModel();
-    if(url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)){
-      streamId.streamId  =url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)[1];
-      streamId.channelStream = 'youtube'
-    }else if(url.match(/(?:https?:\/{2})?.*wistia\.(?:com)(?:\/medias\/)([^\s&]+)/)){
-      streamId.streamId  =url.match(/(?:https?:\/{2})?.*wistia\.(?:com)(?:\/medias\/)([^\s&]+)/)[1];
+    try{
+      streamId.streamId = url
       streamId.channelStream = 'wistia'
+    }catch(err){
+
     }
+      if(url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)){
+        streamId.streamId  =url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)[1];
+        streamId.channelStream = 'youtube'
+      }
+      else if(url.match(/(?:https?:\/{2})?.*wistia\.(?:com)(?:\/medias\/)([^\s&]+)/)){
+        streamId.streamId  =url.match(/(?:https?:\/{2})?.*wistia\.(?:com)(?:\/medias\/)([^\s&]+)/)[1];
+        streamId.channelStream = 'wistia'
+      }
+      else{
+        streamId.streamId = url
+        streamId.channelStream = 'wistia'
+      }
+      // else if(url.match(/(?:https?:\/{2})?.*wistia\.(?:com)(?:\/medias\/)([^\s&]+)/)){
+      //   streamId.streamId  =url.match(/(?:https?:\/{2})?.*wistia\.(?:com)(?:\/medias\/)([^\s&]+)/)[1];
+      //   streamId.channelStream = 'wistia'
+      // }
+    // }catch(err){
+    //   streamId.streamId = url
+    //   streamId.channelStream = 'wistia'
+    // }
     return streamId;
   }
   public getPatternId(string:string){
