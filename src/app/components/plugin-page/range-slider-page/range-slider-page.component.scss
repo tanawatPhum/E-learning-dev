@@ -1,0 +1,17 @@
+.container-input {
+    margin-top: 1.75em;
+    margin-bottom: 2em;
+    width: 100%;
+    padding-left: 1px;
+    padding-right: 1px;
+}
+
+.dotted-line {
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    height: 100%;
+    border-left: 2px dotted lightgrey;
+}

@@ -98,6 +98,7 @@ export class Constants {
                 fileBrowse: {name : 'file-browse', id: 9 },
                 linkBrowse: {name : 'link-browse', id: 10},
                 exam: {name : 'exam', id: 11},
+                note : {name : 'note', id: 12},
             }
         },
         boxes:{
@@ -118,7 +119,8 @@ export class Constants {
                 boxProgressBar: 'box-progress-bar',
                 boxComment: 'box-comment',
                 boxToDoList: 'box-toDoList',
-                boxExam:'box-exam'
+                boxExam:'box-exam',
+                boxNote:'box-note'
 
             }
         },

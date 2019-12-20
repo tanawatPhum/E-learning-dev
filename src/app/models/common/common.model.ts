@@ -2,6 +2,13 @@ export class ScreenDetailModel {
     public height:number;
     public width:number;
 }
+export class RulerDetailModel {
+    public pointerLeft:string;
+    public pointerRight:string;
+    public paddingLeft:number;
+    public paddingRight:number;
+}
+
 export class PostitionDetailModel {
     public top:number;
     public left:number;
@@ -16,3 +23,4 @@ export class CommonResponseModel{
     public data:any;
     public status:string;
 }
+

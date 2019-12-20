@@ -4,9 +4,12 @@ import { Observable } from 'rxjs';
 import { DocumentModel } from '../../models/document/content.model';
 import { ScreenDetailModel } from 'src/app/models/common/common.model';
 import { DocumentNavigatorModel } from 'src/app/models/document/document.model';
-
+import { DocumentService } from './document.service';
+import { CommonService } from '../common/common.service';
+declare var electron: any;
 @Injectable()
 export class DocumentDataControlService {
+
     private _currentDocument: string = "New Document1";
     private _currentDocumentNav: string = "New Document1";
     private _contentSize: ScreenDetailModel = new ScreenDetailModel();
@@ -14,6 +17,13 @@ export class DocumentDataControlService {
     private _documentList: DocumentModel[] = new Array<DocumentModel>();
     private _nameTemplate: string;
     private _currentScreenSize: ScreenDetailModel = new ScreenDetailModel();
+    private _previousPage: string;
+    public get previousPage(): string {
+        return this._previousPage;
+    }
+    public set previousPage(value: string) {
+        this._previousPage = value;
+    }
     public get currentScreenSize(): ScreenDetailModel {
         return this._currentScreenSize;
     }
@@ -56,4 +66,6 @@ export class DocumentDataControlService {
     public set currentDocumentName(value: string) {
         this._currentDocument = value;
     }
+
+   
 }

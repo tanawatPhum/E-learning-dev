@@ -9,7 +9,8 @@ import { ProgressBarContentModel } from './elements/progressBar-content-model';
 import { FileContentModel } from './elements/file-content.model';
 import { LinkContentModel } from './elements/link-content.model';
 import { ExamContentModel } from './elements/exam-content.model';
-import { ScreenDetailModel } from '../common/common.model';
+import { ScreenDetailModel, RulerDetailModel } from '../common/common.model';
+import { NoteContentModel } from './elements/note-content.model';
 
 
 export class DocumentModel {
@@ -35,10 +36,12 @@ export class ContentsModel {
     public todoList:ToDoListContentModel[];
     public progressBar:ProgressBarContentModel[];
     public links:LinkContentModel[];
+    public notes:NoteContentModel[];
 }
 
 export class OtherDetailModel{
     public screenDevDetail:ScreenDetailModel = new ScreenDetailModel();
+    public rulerDevDetail:RulerDetailModel = new RulerDetailModel();
 }
 
 

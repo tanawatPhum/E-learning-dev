@@ -5,10 +5,13 @@ import { DocumentService } from '../../../services/document/document.service';
 import { DocumentModel } from '../../../models/document/content.model';
 import { TriggerEventModel, DocumentNavigatorModel } from 'src/app/models/document/document.model';
 import { DocumentDataControlService } from '../../../services/document/document-data-control.service';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd, RoutesRecognized } from '@angular/router';
 import { ScreenDetailModel } from '../../../models/common/common.model';
 import { async } from 'q';
 import { CommonService } from '../../../services/common/common.service';
+import { RoutingStrategy } from 'aws-sdk/clients/gamelift';
+import { filter, pairwise, map } from 'rxjs/operators';
+import { DocumentPreviewPageComponent } from '../document-preview-page/document-preview-page.component';
 declare var electron: any;
 @Component({
     selector: 'document-home-page',
@@ -34,6 +37,7 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
     public showDocumentList: boolean = false;
     public onSuccessCreateDocNav: Subject<boolean> = new Subject<boolean>();
     public currentScreenSize:ScreenDetailModel = new ScreenDetailModel();
+    public currentResult:DocumentModel = new DocumentModel();
 
     public contents = {
         event: {
@@ -49,14 +53,15 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
         private documentService: DocumentService,
         private documentDataService: DocumentDataControlService,
         private commonService: CommonService,
-        private router: Router,
-        private ngZone: NgZone
+        private ngZone:NgZone,
+        private router: Router
     ) { }
 
     ngOnInit() {
         this.currentScreenSize =  this.documentDataService.currentScreenSize
-     
-
+        this.documentDataService.previousPage  = DocumentHomePageComponent.name
+  
+    
         // if (electron) {
         //     electron.ipcRenderer.send('request-read-document', this.currentDocument)
         //     electron.ipcRenderer.once('reponse-read-document', (event, document) => { 
@@ -75,13 +80,17 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
 
     }
     ngAfterViewInit() {
-        if (this.currentDocumentName) {
-            this.loadTargetDoc(this.currentDocumentName);
-        } else {
-            let newDoc = new DocumentModel();
-            this.contentElement.next(newDoc);
-        }
-        this.loadDocumentNavigator();
+    
+
+            if (this.currentDocumentName) {
+                this.loadTargetDoc(this.currentDocumentName);
+            } else {
+                let newDoc = new DocumentModel();
+                this.contentElement.next(newDoc);
+            }
+            
+        
+    
     }
     ngAfterContentInit() {
         // this.documentDataService.currentScreen = {h}
@@ -120,7 +129,9 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
             });
         } else {
             this.documentService.loadDocFromDB(this.commonService.getPatternId(targetDocumentName)).subscribe((result) => {
-                this.contentElement.next(result);
+                this.currentResult = result;
+                this.loadDocumentNavigator();
+             
             });
         }
 
@@ -141,6 +152,7 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
                 })
             });
         } else {
+
             return this.documentService.loadDocFromDB(this.commonService.getPatternId(targetDocumentName));
         }
     }
@@ -175,15 +187,16 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
                 if (targetDocument) {
                     this.createNavigatorDocument(targetDocument, null)
                 }
-                this.documentList = new Array<DocumentModel>();
-                this.documentDataService.documentList = new Array<DocumentModel>();
-
-                this.documentNavList.forEach((documentNav, index) => {
-                    this.getTargetDoc(documentNav.id).subscribe((document) => {
-                        this.documentList.push(document);
-                        this.documentDataService.documentList.push(document);
-                    });
-                });
+             this.documentList =  this.documentDataService.documentList; 
+             this.contentElement.next(this.currentResult);
+              //console.log(this.documentDataService.documentList)  
+                // this.documentNavList.forEach((documentNav, index) => {
+                //     this.getTargetDoc(documentNav.id).subscribe((document) => {
+                //         this.documentList.push(document);
+                //         this.documentDataService.documentList.push(document);
+                //         console.log(this.documentList)  
+                //     });
+                // });
             });
         }
         this.onSuccessCreateDocNav.subscribe((status) => {
@@ -254,7 +267,6 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
         this.triggerModal.next({ action: this.modalTypes.newDocument.name, data: this.currentDocumentName });
     }
     public changeDocument(documentName) {
-        console.log("changeDoc", documentName)
         this.currentDocumentName = this.documentDataService.currentDocumentName = documentName;
         this.loadTargetDoc(this.currentDocumentName).then((res) => {
             console.log("loadTargetDoc", res)
@@ -410,6 +422,7 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
 
     }
     public dropTool(event) {
+        // console.log(event)
         let data = { element: event, toolType: event.dataTransfer.getData("tool-type") }
         this.dropElement.next({ action: this.contents.event.dropTool, data: data })
         // console.log(event)

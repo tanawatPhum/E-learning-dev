@@ -21,10 +21,10 @@ declare var CKEDITOR: any;
 @Injectable()
 export class DocumentService {
     constructor(
-        private documentDataControlService: DocumentDataControlService,
+        private documentDataService: DocumentDataControlService,
         private commonDataService:CommonDataControlService,
         private commonService:CommonService,
-        private socketIoService:SocketIoService
+        private socketIoService:SocketIoService,
     ) {
 
     }
@@ -58,11 +58,16 @@ export class DocumentService {
             // });
         })
     }
-    public loadDocFromDB(documentName): Observable<DocumentModel> {
+    public loadDocFromDB(documentName?,userId?): Observable<DocumentModel> {
+        console.log(userId)
         return new Observable(subscriber => {
+            let idDoc =null
+            if(documentName){
+                idDoc = this.commonService.getPatternId(documentName)
+            } 
             let requestObjDoc =  {
-                id:this.commonService.getPatternId(documentName),
-                userId:this.commonDataService.userId
+                id:idDoc,
+                userId:userId||this.commonDataService.userId
             }
             if (electron) {
                 electron.ipcRenderer.send('request-read-target-document', documentName)
@@ -72,25 +77,15 @@ export class DocumentService {
                     subscriber.complete();
                 })
             } else {
-                this.socketIoService.sendData(Constants.document.connect.type.documentRead,requestObjDoc).subscribe((objectDoc)=>{
-                    console.log("objectDoc",objectDoc)
-                   this.creaetDocumentModel(objectDoc).subscribe((result)=>{
-                        subscriber.next(result);
-                        subscriber.complete();
-                   });
+                this.socketIoService.sendData(Constants.document.connect.type.documentRead,requestObjDoc).subscribe((objectDoc:DocumentModel[])=>{
+                   
+                        this.creaetDocumentModel(objectDoc).subscribe((result)=>{
+                             subscriber.next(result);
+                             subscriber.complete();
+                        });
+                    
+   
                 });
-                // const requestDB = window.indexedDB.open('e-learning', 1);
-                // requestDB.onerror = ((error) => {
-                //     console.error('error: ', error);
-                // });
-                // requestDB.onsuccess = (async (event) => {
-                //     this.indexDB = requestDB.result;
-                //     this.getDoc(documentName).subscribe((objectDoc) => {
-                //         console.log('☛ Result Document from Database : ', objectDoc);
-                //         subscriber.next(objectDoc);
-                //         subscriber.complete();
-                //     });
-                // });
             }
 
         });
@@ -354,7 +349,7 @@ export class DocumentService {
     }
 
     public compileStyles(styles: string, tagElement?: string) {
-        let editor = CKEDITOR.instances[this.documentDataControlService.nameTemplate];
+        let editor = CKEDITOR.instances[this.documentDataService.nameTemplate];
         let style = new CKEDITOR.style({
             element: tagElement || 'span',
             attributes: {
@@ -517,7 +512,7 @@ export class DocumentService {
                              subscriber.next(Constants.common.message.status.success.text);
                          }
                      })
-                     .catch(err => console.error('upload file ams error',err));
+                     .catch(err => subscriber.next(Constants.common.message.status.success.text));
                  })  
             }else{
                 subscriber.next(Constants.common.message.status.success.text);
@@ -549,8 +544,14 @@ export class DocumentService {
     public creaetDocumentModel(value):Observable<DocumentModel>{
         return new Observable((subscriber)=>{
             // console.log('☛ Result Document from Flie : ', value);
-            let result:DocumentModel;
-            if(value){
+            let result;
+            if(Array.isArray(value)){
+                result = value;
+                result.forEach(element => {
+                    element.status = Constants.common.message.status.success.text;
+                });
+            }
+            else if(value){
                 result = value;
                 result.status = Constants.common.message.status.success.text;
             }else{
@@ -564,5 +565,35 @@ export class DocumentService {
         })
 
     }
+
+    // public createDocumentList(){
+    //     this.loadDocFromDB().subscribe((document)=>{
+    //         console.log('document',document)
+    //     })
+    //     // this.documentDataService.documentNavList.forEach((documentNav)=>{
+    //         // this.getTargetDoc(documentNav.id).subscribe((document) => {
+    //         //     this.documentDataService.documentList.push(document);
+    //         // })
+    //     // })
+    // }
+    // public getTargetDoc(targetDocumentName): Observable<DocumentModel> {
+    //     if (electron) {
+    //         return new Observable((subscriber) => {
+    //             // console.log("targetDocumentName",targetDocumentName)
+    //             electron.ipcRenderer.send('request-read-target-document', targetDocumentName)
+    //             electron.ipcRenderer.once('reponse-read-target-document', (event, result) => {
+    //                 // console.log(' ❏ Object Document :', result);
+
+    //                 subscriber.next(result);
+    //                 subscriber.complete();
+    //                 electron.ipcRenderer.removeListener('request-read-target-document', () => { });
+    //                 electron.ipcRenderer.removeListener('reponse-read-target-document', () => { });
+    //             })
+    //         });
+    //     } else {
+
+    //         return this.loadDocFromDB(this.commonService.getPatternId(targetDocumentName));
+    //     }
+    // }
     
 }

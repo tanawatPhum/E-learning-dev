@@ -6,6 +6,7 @@ import { CommonResponseModel } from '../../models/common/common.model';
 @Injectable()
 export class SocketIoService {
     private socket: SocketIOClient.Socket;
+
     constructor() {
         // this.socket = io.connect('http://localhost:8000');
     }

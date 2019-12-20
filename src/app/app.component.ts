@@ -4,6 +4,7 @@ import { DocumentDataControlService } from './services/document/document-data-co
 import { SocketIoService } from './services/common/socket.service';
 import { CommonDataControlService } from './services/common/common-data-control.service';
 import { Constants } from './global/constants';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +17,9 @@ export class AppComponent implements OnInit {
     private commonService: CommonService, 
     private documentDataService:DocumentDataControlService,
     private socketIoService:SocketIoService,
-    private commonDataService:CommonDataControlService
+    private commonDataService:CommonDataControlService,
+    private router: Router,
+    private route: ActivatedRoute,
     ) { }
   ngOnInit() {
     
@@ -28,5 +31,7 @@ export class AppComponent implements OnInit {
     this.commonDataService.userId = Constants.common.user.id;
     this.documentDataService.currentScreenSize.height = window.screen.height;
     this.documentDataService.currentScreenSize.width = window.screen.width;
+ 
+    
   }
 }

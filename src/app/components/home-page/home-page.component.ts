@@ -59,25 +59,27 @@ export class HomePageComponent implements OnInit , AfterViewInit , OnDestroy{
         console.log('destroy home')
     }
     public getDocumentNavigator(){
-        
+        this.loading =true;
         if(electron){
             this.loadDocumentNavigator();
         }else{
             this.documentService.initDBDoc().subscribe(()=>{
-                this.loadDocumentNavigator();
+                //this.loadDocumentNavigator();
+                this.documentService.loadDocFromDB().subscribe((documents:any)=>{
+                    this.documentDataService.documentList =  documents;
+                    console.log(this.documentDataService.documentList)
+                    this.loadDocumentNavigator();
+                })
             });
         }
     }
     public loadDocumentNavigator() {
-        this.loading =true;
             this.documentService.loadDocumentNavigatorFromDB().subscribe((result) => {
                 this.documentNavList = this.documentDataService.documentNavList = result;
-                console.log("this.documentNavList",this.documentNavList)
-                this.documentDataService.documentList =  new Array<DocumentModel>();
+                //this.documentDataService.documentList =  new Array<DocumentModel>();
                 this.getDocumentList()
             });
     }
-    
     public getDocumentList(){
         this.documentList = new  Array<DocumentModel>();
         this.homeDocumentList.html(null);

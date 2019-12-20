@@ -6,8 +6,19 @@
 CKEDITOR.editorConfig = function(config) {
     config.removePlugins = 'magicline'
     config.extraAllowedContent = 'div(*){*}[*]; ol li span a(*){*}[*]'
-        // config.removePlugins = 'dragdrop,basket';
-        // Define changes to default configuration here. For example:
-        // config.language = 'fr';
-        // config.uiColor = '#AADC6E';
+    config.toolbarLocation = 'top';
+    config.toolbar = [
+
+
+        { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
+        { name: 'paragraph', items: ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
+        { name: 'styles', items: ['Font', 'FontSize'] },
+        { name: 'colors', items: ['TextColor', 'BGColor'] },
+
+    ];
+    config.floatSpacePinnedOffsetY = 120;
+    // config.removePlugins = 'dragdrop,basket';
+    // Define changes to default configuration here. For example:
+    // config.language = 'fr';
+    // config.uiColor = '#AADC6E';
 };

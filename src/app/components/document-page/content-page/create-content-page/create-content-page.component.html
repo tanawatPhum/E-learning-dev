@@ -1,13 +1,14 @@
 <!--component html goes here -->
 <div class="row max-height">
     <div class="col-10 pl-3">
-        <range-slider-page></range-slider-page>
-        <div class="container-content">
-            <div #contentTemplate id="contentTemplate" class="content-template content-template-create">
+        <range-slider-page [rulerDetailSubject]="rulerDetailSubject" (eventToParent)="eventFromChild($event)"></range-slider-page>
 
-            </div>
-
+        <!-- <div class="container-content"> -->
+        <div #contentTemplate id="contentTemplate" class="content-template content-template-create">
+            <loading-page *ngIf="loading"></loading-page>
         </div>
+
+        <!-- </div> -->
     </div>
     <div class="full-screen border-left container-option-content">
         <div #contentOptionTool class="full-screen content-option-tool">

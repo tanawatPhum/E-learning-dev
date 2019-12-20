@@ -4,7 +4,6 @@ import { DocumentService } from '../../../services/document/document.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DocumentModel } from '../../../models/document/content.model';
 import { ScreenDetailModel } from 'src/app/models/common/common.model';
-import { Constants } from '../../../global/constants';
 import { CommonService } from '../../../services/common/common.service';
 import { find } from 'rxjs/operators';
 import { commentContentModel, commentDetailModel } from '../../../models/document/elements/comment-content.model';
@@ -23,7 +22,12 @@ import { FileContentModel } from '../../../models/document/elements/file-content
 import { LinkContentModel } from 'src/app/models/document/elements/link-content.model';
 import { ExamContentModel } from 'src/app/models/document/elements/exam-content.model';
 import { CommonDataControlService } from '../../../services/common/common-data-control.service';
+import { NoteContentModel } from '../../../models/document/elements/note-content.model';
+import { RulerDetailModel } from '../../../models/common/common.model';
+import { Constants } from 'src/app/global/constants';
 
+
+declare var CKEDITOR: any;
 
 declare var electron: any;
 declare var Wistia: any;
@@ -65,6 +69,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             handleFile: 'handleFile',
             handleLink: 'handleLink',
             handleExam: 'handleExam',
+            handleNote: 'handleNote',
             handleDocumentTrack:'handleDocumentTrack'
         },
         data: {
@@ -75,6 +80,9 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             setDocument: 'setDocument',
             setDocumentTrack: 'setDocumentTrack',
 
+        },
+        style:{
+            addStyleBoxContentNote: 'addStyleBoxContentNote',
         }
     }
     public boxes: BoxContentModel[] = new Array<BoxContentModel>();
@@ -88,8 +96,10 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
     public links:LinkContentModel[] = new Array<LinkContentModel>();
     public exams:ExamContentModel[]  = new  Array<ExamContentModel>(); 
     public progressBars: ProgressBarContentModel[] = new Array<ProgressBarContentModel>();
+    public notes:NoteContentModel[] = new Array<NoteContentModel>();
     private documentTrackInterval:any;
     private currentUrlParam:any;
+    private systemDocument:DocumentModel = new DocumentModel();
     constructor(
         private documentDataService: DocumentDataControlService,
         private documentService: DocumentService,
@@ -111,6 +121,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         clearInterval(this.documentTrackInterval)
         $(document).find('body').css('overflow-x','auto');
         $(document).find('body').css('overflow-y','hidden');
+        this.documentDataService.previousPage =  DocumentPreviewPageComponent.name
     }
     ngAfterContentInit() {
 
@@ -137,9 +148,10 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             if(this.currentUrlParam['userId']){
                 this.CommonDataService.userId =  this.currentUrlParam['userId'];
             }
-            
+           // console.log(this.documentDataService.currentDocumentName);
+            this.loadHtml(this.documentDataService.currentDocumentName);
         })
-        this.loadHtml(this.documentDataService.currentDocumentName);
+        
 
     }
 
@@ -157,9 +169,25 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         } else {
             this.documentService.loadDocFromDB(this.commonService.getPatternId(documentName)).subscribe((result) => {
                 console.log(' ❏ Object Document :', result)
-                this.setElements(this.actions.element.setResultElement, null, result);
-                this.setTemplate(this.actions.template.setDocumentTrack);
+                this.documentService.loadDocFromDB(this.commonService.getPatternId(documentName),Constants.common.user.id).subscribe((systemResult) => {
+                    console.log(' ❏ Object Document system :', systemResult)
+                    // this.setElements(this.actions.element.setResultElement, null, result);
+                    // this.setTemplate(this.actions.template.setDocumentTrack);
+                    
+                        this.comments = systemResult.contents.comments ||  new Array<commentContentModel>();
+               
+                        
+                        setTimeout(() => {
+                            this.setElements(this.actions.element.setCommentElement);
+                            this.handles(this.actions.handle.handleComment);
+                        }, 1000);
+                        this.setElements(this.actions.element.setResultElement, null, result);
+                        this.setTemplate(this.actions.template.setDocumentTrack);
+                        
+                });
+  
             });
+        
         };
     }
     public setTemplate(action) {
@@ -168,6 +196,8 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             this.rootElement = $(this.documentPreviewContent.nativeElement);
             // - Constants.general.element.css.navBar.height
             this.rootElement.css('height', $(window).height())
+
+            
             // this.currentScreenSize.height = $(this.rootElement).outerHeight();
             // this.currentScreenSize.width = $(this.rootElement).outerWidth();
             // $(window).resize((event) => {
@@ -186,9 +216,9 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                     this.handles(this.actions.handle.handleDocumentTrack);
                     this.handles(this.actions.handle.handleToDoList);
                     this.handles(this.actions.handle.handleProgressBar);
-                   this.documentTrackInterval = setInterval(()=>{
-                        this.handles(this.actions.handle.handleDocumentTrack);
-                    },2000)
+                //    this.documentTrackInterval = setInterval(()=>{
+                //         this.handles(this.actions.handle.handleDocumentTrack);
+                //     },2000)
                 };
             })
             
@@ -202,7 +232,12 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
     public setElements(action, elment?: JQuery<Element>, data?: any) {
         if (action === this.actions.element.setResultElement) {
             this.currentResult = data;
-            this.contentTemplateSize =  this.currentResult.otherDetail.screenDevDetail;
+            try{
+                this.contentTemplateSize =  this.currentResult.otherDetail.screenDevDetail;
+            }catch(e){
+
+            }
+            
          //   console.log("contentTemplateSize",this.contentTemplateSize)
             // if(!this.contentTemplateSize.width){
             //     this.contentTemplateSize.width = this.currentResult.otherDetail.screenDevDetail.width;
@@ -210,18 +245,25 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             // if(!this.contentTemplateSize.height){
             //     this.contentTemplateSize.height = this.currentResult.otherDetail.screenDevDetail.height;
             // }
-         let html = '<div id="contentTemplate" style="overflow-x:hidden;overflow-y:auto;position:relative; width:' + this.contentTemplateSize.width + 'px;height:' + this.contentTemplateSize.height + 'px">' + data.html + '</div>'
+            let rulerDetail:RulerDetailModel = this.currentResult.otherDetail.rulerDevDetail || new RulerDetailModel();
+            if(rulerDetail&&rulerDetail.paddingLeft<0){
+                rulerDetail.paddingLeft = 0;
+            }
+         let html = '<div class="template-scroll" id="contentTemplate" style="overflow:hidden;position:relative;padding-left:'+rulerDetail.paddingLeft+'%;padding-right:' +(100-rulerDetail.paddingRight)+  '%;width:' +  this.contentTemplateSize.width + 'px;height:' + this.contentTemplateSize.height + 'px" >' + data.html + '</div>'
             this.rootElement.html(html);
             this.retrieveData(this.actions.data.retrieveResultData, data);
             this.setElements(this.actions.element.previewElement);
             this.handles(this.actions.handle.handleSubForm);
             this.handles(this.actions.handle.handleVideo);
-            this.handles(this.actions.handle.handleComment);
+        
             this.handles(this.actions.handle.handleFile);
             this.handles(this.actions.handle.handleLink);
             this.handles(this.actions.handle.handleExam);
+            this.handles(this.actions.handle.handleNote);
+     
            // this.handles(this.actions.handle.handleToDoList);
-            this.setElements(this.actions.element.setCommentElement);
+        //    this.handles(this.actions.handle.handleComment);
+        //     this.setElements(this.actions.element.setCommentElement);
         }
         else if (action === this.actions.element.previewElement) {
             this.rootElement.find('.content-box').removeClass('content-box-active border border-primary');
@@ -246,9 +288,13 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             this.rootElement.find('.content-box').find('.content-progress-bar').find('.progress-bar').css('width', 0)
             this.rootElement.find('.content-comment').css('height', 'auto');
             this.rootElement.find('.content-comment').find('.comment-form').css('padding-bottom', '2.5%');
-
+            this.rootElement.find('.note-area').hide();
+            this.rootElement.find('.content-textarea').attr('contenteditable', 'false');
+            this.rootElement.find('.content-textarea').css('cursor', 'default');
             $(document).find('body').css('overflow-x','hidden');
             $(document).find('body').css('overflow-y','hidden');
+
+             
             this.setElements(this.actions.element.ratioElement)
         }
         if (action === this.actions.element.ratioElement) {
@@ -335,6 +381,9 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         }
         else if (action === this.actions.element.setCommentElement) {
             this.comments.forEach(async (parentBox) => {
+                // console.log('cxx',$('#' + parentBox.id+'-comment'))
+                $('#' + parentBox.id).find('.comment-reply').remove();
+                console.log($('#' + parentBox.id))
                 for await(const comment of parentBox.listComment){
                     this.currentCommentDetail.id = comment.id;
                     this.currentCommentDetail.message = comment.message;
@@ -407,7 +456,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             htmlToolComment += '</div>';
             htmlToolComment += '</div>';
             htmlToolComment += '<div class="col-10 pt-4 pl-5 ">';
-            htmlToolComment += '<div class="reply-user-name">test</div>';
+            htmlToolComment += '<div class="reply-user-name">userId:'+this.CommonDataService.userId +'</div>';
             htmlToolComment += '<div class="reply-user-massege">' + this.currentCommentDetail.message;
             htmlToolComment += '<div class="reply-user-massege-img"></div>'
             htmlToolComment += '</div>';
@@ -478,7 +527,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                             }
     
                             if (subaction === Constants.common.event.click.save || subaction == "replyChild") {
-                                this.saveDocument();
+                                this.saveDocument(Constants.common.user.id);
                             }
                             this.handles(this.actions.handle.handleComment, element)
                             resovle(Constants.common.message.status.success.text)
@@ -500,7 +549,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                         this.comments[targetCommentIndex].listComment[targetCommentReply].childs.push(replyComment)
                     }
                     if (subaction === Constants.common.event.click.save || subaction == "replyChild") {
-                        this.saveDocument();
+                        this.saveDocument(Constants.common.user.id);
                     }
                 }
             }
@@ -573,6 +622,11 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                                         if (isHasToDoList.length > 0) {
                                             this.handles(this.actions.handle.handleToDoList);
                                         }
+                                        clearInterval(this.documentTrackInterval)
+                                    }else{
+                                        this.documentTrackInterval = setInterval(()=>{
+                                            this.handles(this.actions.handle.handleDocumentTrack);
+                                        },2000)
                                     }
                                 }
                             })
@@ -583,7 +637,13 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                         //     this.handles(this.actions.handle.handleToDoList);
                         // }
                     });
-                    
+
+                    video.bind("pause", function() {
+                        clearInterval(this.documentTrackInterval)
+                    });
+                    video.bind("end", function() {
+                        clearInterval(this.documentTrackInterval)
+                    });
      
                     // console.log(targetVideo);
                    // let targetVideoTrackIndex = this.currentDocumentTrack.contents.findIndex(content => content.parentId === this.currentResult.contents.videos[targetVideoIndex].parentId)
@@ -646,7 +706,8 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                     // })
                 })
                 let percentProgress = summaryOfPercent / numberOfContentProgress;
-                this.rootElement.find('#'+ parentBox.parentId).find('.progress-bar').css('width', percentProgress + '%');
+                this.rootElement.find('#'+ parentBox.parentId).find('.progress-bar').css('width', Math.floor(percentProgress) + '%');
+                this.rootElement.find('#'+ parentBox.parentId).find('.progress-bar').html( Math.floor(percentProgress) + '%')
             })
             // this.rootElement.find('.content-progress-bar').find('.progress-bar').css('width', percentProgress + '%');
 
@@ -725,7 +786,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                         this.comments[targetParentBoxIndex].listComment[targetCommentIndex].liked = parseInt(liked) + 1;
                     }
 
-                    this.saveDocument();
+                    this.saveDocument(Constants.common.user.id);
                 });
                 // element.find('#comment-box-current').unbind().bind('click',(element)=>{
                 //     console.log(element);
@@ -932,15 +993,78 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
   
             })
         }
+        else if (action === this.actions.handle.handleNote) {
+            this.rootElement.find('.note-icon.writing.hideCK').show();
+            this.rootElement.find('.note-icon.writing.showCK').hide();
+            this.rootElement.find('.cke').removeClass('currentShow');
+            this.rootElement.find('.cke').hide();
+            this.rootElement.find('.note-area').hide();
+        
 
+            this.rootElement.find('.content-note').each((index,element)=>{
+                // $(element).find('')
+                console.log($(element).attr('id'))
+            })
+            this.rootElement.find('.note-icon.writing.hideCK ').unbind().bind('click',(element)=>{
+                let parentId = $(element.target).attr('data-parentid')
+                  $('#'+parentId+'-note').show();
+                  $('#'+parentId+'-note-area').show();
+                  $(element.target).hide();
+                  $('#'+parentId+'-note').find('.note-icon.writing.showCK').show();
+                  $('#'+parentId+'-note').find('.note-icon.writing.showCK').css('width',$('.note-icon.writing.hideCK').width()-($('.note-icon.writing.hideCK').width()*70/100))
+           
+                if(!CKEDITOR.instances[parentId+'-note-area']){
+                    CKEDITOR.disableAutoInline = true;
+                    CKEDITOR.inline(parentId+'-note-area');
+                    CKEDITOR.on('instanceReady',  (ev)=> {
+                      ev.editor.focus();
+                      $('#cke_'+ parentId+'-note-area').addClass('currentShow');
+                      $('#cke_'+ parentId+'-note-area').find('.cke_top').show();
+                      this.addStyleElements(this.actions.style.addStyleBoxContentNote,$(element.target));
+                      ev.editor.on('focus',  (e)=> {  
+                        $('#cke_'+ parentId+'-note-area').show()
+                        this.addStyleElements(this.actions.style.addStyleBoxContentNote,$(element.target));
+                     });  
+                     ev.editor.on('blur',  (e)=> {  
+                      if($('#cke_'+ parentId+'-note-area').hasClass('currentShow')){
+                        $('#cke_'+ parentId+'-note-area').show()
+                         this.addStyleElements(this.actions.style.addStyleBoxContentNote,$(element.target));
+                       }
+                     });  
+                     ev.editor.on('change', this.commonService.debounce((event) => {
+                        
+                         //console.log( CKEDITOR.instances[parentId+'-note-area'].editable().getText() )
+                         this.saveDocument()
+                    }, 1000));
+                    });
+                }else{
+                    $('#cke_'+ parentId+'-note-area').addClass('currentShow');
+                    $('#cke_'+ parentId+'-note-area').show();
+                    $('#cke_'+ parentId+'-note-area').find('.cke_top').show();
+                    this.addStyleElements(this.actions.style.addStyleBoxContentNote,$(element.target));
+                }
+
+            })      
+            this.rootElement.find('.note-icon.writing.showCK').unbind().bind('click',(element)=>{
+                let parentId = $(element.target).attr('data-parentid')
+                $(element.target).hide();
+                $('#'+parentId+'-note').find('.note-icon.writing.hideCK').show();
+                $('#cke_'+ parentId+'-note-area').removeClass('currentShow');
+                $('#cke_'+ parentId+'-note-area').hide();
+                $('#cke_'+ parentId+'-note-area').find('.cke_top').hide();
+                $('#'+parentId+'-note-area').hide();
+            })
+
+        }
 
     }
-    private saveDocument() {
+    private saveDocument(userId?) {
         let saveobjectTemplate: DocumentModel = {
             nameDocument: this.currentResult.nameDocument,
             previewImg: this.currentResult.previewImg,
-            userId:Constants.common.user.id,
-            id: this.currentResult.id, html: this.currentResult.html,
+            userId:userId||this.CommonDataService.userId,
+            id: this.currentResult.id, 
+            html: $('#contentTemplate').html(),
             status: this.currentResult.status,
             otherDetail: this.currentResult.otherDetail,
             contents: {
@@ -954,9 +1078,11 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                 comments: this.comments,
                 todoList: this.toDoLists,
                 exams:this.exams,
+                notes:this.notes,
                 progressBar: this.progressBars
             }
         }
+        console.log('saveobjectTemplate',saveobjectTemplate)
         this.documentService.saveDocument(this.currentResult.nameDocument, saveobjectTemplate).subscribe((status) => {
 
         })
@@ -1024,7 +1150,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             this.boxes = results.contents.boxes || new Array<BoxContentModel>();
             this.subForms = results.contents.subFroms || new Array<SubFormContentModel>();
             this.imgs = results.contents.imgs||  new Array<ImgContentModel>();
-            this.comments = results.contents.comments ||  new Array<commentContentModel>();
+            //this.comments = results.contents.comments ||  new Array<commentContentModel>();
             this.toDoLists = results.contents.todoList ||  new Array<ToDoListContentModel>();
             this.exams =  results.contents.exams ||  new Array<ExamContentModel>()
             this.videos = results.contents.videos ||  new Array<VideoContentModel>();
@@ -1032,8 +1158,17 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             this.files =   results.contents.files ||  new Array<FileContentModel>();
             this.links =   results.contents.links ||  new Array<LinkContentModel>();
             this.textAreas = results.contents.textAreas ||  new Array<TextAreaContentModel>();
+            this.notes  = results.contents.notes||  new Array<NoteContentModel>();
         }
 
+    }
+
+    private addStyleElements(action: string, element?: JQuery<Element>, styles?: string, subaction?: string) {
+        if(action===this.actions.style.addStyleBoxContentNote && element){
+            let parentId = element.attr('data-parentid')
+            $('#cke_'+ parentId+'-note-area').css('z-index',10)
+            $('#cke_'+ parentId+'-note-area').css('width', document.getElementById(parentId).getBoundingClientRect().width)
+        }
     }
 
 }
