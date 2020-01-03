@@ -249,7 +249,8 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             if(rulerDetail&&rulerDetail.paddingLeft<0){
                 rulerDetail.paddingLeft = 0;
             }
-         let html = '<div class="template-scroll" id="contentTemplate" style="overflow:hidden;position:relative;padding-left:'+rulerDetail.paddingLeft+'%;padding-right:' +(100-rulerDetail.paddingRight)+  '%;width:' +  this.contentTemplateSize.width + 'px;height:' + this.contentTemplateSize.height + 'px" >' + data.html + '</div>'
+        let html = '<div class="template-scroll" id="contentTemplate" style="overflow:hidden;position:relative;padding-left:'+rulerDetail.paddingLeft+'%;padding-right:' +(100-rulerDetail.paddingRight)+  '%;width:' +  this.contentTemplateSize.width + 'px;height:' + this.contentTemplateSize.height + 'px" >' + data.html + '</div>'
+       // let html = data.html; 
             this.rootElement.html(html);
             this.retrieveData(this.actions.data.retrieveResultData, data);
             this.setElements(this.actions.element.previewElement);
@@ -294,10 +295,61 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             $(document).find('body').css('overflow-x','hidden');
             $(document).find('body').css('overflow-y','hidden');
 
+
+            this.documentDataService.currentScreenSize.height =  $('.document-preview-content').height();
+            this.documentDataService.currentScreenSize.width =  $('.document-preview-content').width();
              
             this.setElements(this.actions.element.ratioElement)
         }
         if (action === this.actions.element.ratioElement) {
+            // console.log("currentH",this.documentDataService.currentScreenSize.height)
+            // console.log("currentW",this.documentDataService.currentScreenSize.width)
+            // console.log("templateH",this.contentTemplateSize.height)
+            // console.log("templateW",this.contentTemplateSize.width)
+            // let diffH =  (this.documentDataService.currentScreenSize.height-this.contentTemplateSize.height )/this.documentDataService.currentScreenSize.height  * 100;
+            //let diffW  =  (this.documentDataService.currentScreenSize.width - this.contentTemplateSize.width )/this.documentDataService.currentScreenSize.width;
+            
+           // this.rootElement.find('#template-doc').css('min-height', this.rootElement.find('#template-doc').height() + (( this.rootElement.find('#template-doc').height()* diffH) /100))
+
+            // console.log("diffW",diffW)
+            // console.log("diffH",diffH)
+
+            // let ratioW = this.documentDataService.currentScreenSize.width / this.contentTemplateSize.width;
+            // //let ratioH = this.documentDataService.currentScreenSize.height / (this.contentTemplateSize.height)
+            // //console.log("ratioH",ratioH)
+            let ratioH = this.documentDataService.currentScreenSize.height / this.contentTemplateSize.height;
+            let ratioW = this.documentDataService.currentScreenSize.width / this.contentTemplateSize.width;
+            console.log(ratioW)
+
+            // let scale = Math.min(
+            //     this.documentDataService.currentScreenSize.width/ this.contentTemplateSize.width,    
+            //     this.documentDataService.currentScreenSize.height /this.contentTemplateSize.height
+            //   );
+            this.rootElement.find('#contentTemplate').css({
+                transform:  'scale( '+ ratioW + ','+ratioW +')',
+                transformOrigin: 'left top'
+            });
+            // this.rootElement.find('.content-')
+            // this.rootElement.find('.content-box').each((index,element)=>{
+            //     console.log( $(element).position().top )
+            //     console.log( $(element).position().left )
+            //     console.log( $(element).height() )
+            //     console.log( $(element).width() )
+            //     $(element).css('height',$(element).height() + (($(element).height()* diffH) /100))
+            //     // console.log("new top", $(element).position().top + (($(element).position().top*diffH)/100))
+
+            //     // console.log("new left",$(element).position().left + (($(element).position().left*diffW)/100))
+            //     // console.log("new height", $(element).height() + (($(element).height()* diffH) /100))
+
+            //     // console.log("new width", $(element).width() + (($(element).width()*diffW)/100))
+
+            //     // $(element).css('top',$(element).position().top + (($(element).position().top*diffH)/100))   
+            //     // $(element).css('left',$(element).position().left + (($(element).position().left*diffW)/100 ))   
+               
+            //     // $(element).css('height',$(element).height() + (($(element).height()* diffH) /100))  
+            //     // $(element).css('width',$(element).width() + (($(element).width()*diffW)/100))  
+            // })
+      
             // let ratioW;
             // let ratioH;
 
@@ -314,7 +366,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
 
 
             
-            let ratioW = this.documentDataService.currentScreenSize.width / this.contentTemplateSize.width;
+            //let ratioW = this.documentDataService.currentScreenSize.width / this.contentTemplateSize.width;
 //         let ratioH = this.documentDataService.currentScreenSize.height / (this.contentTemplateSize.height)
 //             // let ratioH = this.documentDataService.currentScreenSize.width / this.contentTemplateSize.width;
 // console.log(Math.min(ratioW,ratioH))
@@ -326,10 +378,10 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             // console.log("contentTemplateSize",this.contentTemplateSize)
             // console.log("ratioW",ratioW)
             // console.log(this.documentDataService.currentScreenSize)
-            this.rootElement.find('#contentTemplate').css({
-                transform: 'scale( ' + ratioW + ')',
-                transformOrigin: 'left top'
-            });
+            // this.rootElement.find('#contentTemplate').css({
+            //     transform: 'scale( ' + ratioW + ')',
+            //     transformOrigin: 'left top'
+            // });
 
 
 

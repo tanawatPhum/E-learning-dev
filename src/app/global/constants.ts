@@ -36,8 +36,8 @@ export class Constants {
                 box:{
                     bgNoneColor: 'transparent',
                     bgWhiteColor: '#fff',
-                    height:"40%",
-                    width:"40%"
+                    height:"300px",
+                    width:"300px"
                 },
                 navBar:{
                     height:55
@@ -59,7 +59,8 @@ export class Constants {
   
         },
         host:{
-            smartDoc:'http://localhost:4200'
+            smartDoc:'http://localhost:4200',
+            storage:'https://e-learning-dev.s3.eu-central-1.amazonaws.com/public/'
         }
     }
     public static readonly document = {

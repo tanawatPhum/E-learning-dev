@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ComponentFactoryResolver, ViewChild } from '@angular/core';
 import { Constants } from '../../global/constants';
 import { Observable, Subscriber } from 'rxjs';
 import { DocumentModel } from '../../models/document/content.model';
@@ -6,38 +6,46 @@ import { DocumentNavigatorModel } from 'src/app/models/document/document.model';
 import { DocumentDataControlService } from './document-data-control.service';
 import html2canvas from 'html2canvas';
 import { CommonService } from '../common/common.service';
-import { CommonResponseModel } from 'src/app/models/common/common.model';
+import { CommonResponseModel, UploadFileModel } from 'src/app/models/common/common.model';
 import { DocumentTrackModel } from '../../models/document/document.model';
 import { FileContentModel } from '../../models/document/elements/file-content.model';
 import Amplify, { Storage, Auth } from 'aws-amplify';
-import { async } from '@angular/core/testing';
-import { constants } from 'os';
 import { SocketIoService } from '../common/socket.service';
 import { CommonDataControlService } from '../common/common-data-control.service';
+import { AdHost } from '../../directives/ad-host/ad-host.directive';
+
 
 declare var electron: any;
 declare var rangy: any;
 declare var CKEDITOR: any;
 @Injectable()
 export class DocumentService {
+    @ViewChild(AdHost, {static: true}) adHost: AdHost;
     constructor(
         private documentDataService: DocumentDataControlService,
-        private commonDataService:CommonDataControlService,
-        private commonService:CommonService,
-        private socketIoService:SocketIoService,
+        private commonDataService: CommonDataControlService,
+        private commonService: CommonService,
+        private socketIoService: SocketIoService,
     ) {
 
     }
     public indexDB: any;
     public highlighter: any;
+    // public createContent(){
+    //     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(Img);
+    //     const viewContainerRef = this.adHost.viewContainerRef;
+    //     viewContainerRef.clear();
+    //     const componentRef = viewContainerRef.createComponent(componentFactory);
+    // }
+
     public initDBDoc(): Observable<any> {
         return new Observable(subscriber => {
             if (!electron) {
-                this.socketIoService.sendData(Constants.document.connect.type.documentReadMongoDBToCacheDB).subscribe((status)=>{
-                   //this.creaetDocumentModel(objectDoc).subscribe((result)=>{
-                        subscriber.next(status);
-                        subscriber.complete();
-                   //});
+                this.socketIoService.sendData(Constants.document.connect.type.documentReadMongoDBToCacheDB).subscribe((status) => {
+                    //this.creaetDocumentModel(objectDoc).subscribe((result)=>{
+                    subscriber.next(status);
+                    subscriber.complete();
+                    //});
                 });
 
             }
@@ -58,16 +66,16 @@ export class DocumentService {
             // });
         })
     }
-    public loadDocFromDB(documentName?,userId?): Observable<DocumentModel> {
+    public loadDocFromDB(documentName?, userId?): Observable<DocumentModel> {
         console.log(userId)
         return new Observable(subscriber => {
-            let idDoc =null
-            if(documentName){
+            let idDoc = null
+            if (documentName) {
                 idDoc = this.commonService.getPatternId(documentName)
-            } 
-            let requestObjDoc =  {
-                id:idDoc,
-                userId:userId||this.commonDataService.userId
+            }
+            let requestObjDoc = {
+                id: idDoc,
+                userId: userId || this.commonDataService.userId
             }
             if (electron) {
                 electron.ipcRenderer.send('request-read-target-document', documentName)
@@ -77,14 +85,14 @@ export class DocumentService {
                     subscriber.complete();
                 })
             } else {
-                this.socketIoService.sendData(Constants.document.connect.type.documentRead,requestObjDoc).subscribe((objectDoc:DocumentModel[])=>{
-                   
-                        this.creaetDocumentModel(objectDoc).subscribe((result)=>{
-                             subscriber.next(result);
-                             subscriber.complete();
-                        });
-                    
-   
+                this.socketIoService.sendData(Constants.document.connect.type.documentRead, requestObjDoc).subscribe((objectDoc: DocumentModel[]) => {
+
+                    this.creaetDocumentModel(objectDoc).subscribe((result) => {
+                        subscriber.next(result);
+                        subscriber.complete();
+                    });
+
+
                 });
             }
 
@@ -92,8 +100,8 @@ export class DocumentService {
     }
     public loadDocumentNavigatorFromDB(): Observable<DocumentNavigatorModel[]> {
         return new Observable(subscriber => {
-            let requestObjDocNav =  {
-                userId:this.commonDataService.userId
+            let requestObjDocNav = {
+                userId: this.commonDataService.userId
             }
             if (electron) {
                 electron.ipcRenderer.send('request-read-document-list', null)
@@ -102,13 +110,13 @@ export class DocumentService {
                     subscriber.complete();
                 });
             } else {
-                this.socketIoService.sendData(Constants.document.connect.type.documentNavRead,requestObjDocNav).subscribe((objectDocNav)=>{
-                    if(!objectDocNav){
+                this.socketIoService.sendData(Constants.document.connect.type.documentNavRead, requestObjDocNav).subscribe((objectDocNav) => {
+                    if (!objectDocNav) {
                         objectDocNav = new Array<DocumentNavigatorModel>();
                     }
-                        subscriber.next(objectDocNav);
-                        subscriber.complete();
-                 });
+                    subscriber.next(objectDocNav);
+                    subscriber.complete();
+                });
                 // this.creaetDocumentModel(objectDoc).subscribe((result)=>{
                 //     subscriber.next(result);
                 // })
@@ -135,8 +143,8 @@ export class DocumentService {
     }
     public loadDocTrackFromDB(): Observable<DocumentTrackModel[]> {
         return new Observable(subscriber => {
-            let requestObjDocTrack =  {
-                userId:this.commonDataService.userId
+            let requestObjDocTrack = {
+                userId: this.commonDataService.userId
             }
             if (electron) {
                 // electron.ipcRenderer.send('request-read-target-document', documentName)
@@ -146,7 +154,7 @@ export class DocumentService {
                 //     subscriber.complete();
                 // })
             } else {
-                this.socketIoService.sendData(Constants.document.connect.type.documentTrackRead,requestObjDocTrack).subscribe((objectDocNav)=>{
+                this.socketIoService.sendData(Constants.document.connect.type.documentTrackRead, requestObjDocTrack).subscribe((objectDocNav) => {
                     subscriber.next(objectDocNav);
                     subscriber.complete();
                 });
@@ -167,17 +175,17 @@ export class DocumentService {
 
         });
     }
-    public deleteDocument(documentNavObj:DocumentNavigatorModel):Observable<string>{
+    public deleteDocument(documentNavObj: DocumentNavigatorModel): Observable<string> {
         return new Observable(subscriber => {
             if (electron) {
 
-            }else{
-                this.socketIoService.sendData(Constants.document.connect.type.documentDelete,documentNavObj).subscribe((res)=>{
-                    console.log('xxxx',res)
-                    if(res === Constants.common.message.status.success.text){
+            } else {
+                this.socketIoService.sendData(Constants.document.connect.type.documentDelete, documentNavObj).subscribe((res) => {
+                    console.log('xxxx', res)
+                    if (res === Constants.common.message.status.success.text) {
                         subscriber.next(Constants.common.message.status.success.text);
                         subscriber.complete();
-                    }else{
+                    } else {
                         subscriber.next(Constants.common.message.status.fail.text);
                         subscriber.complete();
                     }
@@ -221,7 +229,7 @@ export class DocumentService {
             //         }); 
             //     }
             // }
-            
+
         })
     }
     private getDoc(documentName?): Observable<DocumentModel> {
@@ -241,12 +249,12 @@ export class DocumentService {
             request.onsuccess = ((event) => {
                 // Do something with the request.result!
                 if (request.result) {
-                    let result:DocumentModel = request.result;
+                    let result: DocumentModel = request.result;
                     result.status = Constants.common.message.status.success.text;
                     subscriber.next(result);
                     subscriber.complete();
                 } else {
-                    let result:DocumentModel = new DocumentModel();
+                    let result: DocumentModel = new DocumentModel();
                     result.status = Constants.common.message.status.notFound.text;
                     subscriber.next(result);
                     subscriber.complete();
@@ -260,7 +268,7 @@ export class DocumentService {
         const transaction = this.indexDB.transaction(['documents']);
         const objectStore = transaction.objectStore('documents');
         let request = objectStore.get(documentName)
-        
+
         return new Observable(subscriber => {
             request.onerror = ((event) => {
                 console.error('Unable to retrieve daa from database!');
@@ -269,12 +277,12 @@ export class DocumentService {
             request.onsuccess = ((event) => {
                 // Do something with the request.result!
                 if (request.result) {
-                    let result:DocumentModel = request.result;
+                    let result: DocumentModel = request.result;
                     result.status = Constants.common.message.status.success.text;
                     subscriber.next(result);
                     subscriber.complete();
                 } else {
-                    let result:DocumentModel = new DocumentModel();
+                    let result: DocumentModel = new DocumentModel();
                     result.status = Constants.common.message.status.notFound.text;
                     subscriber.next(result);
                     subscriber.complete();
@@ -295,20 +303,20 @@ export class DocumentService {
             request.onsuccess = ((event) => {
                 // Do something with the request.result!
                 if (request.result) {
-                    let result:DocumentNavigatorModel[] = request.result;
-                    if(result.length > 0){
-                        result[0].status = Constants.common.message.status.success.text; 
+                    let result: DocumentNavigatorModel[] = request.result;
+                    if (result.length > 0) {
+                        result[0].status = Constants.common.message.status.success.text;
                     }
                     subscriber.next(result);
                     subscriber.complete();
                 } else {
-                    let result:DocumentNavigatorModel[] = new Array<DocumentNavigatorModel>();
-                    if(result.length > 0){
-                        result[0].status  = Constants.common.message.status.notFound.text;
+                    let result: DocumentNavigatorModel[] = new Array<DocumentNavigatorModel>();
+                    if (result.length > 0) {
+                        result[0].status = Constants.common.message.status.notFound.text;
                     }
                     subscriber.next(result);
                     subscriber.complete();
-                   // console.error('couldn\'t be found in your database!');
+                    // console.error('couldn\'t be found in your database!');
                 }
             });
         });
@@ -316,7 +324,7 @@ export class DocumentService {
     private getTrack(): Observable<DocumentTrackModel[]> {
         const transaction = this.indexDB.transaction(['tracks']);
         const objectStore = transaction.objectStore('tracks');
-        let request  = objectStore.getAll();
+        let request = objectStore.getAll();
         // if (documentName) {
         //     request = objectStore.get(documentName);
         // }else{
@@ -329,14 +337,14 @@ export class DocumentService {
             request.onsuccess = ((event) => {
                 // Do something with the request.result!
                 if (request.result) {
-                    let result:DocumentTrackModel[] = request.result;
+                    let result: DocumentTrackModel[] = request.result;
                     result.forEach(element => {
                         element.status = Constants.common.message.status.success.text;
                     });
                     subscriber.next(result);
                     subscriber.complete();
                 } else {
-                    let result:DocumentTrackModel[] = new Array<DocumentTrackModel>();
+                    let result: DocumentTrackModel[] = new Array<DocumentTrackModel>();
                     result.forEach(element => {
                         element.status = Constants.common.message.status.notFound.text;
                     });
@@ -358,8 +366,8 @@ export class DocumentService {
         });
         editor.applyStyle(style);
     }
-    public saveDocument(nameDocument,saveobjectTemplate):Observable<string>{
-        return new Observable((subscriber)=>{
+    public saveDocument(nameDocument, saveobjectTemplate): Observable<string> {
+        return new Observable((subscriber) => {
             if (electron) {
                 console.log(' ❏ Object for Save :', saveobjectTemplate);
                 electron.ipcRenderer.send('request-save-document', JSON.stringify(saveobjectTemplate))
@@ -368,7 +376,7 @@ export class DocumentService {
                     console.log('data has been saved to your file.');
                     //this.eventToParent.emit({ action: Constants.general.event.load.success, data: event })
                 });
-            }else{
+            } else {
                 // console.log("saveobjectTemplate",saveobjectTemplate)
                 // const requestTableDoc = this.indexDB.transaction(['documents'], 'readwrite');
                 // const objectStoreDoc = requestTableDoc.objectStore('documents');
@@ -392,17 +400,17 @@ export class DocumentService {
                 //             console.log('data has error',error);
                 //         };
                 //     }
-                    this.socketIoService.sendData(Constants.document.connect.type.documentSave, saveobjectTemplate).subscribe((result)=>{
-                        subscriber.next(Constants.common.event.load.success)
-                    })
+                this.socketIoService.sendData(Constants.document.connect.type.documentSave, saveobjectTemplate).subscribe((result) => {
+                    subscriber.next(Constants.common.event.load.success)
+                })
 
-                
+
 
             }
         });
     }
-    public saveDocumentNav(nameDocument,saveobjectNavTemplate):Observable<string>{
-        return new Observable((subscriber)=>{
+    public saveDocumentNav(nameDocument, saveobjectNavTemplate): Observable<string> {
+        return new Observable((subscriber) => {
             if (electron) {
                 electron.ipcRenderer.send('request-read-document-list', null)
                 electron.ipcRenderer.once('reponse-read-document-list', (event, documentList) => {
@@ -427,8 +435,8 @@ export class DocumentService {
                 electron.ipcRenderer.once('response-save-document-list', (event, status) => {
                     subscriber.next(Constants.common.event.load.success)
                 });
-            }else{
-                this.socketIoService.sendData(Constants.document.connect.type.documentNavSave,saveobjectNavTemplate).subscribe((result)=>{
+            } else {
+                this.socketIoService.sendData(Constants.document.connect.type.documentNavSave, saveobjectNavTemplate).subscribe((result) => {
                     subscriber.next(Constants.common.event.load.success)
                 })
                 // const requestTableNav = this.indexDB.transaction(['navigators'], 'readwrite');
@@ -446,10 +454,10 @@ export class DocumentService {
                 // }
             }
         });
-        
+
     }
-    public saveDocumentTrack(nameDocument,saveobjectTrack):Observable<string>{
-        return new Observable((subscriber)=>{
+    public saveDocumentTrack(nameDocument, saveobjectTrack): Observable<string> {
+        return new Observable((subscriber) => {
             if (electron) {
                 // console.log(' ❏ Object for Save :', saveobjectTemplate);
                 // electron.ipcRenderer.send('request-save-document', JSON.stringify(saveobjectTemplate))
@@ -458,8 +466,8 @@ export class DocumentService {
                 //     console.log('data has been saved to your file.');
                 //     //this.eventToParent.emit({ action: Constants.general.event.load.success, data: event })
                 // });
-            }else{
-                this.socketIoService.sendData(Constants.document.connect.type.documentTrackSave,saveobjectTrack).subscribe((result)=>{
+            } else {
+                this.socketIoService.sendData(Constants.document.connect.type.documentTrackSave, saveobjectTrack).subscribe((result) => {
                     subscriber.next(Constants.common.event.load.success)
                 })
                 // const requestTableTrack = this.indexDB.transaction(['tracks'], 'readwrite');
@@ -488,74 +496,90 @@ export class DocumentService {
             }
         });
     }
-    public uploadFile(files:FileContentModel[]):Observable<string>{
-        return new Observable((subscriber)=>{
+    public uploadFile(files: UploadFileModel[] | FileContentModel[]): Observable<string> {
+        console.log(files);
+        return new Observable((subscriber) => {
             Amplify.configure({
                 Auth: {
-                    identityPoolId: 'us-east-2:b1d020f3-2250-4e5f-beed-0fd588b8a01c',
-                    region: 'us-east-2',
-                    userPoolId: 'us-east-2_qCW1BuFYV',
-                    userPoolWebClientId:'663n1uidmi0ao3lrsk7ldsvv3q'
+                    identityPoolId: 'eu-central-1:4c9f1222-30c0-4db9-b9ed-57938e9684be',
+                    region: 'eu-central-1',
+                    // userPoolId: 'us-east-2_qCW1BuFYV',
+                    // userPoolWebClientId:'663n1uidmi0ao3lrsk7ldsvv3q'
                 },
                 Storage: {
                     bucket: 'e-learning-dev',
+
                 }
             });
-            let numberOfFiles  = 0;
-            if(files.length>0){
-                files.forEach(async (file)=>{
-                    console.log(file)
-                    await Storage.put(file.awsFileName, file.data,{contentType: file.data.type})
-                     .then (result => {
-                         numberOfFiles += 1;
-                         if(numberOfFiles === files.length){
-                             subscriber.next(Constants.common.message.status.success.text);
-                         }
-                     })
-                     .catch(err => subscriber.next(Constants.common.message.status.success.text));
-                 })  
-            }else{
+            let numberOfFiles = 0;
+            if (files.length > 0) {
+                files.forEach(async (file) => {
+                    await Storage.put(file.awsFileName, file.data, { contentType: file.data.type})
+                        .then(result => {
+                            numberOfFiles += 1;
+                            if (numberOfFiles === files.length) {
+                                console.log("Upload Success")
+                                subscriber.next(Constants.common.message.status.success.text);
+                            }
+                           
+                        })
+                        .catch(err => subscriber.next(Constants.common.message.status.success.text));
+                })
+            } else {
                 subscriber.next(Constants.common.message.status.success.text);
             }
         })
     }
-    public downloadFile(awsFileName:string):Observable<Blob>{
-        return new Observable((subscriber)=>{
-            Storage.get(awsFileName,{download: true}).then((result:any)=>{
-                let blob=new Blob([result.Body],{type: result.ContentType})
+    public downloadFile(awsFileName: string): Observable<Blob> {
+        return new Observable((subscriber) => {
+            Storage.get(awsFileName, { download: true }).then((result: any) => {
+                let blob = new Blob([result.Body], { type: result.ContentType })
                 subscriber.next(blob)
-               //  $('#test').attr('href',window.URL.createObjectURL(blob))
-               //  $('#test').attr('download',file.fileName)
-               });
+                //  $('#test').attr('href',window.URL.createObjectURL(blob))
+                //  $('#test').attr('download',file.fileName)
+            });
         })
 
- 
-     }
+
+    }
     // public getFile
-    public captureHTML(id):Observable<string>{
-        return new Observable((subscriber)=>{
-            html2canvas(document.querySelector('#'+id)).then((canvas)=>{
-                let imgdata = canvas.toDataURL('image/png');
-                subscriber.next(imgdata)             
+    public captureHTML(id): Observable<string> {
+        return new Observable((subscriber) => {
+            html2canvas(document.querySelector('#' + id)).then((canvas) => {
+                canvas.toBlob((blob) => {
+                    let fileImg = new File([blob], this.documentDataService.currentDocumentName)
+                    let awsFileName = this.commonService.getPatternAWSName(fileImg.name) || 'fileName';
+                    let uploadFile: UploadFileModel = {
+                        data: fileImg,
+                        awsFileName:awsFileName
+                    }
+                    this.uploadFile([uploadFile]).subscribe(() => {
+                        let urlFile  = Constants.common.host.storage +awsFileName;
+                        subscriber.next(urlFile)
+                    });
+                    // formData.append('file', blob, this.documentDataService.currentDocumentName)
+                }, 'image/jpeg')
+                // let imgdata = canvas.toDataURL('image/png');
+                // subscriber.next(imgdata)             
             });
         });
     }
 
-    public creaetDocumentModel(value):Observable<DocumentModel>{
-        return new Observable((subscriber)=>{
+    public creaetDocumentModel(value): Observable<DocumentModel> {
+        return new Observable((subscriber) => {
             // console.log('☛ Result Document from Flie : ', value);
             let result;
-            if(Array.isArray(value)){
+            if (Array.isArray(value)) {
                 result = value;
                 result.forEach(element => {
                     element.status = Constants.common.message.status.success.text;
                 });
             }
-            else if(value){
+            else if (value) {
                 result = value;
                 result.status = Constants.common.message.status.success.text;
-            }else{
-                result=  new DocumentModel();
+            } else {
+                result = new DocumentModel();
                 result.status = Constants.common.message.status.notFound.text;
             }
             subscriber.next(result);
@@ -595,5 +619,5 @@ export class DocumentService {
     //         return this.loadDocFromDB(this.commonService.getPatternId(targetDocumentName));
     //     }
     // }
-    
+
 }

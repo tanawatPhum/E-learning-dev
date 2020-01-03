@@ -6,6 +6,7 @@ import { ScreenDetailModel } from 'src/app/models/common/common.model';
 import { DocumentNavigatorModel } from 'src/app/models/document/document.model';
 import { DocumentService } from './document.service';
 import { CommonService } from '../common/common.service';
+import { DocumentTrackModel } from '../../models/document/document.model';
 declare var electron: any;
 @Injectable()
 export class DocumentDataControlService {
@@ -18,6 +19,14 @@ export class DocumentDataControlService {
     private _nameTemplate: string;
     private _currentScreenSize: ScreenDetailModel = new ScreenDetailModel();
     private _previousPage: string;
+    private _documentTrack: DocumentTrackModel = new DocumentTrackModel();
+    public get documentTrack(): DocumentTrackModel {
+        return this._documentTrack;
+    }
+    public set documentTrack(value: DocumentTrackModel) {
+        this._documentTrack = value;
+    }
+ 
     public get previousPage(): string {
         return this._previousPage;
     }

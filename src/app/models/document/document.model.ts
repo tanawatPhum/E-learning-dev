@@ -40,4 +40,6 @@ export class DocumentTrackContentCondition{
     public subformCondition:SubFormContentConditionModel = new SubFormContentConditionModel();
     public examCondition:ExamContentConditionModel = new ExamContentConditionModel();
 
+
 }
+

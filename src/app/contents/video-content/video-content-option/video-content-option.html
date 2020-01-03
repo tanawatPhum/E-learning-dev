@@ -1,0 +1,37 @@
+<section [hidden]="currentCase!==actionCase.browseVideo">
+    <div class="row p-0 m-0 mt-3 option-video">
+
+        <div class="col-12 d-flex justify-content-center border-bottom">
+            <div class="form-group text-center">
+                <label>Action</label>
+                <div>
+                    <img (click)="removeVideo()" class="option-action-trash" src="assets/imgs/contentPage/trash.svg">
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+<section [hidden]="currentCase!==actionCase.showVideo">
+
+    <div class="row p-0 m-0 mt-3 option-video">
+        <div class="col-12 d-flex justify-content-center border-bottom">
+            <div class="form-group text-center">
+                <label>Property</label>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input video-tracker" id="switch">
+                    <label class="custom-control-label" for="switch">Must finish watching</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 d-flex justify-content-center border-bottom">
+            <div class="form-group text-center">
+                <label>Action</label>
+                <div>
+                    <img (click)="removeVideo()" class="option-action-trash" src="assets/imgs/contentPage/trash.svg">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

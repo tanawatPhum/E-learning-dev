@@ -1,0 +1,33 @@
+<section [hidden]="currentCase!==actionCase.browseLink">
+    <div class="row p-0 m-0 mt-3 option-cancle">
+        <div class="col-12 d-flex justify-content-center border-bottom">
+            <div class="form-group text-center">
+                <label>Action</label>
+                <div>
+                    <img (click)="removeLink()" class="option-action-trash" src="assets/imgs/contentPage/trash.svg">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section [hidden]="currentCase!==actionCase.showLink">
+    <div class="row p-0 m-0 mt-3 option-link">
+        <div class="col-12 d-flex justify-content-center border-bottom">
+            <div class="form-group text-center w-70">
+                <label>Property</label>
+                <input id="link-input-url" type="text" class="form-control text-center" placeholder="LinkName">
+            </div>
+        </div>
+
+        <div class="col-12 d-flex justify-content-center border-bottom">
+            <div class="form-group text-center">
+                <label>Action</label>
+                <div>
+                    <img (click)="removeLink()" class="option-action-trash" src="assets/imgs/contentPage/trash.svg">
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>

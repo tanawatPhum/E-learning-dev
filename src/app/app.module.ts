@@ -12,11 +12,9 @@ import { DocumentHomePageComponent } from './components/document-page/document-h
 import { FormsModule } from '@angular/forms';
 import { DocumentService } from './services/document/document.service';
 import { DocumentPreviewPageComponent } from './components/document-page/document-preview-page/document-preview-page.component';
-import { NoteComponentComponent } from './note-component/note-component.component';
 import { DocumentModalPageComponent } from './components/document-page/document-modal-page/document-modal-page.component';
 import { DocumentDataControlService } from './services/document/document-data-control.service';
 import { LoadingPageComponent } from './components/plugin-page/loading-page/loading-page.component';
-import { ExampleDocumentPageComponent } from './components/example-document-page/example-document-page/example-document-page.component';
 import { CKEditorModule } from 'ckeditor4-angular';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
@@ -25,6 +23,10 @@ import { AmplifyAngularModule, AmplifyService } from 'aws-amplify-angular';
 import { SocketIoService } from './services/common/socket.service';
 import { CommonDataControlService } from './services/common/common-data-control.service';
 import { RangeSliderPageComponent } from './components/plugin-page/range-slider-page/range-slider-page.component';
+import { AdHost } from './directives/ad-host/ad-host.directive';
+import { ImgContentComponent } from './contents/img-content/img-content';
+import { ContentRouting } from './app-content-routing';
+import { ContentDataControlService } from './services/content/content-data-control.service';
 
 export const COMPONENTS: any[] = [
   AppComponent,
@@ -32,9 +34,7 @@ export const COMPONENTS: any[] = [
   DocumentHomePageComponent,
  CreateContentPageComponent,
  DocumentPreviewPageComponent,
- NoteComponentComponent,
  DocumentModalPageComponent,
- ExampleDocumentPageComponent
 ];
 export const PLUGINS: any[] = [
   LoadingPageComponent,
@@ -51,11 +51,15 @@ export const MODULES: any[] = [
   HttpClientModule,
   AmplifyAngularModule
 ];
+export const CONTENTS: any[] = [
+  ...ContentRouting.exports
+]
 export const SERVICES: any[] = [
   CommonService,
   DocumentService,
   CommonDataControlService,
   DocumentDataControlService,
+  ContentDataControlService,
   HttpClientService,
   AmplifyService,
   SocketIoService
@@ -64,23 +68,30 @@ export const PIPES: any[] = [
 
 ];
 export const DIRECTIVES: any[] = [
+AdHost
 
 ];
 @NgModule({
   declarations: [
     ...COMPONENTS,
+    ...CONTENTS,
     ...DIRECTIVES,
     ...LAYOUTS,
     ...PIPES,
     ...PLUGINS,
-    NoteComponentComponent
   ],
   imports: [
-    ...MODULES
+    ...MODULES,
+    // ...CONTENTS
   ],
   providers: [
     ...SERVICES
   ],
+
+  entryComponents: [...CONTENTS ],
+  // exports:[  
+  //   ...CONTENTS 
+  // ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

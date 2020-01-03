@@ -25,18 +25,18 @@ export class DocumentModel {
 }
 
 export class ContentsModel {
-    public boxes: BoxContentModel[];
-    public files:FileContentModel[];
-    public textAreas: TextAreaContentModel[];
-    public imgs: ImgContentModel[];
-    public exams: ExamContentModel[];
-    public videos: VideoContentModel[];
-    public subFroms:SubFormContentModel[];
-    public comments:commentContentModel[];
-    public todoList:ToDoListContentModel[];
-    public progressBar:ProgressBarContentModel[];
-    public links:LinkContentModel[];
-    public notes:NoteContentModel[];
+    public boxes: BoxContentModel[] =  new Array<BoxContentModel>();
+    public files:FileContentModel[] =  new Array<FileContentModel>();
+    public textAreas: TextAreaContentModel[] =  new Array<TextAreaContentModel>();
+    public imgs: ImgContentModel[] =  new Array<ImgContentModel>();
+    public exams: ExamContentModel[] =  new Array<ExamContentModel>();
+    public videos: VideoContentModel[] =  new Array<VideoContentModel>();
+    public subFroms:SubFormContentModel[] =  new Array<SubFormContentModel>();
+    public comments:commentContentModel[] =  new Array<commentContentModel>();
+    public todoList:ToDoListContentModel[] =  new Array<ToDoListContentModel>();
+    public progressBar:ProgressBarContentModel[] =  new Array<ProgressBarContentModel>();
+    public links:LinkContentModel[] =  new Array<LinkContentModel>();
+    public notes:NoteContentModel[] =  new Array<NoteContentModel>();
 }
 
 export class OtherDetailModel{

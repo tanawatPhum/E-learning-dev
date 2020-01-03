@@ -1,0 +1,47 @@
+<!-- <main name="section-content"> -->
+<section [hidden]="currentCase!==actionCase.browseImg">
+    <div class="row content-toolbar toolbar-browse-img">
+        <div class="col-5 toolbar-drag">
+            <input type="file" class="content-browse-img" id="input-file" #inputFile>
+            <img src="assets/imgs/contentPage/browse-file.svg">
+            <p class="content-font-title1">Drag & Drop your images</p>
+            <button id="btn-file" type="button" class="btn btn-primary mt-1">Browse</button>
+        </div>
+        <div class="col-2">
+            OR'
+        </div>
+        <div class="col-5 toolbar-drag">
+            <div class="form-group">
+                <input placeholder="https://example.com" type="text" class="form-control" id="img-input-url">
+            </div>
+            <p class="content-font-title1">Get your URL</p>
+        </div>
+    </div>
+</section>
+<section [hidden]="currentCase!==actionCase.loadingImg">
+    <div class="loading-img">
+        <div class="spinner-border text-warning" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+</section>
+<section [hidden]="currentCase!==actionCase.showImg">
+    <img class="content-img">
+</section>
+<!-- </main> -->
+
+<!-- <main style="display: none;" name="section-option">
+    <section>
+        <div class="row p-0 m-0 mt-3 option-cancle">
+            <div class="col-12 d-flex justify-content-center border-bottom">
+                <div class="form-group text-center">
+                    <label>Action</label>
+                    <div>
+                        <img class="option-action-trash" src="assets/imgs/contentPage/trash.svg">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main> -->

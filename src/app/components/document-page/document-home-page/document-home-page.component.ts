@@ -417,13 +417,13 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
     }
     public dragTool(event) {
         event.stopPropagation();
-        event.dataTransfer.setData("tool-type", $(event.target).attr('document-data'));
+        event.dataTransfer.setData("content-name", $(event.target).attr('content-name'));
         // console.log("drag",$(event.target).attr('document-data'));
 
     }
     public dropTool(event) {
         // console.log(event)
-        let data = { element: event, toolType: event.dataTransfer.getData("tool-type") }
+        let data = { element: event, contentName: event.dataTransfer.getData("content-name") }
         this.dropElement.next({ action: this.contents.event.dropTool, data: data })
         // console.log(event)
         // console.log("drop",event.dataTransfer.getData("tool-type"));

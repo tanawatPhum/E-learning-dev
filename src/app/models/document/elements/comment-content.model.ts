@@ -1,4 +1,5 @@
 export class commentContentModel {
+    public parentId:string;
     public id:string;
     public listComment:commentDetailModel[] = new Array<commentDetailModel>();
 

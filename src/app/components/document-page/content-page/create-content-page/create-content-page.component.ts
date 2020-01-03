@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterContentInit, ViewEncapsulation, ViewChild, ElementRef, Input, EventEmitter, Output, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterContentInit, ViewEncapsulation, ViewChild, ElementRef, Input, EventEmitter, Output, AfterViewInit, ComponentFactoryResolver, Type } from '@angular/core';
 import { catchError, mergeMap, toArray, map, find } from 'rxjs/operators';
 import { Observable, of, Subject, empty, fromEvent, VirtualTimeScheduler } from 'rxjs';
 import { Constants } from 'src/app/global/constants';
@@ -14,7 +14,7 @@ import 'splitting/dist/splitting-cells.css';
 import Splitting from 'splitting';
 import { TriggerEventModel, DocumentNavigatorModel, DocumentTrackContentCondition } from 'src/app/models/document/document.model';
 import { SubFormContentModel, SubFormContentDetailModel, SubFormContentConditionModel, SubFormContentLinkModel } from '../../../../models/document/elements/subForm-content.model';
-import { ScreenDetailModel, RulerDetailModel } from '../../../../models/common/common.model';
+import { ScreenDetailModel, RulerDetailModel, UploadFileModel } from '../../../../models/common/common.model';
 import { DocumentDataControlService } from '../../../../services/document/document-data-control.service';
 import { element } from 'protractor';
 import html2canvas from 'html2canvas';
@@ -32,6 +32,10 @@ import { LinkContentModel } from 'src/app/models/document/elements/link-content.
 import { ExamContentModel } from 'src/app/models/document/elements/exam-content.model';
 import { NoteContentModel } from 'src/app/models/document/elements/note-content.model';
 import { ninvoke } from 'q';
+import { AdHost } from '../../../../directives/ad-host/ad-host.directive';
+import { ContentRouting } from '../../../../app-content-routing';
+import { ContentDataControlService } from 'src/app/services/content/content-data-control.service';
+import { ContentInterFace } from 'src/app/contents/interface/content.interface';
 declare var electron: any;
 declare var rangy: any;
 declare var CKEDITOR: any;
@@ -46,6 +50,7 @@ declare var Wistia: any;
 export class CreateContentPageComponent implements OnInit, AfterViewInit {
     @ViewChild('contentTemplate', { static: true }) contentTemplate: ElementRef;
     @ViewChild('contentOptionTool', { static: true }) contentOptionTool: ElementRef;
+    @ViewChild(AdHost, {static: true}) adHost: AdHost;
     @Input() triggerElement: Subject<TriggerEventModel>;
     @Input() contentElement: Subject<DocumentModel>;
     @Input() contentTypeSelected: Subject<any>;
@@ -184,6 +189,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             addStyleBoxActive: 'addStyleBoxActive',
             addStyleBorderBox: 'addStyleBorderBox',
             addStyleBoxContentNote:'addStyleBoxContentNote',
+            
             removeStyleBorderBox: 'removeStyleBorderBox',
             removeStyleBoxCurrent: 'removeStyleBoxCurrent',
             removeStyleBoxActive: 'removeStyleBoxActive',
@@ -200,8 +206,10 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         },
         template: {
             setDocument: 'setDocument',
+            setHTML:'setHTML',
             setDocumentTrack: 'setDocumentTrack',
-            setContentEditable:'setContentEditable'
+            setContentEditable:'setContentEditable',
+            
 
         },
         editor:{
@@ -231,7 +239,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         private commonService: CommonService,
         private documentService: DocumentService,
         private documentDataService: DocumentDataControlService,
-        private http:HttpClientService
+        private http:HttpClientService,
+        private contentDCtrlService:ContentDataControlService,
+        private componentFactoryResolver: ComponentFactoryResolver
     ) { }
     ngOnInit() {
         this.loading = true;
@@ -242,17 +252,14 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.loading = false;
             this.currentDocument = result;
             this.rulerDetailSubject.next(result.otherDetail.rulerDevDetail)
-            this.rootElement.html(result.html);
             this.setTemplate(this.actions.template.setDocument);
             this.setTemplate(this.actions.template.setDocumentTrack);
-            if (result.status!== Constants.common.message.status.notFound.text) {
-                this.addElements(this.actions.event.addEventBox).then(() => {
-                    this.removeData(this.actions.data.removeAllContentObj);
-                    this.retrieveData(this.actions.data.retrieveBoxData, result);
-                    this.retrieveData(this.actions.data.retrieveContentsData, result);
+        
+        
+          
+          
 
-                });
-            }
+       
 
         });
         this.contentTypeSelected.subscribe((contentType) => {
@@ -263,43 +270,43 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
 
             if (tool.action === this.actions.event.dropTool) {
                 this.currentContentType = this.contentTypes.freedomLayout;
-                if (tool.data.toolType === this.toolTypes.videoBrowse.name) {
-                    this.setCurrentToolbar(this.actions.toolbar.addBrowseVideoTool);
-                }
-                else if (tool.data.toolType === this.toolTypes.imgBrowse.name) {
-                    this.setCurrentToolbar(this.actions.toolbar.addBrowseImgTool);
-                }
-                else if (tool.data.toolType === this.toolTypes.fileBrowse.name) {
-                    this.setCurrentToolbar(this.actions.toolbar.addBrowseFileTool);
-                }
-                else if (tool.data.toolType === this.toolTypes.subform.name) {
-                    this.setCurrentToolbar(this.actions.toolbar.addCreateSubformTool);
-                }
-                else if (tool.data.toolType === this.toolTypes.textArea.name) {
-                    this.setCurrentToolbar(this.actions.toolbar.addTextareaTool);
-                }
-                else if (tool.data.toolType === this.toolTypes.progressBar.name) {
-                    this.setCurrentToolbar(this.actions.toolbar.addProgressBarTool);
-                }
-                else if (tool.data.toolType === this.toolTypes.comment.name) {
-                    this.setCurrentToolbar(this.actions.toolbar.addCommentTool);
-                }
-                else if (tool.data.toolType === this.toolTypes.toDoList.name) {
-                    this.setCurrentToolbar(this.actions.toolbar.addToDoListTool);
-                }
-                else if (tool.data.toolType === this.toolTypes.linkBrowse.name) {
-                    this.setCurrentToolbar(this.actions.toolbar.addBrowseLinkTool);
-                }
-                else if (tool.data.toolType === this.toolTypes.exam.name) {
-                    this.setCurrentToolbar(this.actions.toolbar.addBrowseExamTool);
-                }
-                else if (tool.data.toolType === this.toolTypes.note.name) {
-                    this.setCurrentToolbar(this.actions.toolbar.addNote);
-                }
+                // if (tool.data.toolType === this.toolTypes.videoBrowse.name) {
+                //     this.setCurrentToolbar(this.actions.toolbar.addBrowseVideoTool);
+                // }
+                // else if (tool.data.toolType === this.toolTypes.imgBrowse.name) {
+                //     this.setCurrentToolbar(this.actions.toolbar.addBrowseImgTool);
+                // }
+                // else if (tool.data.toolType === this.toolTypes.fileBrowse.name) {
+                //     this.setCurrentToolbar(this.actions.toolbar.addBrowseFileTool);
+                // }
+                // else if (tool.data.toolType === this.toolTypes.subform.name) {
+                //     this.setCurrentToolbar(this.actions.toolbar.addCreateSubformTool);
+                // }
+                // else if (tool.data.toolType === this.toolTypes.textArea.name) {
+                //     this.setCurrentToolbar(this.actions.toolbar.addTextareaTool);
+                // }
+                // else if (tool.data.toolType === this.toolTypes.progressBar.name) {
+                //     this.setCurrentToolbar(this.actions.toolbar.addProgressBarTool);
+                // }
+                // else if (tool.data.toolType === this.toolTypes.comment.name) {
+                //     this.setCurrentToolbar(this.actions.toolbar.addCommentTool);
+                // }
+                // else if (tool.data.toolType === this.toolTypes.toDoList.name) {
+                //     this.setCurrentToolbar(this.actions.toolbar.addToDoListTool);
+                // }
+                // else if (tool.data.toolType === this.toolTypes.linkBrowse.name) {
+                //     this.setCurrentToolbar(this.actions.toolbar.addBrowseLinkTool);
+                // }
+                // else if (tool.data.toolType === this.toolTypes.exam.name) {
+                //     this.setCurrentToolbar(this.actions.toolbar.addBrowseExamTool);
+                // }
+                // else if (tool.data.toolType === this.toolTypes.note.name) {
+                //     this.setCurrentToolbar(this.actions.toolbar.addNote);
+                // }
                 
 
                 this.currentElementTool = tool.data.element;
-                this.addElements(this.actions.event.addElBox, null, this.actions.event.dropTool)
+                this.addElements(this.actions.event.addElBox, null, this.actions.event.dropTool,null,tool.data.contentName)
                 //remove tranfer img icon to ckeditor
                 //if(this.rootElement.find('p').find('img'))
                 //this.rootElement.find('p').find('img').remove();
@@ -344,7 +351,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.handleEditor(this.actions.editor.closeEditorContentNote,this.rootElement);
             this.handles(this.actions.event.handleNote);
             // this.handles(this.actions.event.handleTextArea);
-            this.handles(this.actions.event.handleTemplateDoc, $('.template-doc'));
+    
+            this.handles(this.actions.event.handleTemplateDoc, $('.template-doc'));                
+          
        
         }
         else if (action === this.actions.template.setDocumentTrack) {
@@ -356,6 +365,17 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 }
                
             })
+        }
+        else if(action === this.actions.template.setHTML){
+            this.rootElement.html(this.currentDocument.html); 
+            if (this.currentDocument.status!== Constants.common.message.status.notFound.text) {
+               this.addElements(this.actions.event.addEventBox).then(() => {
+                   this.removeData(this.actions.data.removeAllContentObj);
+                   this.retrieveData(this.actions.data.retrieveBoxData, this.currentDocument);
+                   this.retrieveData(this.actions.data.retrieveContentsData, this.currentDocument);
+
+               });
+           } 
         }
     }
     private getContentTemplateSize() {
@@ -369,32 +389,37 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     }
     private handleEditor(action:string,element?:JQuery<Element>){
         if(action===this.actions.editor.setEditor){
-            this.documentDataService.nameTemplate = 'template-doc';
-            $('#template-doc').attr('contenteditable','true');
-            CKEDITOR.disableAutoInline = true;
-            CKEDITOR.inline('template-doc');
-            CKEDITOR.on('instanceReady', (ev) => {
-            
-                 $('.cke_top').css('display','none')
-                // $('#template-doc').css('display', 'block')
            
-                // $('#cke_template-doc').css('display','none')
-                // ev.editor.on('focus',  (e)=> {  
-                //     $('.cke').css('display','none')
-                
-                // });  
-                // ev.editor.on('blur',  (e)=> {  
-                //     $('.cke').css('display','none')
-                
-                // });  
-
-            });
-     
-            $('#template-doc').on('drop',(event)=>{
-                setTimeout(() => {
-                $('#box-'+ this.commonService.getBoxCurrentId()).detach().appendTo($('#template-doc'))
-                },500)
-            })
+            this.documentDataService.nameTemplate = 'template-doc';
+           
+         
+                CKEDITOR.disableAutoInline = true;
+                CKEDITOR.inline('template-doc');
+                CKEDITOR.on('instanceReady', (ev) => {
+                     $('.cke_top').css('display','none')
+                     this.setTemplate(this.actions.template.setHTML)
+                     $('#template-doc').attr('contenteditable','true');
+                    // $('#template-doc').css('display', 'block')
+               
+                    // $('#cke_template-doc').css('display','none')
+                    // ev.editor.on('focus',  (e)=> {  
+                    //     $('.cke').css('display','none')
+                    
+                    // });  
+                    // ev.editor.on('blur',  (e)=> {  
+                    //     $('.cke').css('display','none')
+                    
+                    // });  
+    
+                });
+            
+    
+            // $('#template-doc').on('drop',(event)=>{
+            //     setTimeout(() => {
+            //         console.log($('#box-'+ this.commonService.getBoxCurrentId()));
+            //    $('#box-'+ this.commonService.getBoxCurrentId()).detach().appendTo($('#template-doc'))
+            //     },500)
+            // })
          
  
         }
@@ -438,7 +463,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 const numberOfBox = this.commonService.getBoxId();
                 // const numberOfBox = this.rootElement.find('.content-box').length;
                 if (this.currentContentType.name === this.contentTypes.freedomLayout.name) {
-                    this.rootElement.append('<div contenteditable="false" style="z-index:999" id=box-' + numberOfBox + ' class="content-box ' + this.boxType.boxInitial + ' freedom-layout" name="box-' + numberOfBox + '" ><p class="content-box-label">box-' + numberOfBox + '</p> </div>');
+                    this.rootElement.append('<div contenteditable="false" style="z-index:999" id=box-' + numberOfBox + ' class="content-box ' + this.boxType.boxInitial + ' freedom-layout" name="box-' + numberOfBox + '" ><div class="content-box-label">box-' + numberOfBox + '</div> </div>');
                     $('[id="box-' + numberOfBox + '"]').css('position', 'absolute');
                     if (subaction === this.actions.event.dropTool) {
                         setTimeout(() => {
@@ -461,7 +486,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     $('[id="box-' + numberOfBox + '"]').css('width', Constants.common.element.css.box.width);
                     $('[id="box-' + numberOfBox + '"]').css('height', Constants.common.element.css.box.height);
                 } else if (this.currentContentType.name === this.contentTypes.oneLayout.name) {
-                    this.rootElement.append('<div style=""id=box-' + numberOfBox + ' class="content-box ' + this.boxType.boxInitial + ' one-layout"></div>');
+                    this.rootElement.append('<div  style=""id=box-' + numberOfBox + ' class="content-box ' + this.boxType.boxInitial + ' one-layout"></div>');
                     $('[id="box-' + numberOfBox + '"]').css('cursor', 'default')
                     $('[id="box-' + numberOfBox + '"]').css('height', Constants.common.element.css.box.height)
                 } else if (this.currentContentType.name === this.contentTypes.twoLayout.name) {
@@ -477,52 +502,69 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                         '</div>' +
                         '</div>');
                 }
-                this.setCurrentBox();
+                // this.setCurrentBox();
                 this.removeStyleElements(this.actions.toolbar.removeTool);
                 this.setCurrentBox($('#box-' + numberOfBox));
                 this.addData(this.actions.data.retrieveBoxData, 'box-' + numberOfBox, $('[id="box-' + numberOfBox + '"]'));
                 if (subaction === this.actions.event.dropTool) {
-                    if (this.currentToolbar === this.actions.toolbar.addBrowseVideoTool) {
-                        this.currentBox.addClass(this.boxType.boxBrowseVideo);
-                    }
-                    else if (this.currentToolbar === this.actions.toolbar.addBrowseImgTool) {
-                        this.currentBox.addClass(this.boxType.boxBrowseImg);
-                    }
-                    else if (this.currentToolbar === this.actions.toolbar.addBrowseFileTool) {
-                        this.currentBox.addClass(this.boxType.boxBrowseFile);
-                    }
-                    else if (this.currentToolbar === this.actions.toolbar.addBrowseLinkTool) {
-                        this.currentBox.addClass(this.boxType.boxBrowseLink);
-                    }
-                    else if (this.currentToolbar === this.actions.toolbar.addTextareaTool) {
-                        this.currentBox.addClass(this.boxType.boxTextarea);
-                        this.addElements(this.actions.event.addElTextArea, this.currentBox);
-                    }
-                    else if (this.currentToolbar === this.actions.toolbar.addCommentTool) {
-                        this.currentBox.addClass(this.boxType.boxComment);
-                        this.addElements(this.actions.event.addElComment, this.currentBox);
-                    }
-                    else if (this.currentToolbar === this.actions.toolbar.addProgressBarTool) {
-                        this.currentBox.addClass(this.boxType.boxProgressBar);
-                        this.addElements(this.actions.event.addElProgressBar, this.currentBox);
-                    }
-                    else if (this.currentToolbar === this.actions.toolbar.addCreateSubformTool) {
-                        this.currentBox.addClass(this.boxType.boxAddSubform);
-                    } else if (this.currentToolbar === this.actions.toolbar.addCommentTool) {
-                        this.currentBox.addClass(this.boxType.boxComment);
-                    }
-                    else if (this.currentToolbar === this.actions.toolbar.addToDoListTool) {
-                        this.removeStyleElements(this.actions.style.removeStyleBoxType);
-                        this.currentBox.addClass(this.boxType.boxToDoList);
-                    }
-                    else if (this.currentToolbar === this.actions.toolbar.addBrowseExamTool) {
-                        this.removeStyleElements(this.actions.style.removeStyleBoxType);
-                        this.currentBox.addClass(this.boxType.boxBrowseExam);
-                    }
-                    else if (this.currentToolbar === this.actions.toolbar.addNote) {
-                        this.removeStyleElements(this.actions.style.removeStyleBoxType);
-                        this.currentBox.addClass(this.boxType.boxNote);
-                    }
+                    let targetContent  = ContentRouting.routes.find((content)=>content.contentName === data)
+                    let targetContentHtml  = await this.createContent(targetContent.component);
+                    targetContentHtml.setAttribute('content-name',targetContent.contentName)
+                    targetContentHtml.classList.add("full-screen");
+                    this.currentBox.append(targetContentHtml);
+                    this.currentBox.find('[content-name]').show();
+                    $('.content-box').find('[content-name][content-last!="true"]').hide();
+                    this.rootOptionTool.html(this.createContentOption(targetContent.option))
+              
+
+                    $(this.currentBox).detach().appendTo($('#template-doc'))
+                    // let targetOption  = $(contentHTML).find("[name='section-option']").html();
+                    // this.currentBox.append(contentHTML)
+                    // this.rootOptionTool.html(targetOption)
+                    // console.log($(contentHTML).find("[name='section-option']").html())
+                    // this.currentBox.append(contentHTML);
+                    // if (this.currentToolbar === this.actions.toolbar.addBrowseVideoTool) {
+                    //     this.currentBox.addClass(this.boxType.boxBrowseVideo);
+                    // }
+                    // else if (this.currentToolbar === this.actions.toolbar.addBrowseImgTool) {
+                    //     this.currentBox.addClass(this.boxType.boxBrowseImg);
+                    //     this.addToolBarBox(this.actions.toolbar.addBrowseImgTool,this.currentBox)
+                    // }
+                    // else if (this.currentToolbar === this.actions.toolbar.addBrowseFileTool) {
+                    //     this.currentBox.addClass(this.boxType.boxBrowseFile);
+                    // }
+                    // else if (this.currentToolbar === this.actions.toolbar.addBrowseLinkTool) {
+                    //     this.currentBox.addClass(this.boxType.boxBrowseLink);
+                    // }
+                    // else if (this.currentToolbar === this.actions.toolbar.addTextareaTool) {
+                    //     this.currentBox.addClass(this.boxType.boxTextarea);
+                    //     this.addElements(this.actions.event.addElTextArea, this.currentBox);
+                    // }
+                    // else if (this.currentToolbar === this.actions.toolbar.addCommentTool) {
+                    //     this.currentBox.addClass(this.boxType.boxComment);
+                    //     this.addElements(this.actions.event.addElComment, this.currentBox);
+                    // }
+                    // else if (this.currentToolbar === this.actions.toolbar.addProgressBarTool) {
+                    //     this.currentBox.addClass(this.boxType.boxProgressBar);
+                    //     this.addElements(this.actions.event.addElProgressBar, this.currentBox);
+                    // }
+                    // else if (this.currentToolbar === this.actions.toolbar.addCreateSubformTool) {
+                    //     this.currentBox.addClass(this.boxType.boxAddSubform);
+                    // } else if (this.currentToolbar === this.actions.toolbar.addCommentTool) {
+                    //     this.currentBox.addClass(this.boxType.boxComment);
+                    // }
+                    // else if (this.currentToolbar === this.actions.toolbar.addToDoListTool) {
+                    //     this.removeStyleElements(this.actions.style.removeStyleBoxType);
+                    //     this.currentBox.addClass(this.boxType.boxToDoList);
+                    // }
+                    // else if (this.currentToolbar === this.actions.toolbar.addBrowseExamTool) {
+                    //     this.removeStyleElements(this.actions.style.removeStyleBoxType);
+                    //     this.currentBox.addClass(this.boxType.boxBrowseExam);
+                    // }
+                    // else if (this.currentToolbar === this.actions.toolbar.addNote) {
+                    //     this.removeStyleElements(this.actions.style.removeStyleBoxType);
+                    //     this.currentBox.addClass(this.boxType.boxNote);
+                    // }
                 } else {
                     this.setCurrentToolbar();
                 }
@@ -535,11 +577,17 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'startDrag');
                 }),
                 stop: ((event) => {
-                    // let l = (100 * parseFloat(($(event.target).position().left / this.rootElement.width()).toString())) + "%";
-                    // let t = (100 * parseFloat(($(event.target).position().top / this.rootElement.height()).toString())) + "%";
-                    // $(event.target).css("left", l);
-                    // $(event.target).css("top", t);
-                    this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'endDrag');
+                //     let l = (100 * parseFloat(($(event.target).position().left  / this.rootElement.width()).toString())) + "%";
+                //     let t = (100 * parseFloat((($(event.target).position().top+$('#template-doc').scrollTop()) / this.rootElement.height()).toString())) + "%";
+                   
+                // //    console.log($(event.target).position().top)
+                // //     console.log($('#template-doc').scrollTop())
+
+                //     $(event.target).css("left", l);
+                //     $(event.target).css("top", t);
+                    // this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'endDrag');
+                    this.removeStyleElements(this.actions.style.removeStyleBoxActive);
+                    // console.log($('#template-doc').scrollTop())
                 }),
             });
 
@@ -553,11 +601,12 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                         this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'startResize');
                     }),
                     stop: ((event) => {
-                        // let w = (100 * parseFloat(($(event.target).width() / this.rootElement.width()).toString())) + "%";
-                        // let h = (100 * parseFloat(($(event.target).height() / this.rootElement.height()).toString())) + "%";
-                        // $(event.target).css("width", w);
-                        // $(event.target).css("height", h);
-                        this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'endResize');
+                    //     let w = (100 * parseFloat(($(event.target).width() / this.rootElement.width()).toString())) + "%";
+                    //     let h = (100 * parseFloat(($(event.target).height() / this.rootElement.height()).toString())) + "%";
+                    //     $(event.target).css("width", w);
+                    //   $(event.target).css("height", h);
+                        //this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'endResize');
+                        this.removeStyleElements(this.actions.style.removeStyleBoxActive);
                         if ($(event.target).hasClass(this.boxType.boxSubform)) {
                             this.handles(this.actions.event.handleElRatio, $(event.target).find('#contentTemplate'), $(event.target).find('.subform-preview'))
                         }
@@ -575,13 +624,14 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             // this.handles(this.actions.event.handleOptionToolSubform);
             // this.handles(this.actions.event.handleOptionToolToDoList);
             if (this.currentBox) {
-                this.handles(this.actions.event.handleBrowseImg, this.currentBox);
+                // this.handles(this.actions.event.handleBrowseImg, this.currentBox);
                 this.addElements(this.actions.style.addStyleBoxCurrent, this.currentBox);
             }
         } else if (action === this.actions.style.addStyleBoxCurrent) {
+
             this.setCurrentBox(element);
-            this.addStyleElements(this.actions.style.addStyleBoxCurrent, element);
-            this.addStyleElements(this.actions.style.addStyleBorderBox, element);
+            // this.addStyleElements(this.actions.style.addStyleBoxCurrent, element);
+            // this.addStyleElements(this.actions.style.addStyleBorderBox, element);
             // console.log(CKEDITOR.instances[this.documentDataService.nameTemplate])
             // CKEDITOR.instances[this.documentDataService.nameTemplate].setReadOnly(true);
             if (subaction === 'startDrag' || subaction === 'click' || subaction === 'startResize') {
@@ -590,14 +640,16 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 this.removeStyleElements(this.actions.style.removeStyleBoxActive);
             }
 
-            this.setCurrentToolbar();
-            const IndexBox = this.findData(this.actions.data.findIndexBoxData, element);
-            if (IndexBox !== -1) {
-                if (this.boxes[IndexBox].isEmpty) {
-                    this.addToolBarBox(this.currentToolbar, element);
-                }
-            }
-            this.addOptionToolBar();
+            // this.setCurrentToolbar();
+            // const IndexBox = this.findData(this.actions.data.findIndexBoxData, element);
+            // $('.content-box').find('[name="section-content"]').hide();
+            // this.currentBox.find('[name="section-content"]').show();
+            // if (IndexBox !== -1) {
+            //     if (this.boxes[IndexBox].isEmpty) {
+            //         this.addToolBarBox(this.currentToolbar, element);
+            //     }
+            // }
+            //this.addOptionToolBar();
         }
         else if (action === this.actions.event.addElTextArea) {
             const IndexBox = this.findData(this.actions.data.findIndexBoxData, element);
@@ -605,29 +657,52 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             if (IndexBox !== -1) {
                 this.boxes[IndexBox].isEmpty = false;
             }
+            // let textarea:TextAreaContentModel = {
+            //     id: element.attr('id') + '-textarea',
+            //     value: null
+            // }
 
+            // this.textAreas.push(textarea);
             element.append('<div contenteditable id="' + element.attr('id') + '-textarea" class="content-textarea"></div>');
             this.handles(this.actions.event.handleTextArea,element)
            // element.find('textarea').focus();
         } else if (action === this.actions.event.addElImg) {
             let img:ImgContentModel = {
+                parentId:element.attr('id'),
                 id: element.attr('id') + '-img',
-                path: null
+                path:null
             }
             if(subaction==='fromBrowse'){
-                const reader = new FileReader();
-                reader.onload = ((event: any) => {
-                    img.path =  event.target.result;
-                    console.log(element)
-                    element.append('<img src="' + event.target.result + '" id="' + element.attr('id') + '-img" class="content-img"></img>');
+                let  awsFileName =  this.commonService.getPatternAWSName(this.currentBrowseFile[0].name)|| 'fileName';
+                let uploadFile:UploadFileModel = {
+                    data:this.currentBrowseFile[0],
+                    awsFileName:awsFileName
+                }
+                element.append(`<div class="loading-img spinner-border text-warning" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>`)
+                this.documentService.uploadFile([uploadFile]).subscribe(()=>{
+               
+                    element.find('.loading-img').remove();     
+                 
+                   
+                    img.path =  Constants.common.host.storage +awsFileName;
+                    element.append('<img src="' + Constants.common.host.storage +awsFileName + '" id="' + element.attr('id') + '-img" class="content-img"></img>');
                     this.imgs.push(img);
-                });
-                reader.readAsDataURL(this.currentBrowseFile[0]);
+                })
+                // const reader = new FileReader();
+                // reader.onload = ((event: any) => {
+                //     img.database64 =  event.target.result;
+                //     element.append('<img src="' + event.target.result + '" id="' + element.attr('id') + '-img" class="content-img"></img>');
+                //     this.imgs.push(img);
+                // });
+                // reader.readAsDataURL(this.currentBrowseFile[0]);
             }
             else if(subaction==='fromUrl'){
                 let img:ImgContentModel = {
+                    parentId:element.attr('id'),
                     id: element.attr('id') + '-img',
-                    path: null
+                    path:null
                 }
                 element.append('<img src="' + this.currentBrowseFile + '" id="' + element.attr('id') + '-img" class="content-img"></img>');
                 // const reader = new FileReader();
@@ -676,7 +751,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         else if (action === this.actions.event.addElExam) {
             
             let hostname = (new URL(this.currentBrowseLink)).hostname;
-            console.log(hostname)
             if(!this.currentinput){
                 this.currentinput = 'Title'
             }
@@ -893,6 +967,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             htmlToolComment += '</div>';
             element.append(htmlToolComment);
             this.comments.push({
+                parentId:element.attr('id'),
                 id: element.attr('id') + '-comment',
                 listComment: []
             })
@@ -944,37 +1019,47 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         }
 
         this.setCurrentToolbar();
-        this.addOptionToolBar();
+       // this.addOptionToolBar();
         this.createData(this.actions.data.addBoxType, element)
         this.createData(this.actions.data.createDocumentTrack);
     }
     private handles(action: string, element?: any, subElement?: any) {
         if (action === this.actions.event.handleCurrentBox) {
             this.rootElement.find('.content-box').click((event) => {
-                if ($(event.currentTarget).attr('id') !== (this.currentBox && this.currentBox.attr('id'))) {
-                //    console.log('afiokdjffdjdsfopfjdslkdfs');
-                    this.currentElement = $(event.target);
-                    if (/-textarea/.test(event.target.id)) {
-                        this.currentElement.focus();
-                        this.removeStyleElements(this.actions.toolbar.removeTool);
-                    }
-                    if (event.target.id && !/-textarea/.test(event.target.id) && $(event.target).hasClass('content-box')) {
-                        this.setCurrentBox(this.currentElement);
-                    } else {
-                        this.setCurrentBox(this.currentElement.parents('.content-box'));
-                    }
-                    // console.log()
-                    // this.currentBox.draggable({ disabled: true });
-                    // this.addOptionToolBar();
-                    this.addElements(this.actions.style.addStyleBoxCurrent, this.currentBox, 'click');
-
-                    // if (!this.currentBox.hasClass('content-box-current')) {
-                    //     this.addElements(this.contents.event.addStyleCurrentBoxBefore, this.currentBox);
-                    // } else {
-                    //     this.addElements(this.contents.event.addStyleCurrentBoxAfter, this.currentBox);
-                    // }
-
+                this.currentElement = $(event.target);
+                if ($(event.target).hasClass('content-box')) {
+                    this.setCurrentBox(this.currentElement);
+                }else{
+                    this.setCurrentBox(this.currentElement.parents('.content-box'));
                 }
+                // this.addStyleElements(this.actions.style.addStyleBoxCurrent,this.currentBox)
+                // this.addElements(this.actions.style.addStyleBoxCurrent, this.currentBox, 'click');
+                
+                // if ($(event.currentTarget).attr('id') !== (this.currentBox && this.currentBox.attr('id'))) {
+                //     console.log(event.currentTarget)
+                // //    console.log('afiokdjffdjdsfopfjdslkdfs');
+                //     this.currentElement = $(event.target);
+                //     if (/-textarea/.test(event.target.id)) {
+                //         this.currentElement.focus();
+                //         this.removeStyleElements(this.actions.toolbar.removeTool);
+                //     }
+                //     if (event.target.id && !/-textarea/.test(event.target.id) && $(event.target).hasClass('content-box')) {
+                //         this.setCurrentBox(this.currentElement);
+                //     } else {
+                //         this.setCurrentBox(this.currentElement.parents('.content-box'));
+                //     }
+                //     // console.log()
+                //     // this.currentBox.draggable({ disabled: true });
+                //     // this.addOptionToolBar();
+                //     this.addElements(this.actions.style.addStyleBoxCurrent, this.currentBox, 'click');
+
+                //     // if (!this.currentBox.hasClass('content-box-current')) {
+                //     //     this.addElements(this.contents.event.addStyleCurrentBoxBefore, this.currentBox);
+                //     // } else {
+                //     //     this.addElements(this.contents.event.addStyleCurrentBoxAfter, this.currentBox);
+                //     // }
+
+                // }
 
             });
         
@@ -1140,157 +1225,157 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             })
         } 
         else if (action === this.actions.event.handleBrowseFile) {
-            element.find('#btn-file').click((event) => {
-                element.find('.content-browse-file').trigger('click');
-                element.find('.content-browse-file').change((fileEvent) => {
-                    this.removeStyleElements(this.actions.style.removeStyleBoxType);
-                    this.currentBox.addClass(this.boxType.boxFile);
-                    this.setCurrentToolbar(this.actions.toolbar.cancelTool);
-                    this.addToolBarBox(this.actions.toolbar.cancelTool, element);
-                    this.currentBrowseFile = fileEvent.target.files;
-                    console.log(' ❏ File :', this.currentBrowseFile);
+            // element.find('#btn-file').click((event) => {
+            //     element.find('.content-browse-file').trigger('click');
+            //     element.find('.content-browse-file').change((fileEvent) => {
+            //         this.removeStyleElements(this.actions.style.removeStyleBoxType);
+            //         this.currentBox.addClass(this.boxType.boxFile);
+            //         this.setCurrentToolbar(this.actions.toolbar.cancelTool);
+            //         this.addToolBarBox(this.actions.toolbar.cancelTool, element);
+            //         this.currentBrowseFile = fileEvent.target.files;
+            //         console.log(' ❏ File :', this.currentBrowseFile);
 
-                    this.addElements(this.actions.event.addElFile, element);
-                });
-            });
-            element.find('.toolbar-browse-file').on('dragover', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-            });
-            element.find('.toolbar-browse-file').on('dragleave', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-            });
-            element.find('.toolbar-browse-file').on('drop', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                this.removeStyleElements(this.actions.style.removeStyleBoxType);
-                this.currentBox.addClass(this.boxType.boxFile);
-                this.setCurrentToolbar(this.actions.toolbar.cancelTool);
-                this.addToolBarBox(this.actions.toolbar.cancelTool, element);
-                this.currentBrowseFile = event.originalEvent.dataTransfer.files;
-                console.log(' ❏ File :', this.currentBrowseFile);
+            //         this.addElements(this.actions.event.addElFile, element);
+            //     });
+            // });
+            // element.find('.toolbar-browse-file').on('dragover', (event) => {
+            //     event.preventDefault();
+            //     event.stopPropagation();
+            // });
+            // element.find('.toolbar-browse-file').on('dragleave', (event) => {
+            //     event.preventDefault();
+            //     event.stopPropagation();
+            // });
+            // element.find('.toolbar-browse-file').on('drop', (event) => {
+            //     event.preventDefault();
+            //     event.stopPropagation();
+            //     this.removeStyleElements(this.actions.style.removeStyleBoxType);
+            //     this.currentBox.addClass(this.boxType.boxFile);
+            //     this.setCurrentToolbar(this.actions.toolbar.cancelTool);
+            //     this.addToolBarBox(this.actions.toolbar.cancelTool, element);
+            //     this.currentBrowseFile = event.originalEvent.dataTransfer.files;
+            //     console.log(' ❏ File :', this.currentBrowseFile);
 
-                this.addElements(this.actions.event.addElFile, element);
-            });
+            //     this.addElements(this.actions.event.addElFile, element);
+            // });
 
         }
         
         else if (action === this.actions.event.handleBrowseVideo) {
-            element.find('#btn-video').click((event) => {
-                element.find('.content-browse-video').trigger('click');
-                element.find('.content-browse-video').change((fileEvent) => {
+            // element.find('#btn-video').click((event) => {
+            //     element.find('.content-browse-video').trigger('click');
+            //     element.find('.content-browse-video').change((fileEvent) => {
                     
-                    this.removeStyleElements(this.actions.style.removeStyleBoxType);
-                    this.currentBox.addClass(this.boxType.boxVideo);
-                    this.setCurrentToolbar(this.actions.toolbar.cancelTool);
-                    this.addToolBarBox(this.actions.toolbar.cancelTool, element);
-                    this.currentBrowseFile = fileEvent.target.files;
-                    console.log(' ❏ Video :', this.currentBrowseFile);
+            //         this.removeStyleElements(this.actions.style.removeStyleBoxType);
+            //         this.currentBox.addClass(this.boxType.boxVideo);
+            //         this.setCurrentToolbar(this.actions.toolbar.cancelTool);
+            //         this.addToolBarBox(this.actions.toolbar.cancelTool, element);
+            //         this.currentBrowseFile = fileEvent.target.files;
+            //         console.log(' ❏ Video :', this.currentBrowseFile);
 
-                    this.addElements(this.actions.event.addElVideo, element);
-                });
-            });
-            element.find('.toolbar-browse-video').find('.toolbar-drag').on('dragover', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-            });
-            element.find('.toolbar-browse-video').find('.toolbar-drag').on('dragleave', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-            });
-            element.find('.toolbar-browse-video').find('.toolbar-drag').on('drop', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                this.removeStyleElements(this.actions.style.removeStyleBoxType);
-                this.currentBox.addClass(this.boxType.boxVideo);
-                this.setCurrentToolbar(this.actions.toolbar.cancelTool);
-                this.addToolBarBox(this.actions.toolbar.cancelTool, element);
-                this.currentBrowseFile = event.originalEvent.dataTransfer.files;
-                console.log(' ❏ Video :', this.currentBrowseFile);
+            //         this.addElements(this.actions.event.addElVideo, element);
+            //     });
+            // });
+            // element.find('.toolbar-browse-video').find('.toolbar-drag').on('dragover', (event) => {
+            //     event.preventDefault();
+            //     event.stopPropagation();
+            // });
+            // element.find('.toolbar-browse-video').find('.toolbar-drag').on('dragleave', (event) => {
+            //     event.preventDefault();
+            //     event.stopPropagation();
+            // });
+            // element.find('.toolbar-browse-video').find('.toolbar-drag').on('drop', (event) => {
+            //     event.preventDefault();
+            //     event.stopPropagation();
+            //     this.removeStyleElements(this.actions.style.removeStyleBoxType);
+            //     this.currentBox.addClass(this.boxType.boxVideo);
+            //     this.setCurrentToolbar(this.actions.toolbar.cancelTool);
+            //     this.addToolBarBox(this.actions.toolbar.cancelTool, element);
+            //     this.currentBrowseFile = event.originalEvent.dataTransfer.files;
+            //     console.log(' ❏ Video :', this.currentBrowseFile);
 
-                this.addElements(this.actions.event.addElVideo, element, 'videoSource');
-            });
-            element.find('.toolbar-browse-video').find('#video-input-url').click(() => {
-                element.find('.toolbar-browse-video').find('#video-input-url').focus();
+            //     this.addElements(this.actions.event.addElVideo, element, 'videoSource');
+            // });
+            // element.find('.toolbar-browse-video').find('#video-input-url').click(() => {
+            //     element.find('.toolbar-browse-video').find('#video-input-url').focus();
 
-                element.find('.toolbar-browse-video').find('#video-input-url').bind("paste", (event)=>{
-                    event.preventDefault();
-                    event.stopPropagation();
-                    let pastedData = event.originalEvent.clipboardData.getData('text');
-                    $(event.currentTarget).val(pastedData)
-                    const url = pastedData;
-                    let dataStreaming = new VideoConetentDataModel();
-                   // let streamId = event.target.value;
-                   const streamId = this.commonService.getStreamId(url);
+            //     element.find('.toolbar-browse-video').find('#video-input-url').bind("paste", (event)=>{
+            //         event.preventDefault();
+            //         event.stopPropagation();
+            //         let pastedData = event.originalEvent.clipboardData.getData('text');
+            //         $(event.currentTarget).val(pastedData)
+            //         const url = pastedData;
+            //         let dataStreaming = new VideoConetentDataModel();
+            //        // let streamId = event.target.value;
+            //        const streamId = this.commonService.getStreamId(url);
 
-                    if (streamId.streamId != null && streamId.channelStream == 'youtube') {
-                        this.currentBrowseFile = 'https://www.youtube.com/embed/' + streamId.streamId;
-                        dataStreaming.streamId = streamId.streamId;
-                        dataStreaming.channelStream = streamId.channelStream;
-                    }else{
-                        this.currentBrowseFile = streamId.streamId;
-                        dataStreaming.streamId = streamId.streamId;
-                        dataStreaming.channelStream = streamId.channelStream;
-                    }
-                    this.removeStyleElements(this.actions.style.removeStyleBoxType);
-                    this.currentBox.addClass(this.boxType.boxVideo);
-                    this.setCurrentToolbar(this.actions.toolbar.cancelTool);
-                    this.addToolBarBox(this.actions.toolbar.cancelTool, element);
-                    this.addElements(this.actions.event.addElVideo, element, dataStreaming.channelStream, null, dataStreaming);
+            //         if (streamId.streamId != null && streamId.channelStream == 'youtube') {
+            //             this.currentBrowseFile = 'https://www.youtube.com/embed/' + streamId.streamId;
+            //             dataStreaming.streamId = streamId.streamId;
+            //             dataStreaming.channelStream = streamId.channelStream;
+            //         }else{
+            //             this.currentBrowseFile = streamId.streamId;
+            //             dataStreaming.streamId = streamId.streamId;
+            //             dataStreaming.channelStream = streamId.channelStream;
+            //         }
+            //         this.removeStyleElements(this.actions.style.removeStyleBoxType);
+            //         this.currentBox.addClass(this.boxType.boxVideo);
+            //         this.setCurrentToolbar(this.actions.toolbar.cancelTool);
+            //         this.addToolBarBox(this.actions.toolbar.cancelTool, element);
+            //         this.addElements(this.actions.event.addElVideo, element, dataStreaming.channelStream, null, dataStreaming);
 
 
-                })
+            //     })
 
-                element.find('.toolbar-browse-video').find('#video-input-url').on('input', this.commonService.debounce((event) => {
-                    event.preventDefault();
-                    if (event.target.value) {
-                        const url = event.target.value;
-                        let dataStreaming = new VideoConetentDataModel();
-                       // let streamId = event.target.value;
-                       const streamId = this.commonService.getStreamId(url);
+            //     element.find('.toolbar-browse-video').find('#video-input-url').on('input', this.commonService.debounce((event) => {
+            //         event.preventDefault();
+            //         if (event.target.value) {
+            //             const url = event.target.value;
+            //             let dataStreaming = new VideoConetentDataModel();
+            //            // let streamId = event.target.value;
+            //            const streamId = this.commonService.getStreamId(url);
 
-                        if (streamId.streamId != null && streamId.channelStream == 'youtube') {
-                            this.currentBrowseFile = 'https://www.youtube.com/embed/' + streamId.streamId;
-                            dataStreaming.streamId = streamId.streamId;
-                            dataStreaming.channelStream = streamId.channelStream;
-                        }else{
-                            this.currentBrowseFile = streamId.streamId;
-                            dataStreaming.streamId = streamId.streamId;
-                            dataStreaming.channelStream = streamId.channelStream;
-                        }
+            //             if (streamId.streamId != null && streamId.channelStream == 'youtube') {
+            //                 this.currentBrowseFile = 'https://www.youtube.com/embed/' + streamId.streamId;
+            //                 dataStreaming.streamId = streamId.streamId;
+            //                 dataStreaming.channelStream = streamId.channelStream;
+            //             }else{
+            //                 this.currentBrowseFile = streamId.streamId;
+            //                 dataStreaming.streamId = streamId.streamId;
+            //                 dataStreaming.channelStream = streamId.channelStream;
+            //             }
     
-                       // const streamId = this.commonService.getStreamId(url);
+            //            // const streamId = this.commonService.getStreamId(url);
 
 
-                        // if (streamId.streamId != null && streamId.channelStream == 'youtube') {
-                        //     this.currentBrowseFile = 'https://www.youtube.com/embed/' + streamId.streamId;
-                        //     dataStreaming.streamId = streamId.streamId;
-                        //     dataStreaming.channelStream = streamId.channelStream;
-                        // }
-                        // if (streamId.streamId != null && streamId.channelStream == 'wistia') {
-                        //     this.currentBrowseFile = streamId.streamId;
-                        //     dataStreaming.streamId = streamId.streamId;
-                        //     dataStreaming.channelStream = streamId.channelStream;
-                        // } else {
-                        //     let streamId = event.target.value;
-                        //     this.currentBrowseFile = streamId;
-                        //     let dataStreaming = new VideoConetentDataModel();
-                        //     dataStreaming.streamId = streamId;
-                        //     dataStreaming.channelStream = 'wistia';
-                        // }
-                        // else {
-                        //     console.log('The youtube url is not valid.');
-                        //     this.currentBrowseFile = event.target.value;
-                        // }
-                        this.removeStyleElements(this.actions.style.removeStyleBoxType);
-                        this.currentBox.addClass(this.boxType.boxVideo);
-                        this.setCurrentToolbar(this.actions.toolbar.cancelTool);
-                        this.addToolBarBox(this.actions.toolbar.cancelTool, element);
-                        this.addElements(this.actions.event.addElVideo, element, dataStreaming.channelStream, null, dataStreaming);
-                    }
-                }, 2000));
-            });
+            //             // if (streamId.streamId != null && streamId.channelStream == 'youtube') {
+            //             //     this.currentBrowseFile = 'https://www.youtube.com/embed/' + streamId.streamId;
+            //             //     dataStreaming.streamId = streamId.streamId;
+            //             //     dataStreaming.channelStream = streamId.channelStream;
+            //             // }
+            //             // if (streamId.streamId != null && streamId.channelStream == 'wistia') {
+            //             //     this.currentBrowseFile = streamId.streamId;
+            //             //     dataStreaming.streamId = streamId.streamId;
+            //             //     dataStreaming.channelStream = streamId.channelStream;
+            //             // } else {
+            //             //     let streamId = event.target.value;
+            //             //     this.currentBrowseFile = streamId;
+            //             //     let dataStreaming = new VideoConetentDataModel();
+            //             //     dataStreaming.streamId = streamId;
+            //             //     dataStreaming.channelStream = 'wistia';
+            //             // }
+            //             // else {
+            //             //     console.log('The youtube url is not valid.');
+            //             //     this.currentBrowseFile = event.target.value;
+            //             // }
+            //             this.removeStyleElements(this.actions.style.removeStyleBoxType);
+            //             this.currentBox.addClass(this.boxType.boxVideo);
+            //             this.setCurrentToolbar(this.actions.toolbar.cancelTool);
+            //             this.addToolBarBox(this.actions.toolbar.cancelTool, element);
+            //             this.addElements(this.actions.event.addElVideo, element, dataStreaming.channelStream, null, dataStreaming);
+            //         }
+            //     }, 2000));
+            // });
             
 
         } else if (action === this.actions.event.handleSubForm) {
@@ -1386,38 +1471,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     }
                     this.removeStyleElements(this.actions.style.removeStyleSubformActive, element);
                     this.addStyleElements(this.actions.style.addStyleSubformActive, element.find('.toolbar-subform').find('#' + this.currentSubFormType.id));
-                    // }   
-                    // console.log(this.subForms);
-                    // if (!this.subForms.find(form => form.id === $(itemElement.currentTarget).val())) {
-                    //     let targetDocument = this.documentDataService.documentNavList.find((document) => document.nameDocument === $(itemElement.currentTarget).val())
-                    //     if (!tempSubForms.find((subform) => subform.id == targetDocument.id)) {
-                    //         tempSubForms.push({
-                    //             id: targetDocument.id,
-                    //             nameDocument: targetDocument.nameDocument,
-                    //             isLinked: true,
-                    //             linkName: targetDocument.nameDocument,
-                    //             type: this.currentSubFormType.id
-                    //         });
-                    //     }
-                    //     //    $(this.currentSubFormType.id).text('test')
-                    // } else {
-                    //     tempSubForms = tempSubForms.filter((form) => form.id != $(itemElement.currentTarget).val())
-                    // }
-                    // if (this.currentSubFormType.id === "subform-silde") {
-                    //     element.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Silde (' + tempSubForms.length + ')');
-                    // }
-                    // else if (this.currentSubFormType.id === "subform-link") {
-                    //     element.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Link (' + tempSubForms.length + ')');
-                    // }
                 });
-                // element.find('.content-subform').find('li').on('blur', (event) => {
-                //     let subformId = this.subForms.findIndex((subform) => subform.id == $(event.currentTarget).attr('data-subformId'));
-                //     this.subForms[subformId].linkName = $(event.currentTarget).text();
-                // });
-                // element.find('.content-subform').find('li').click((event) => {
-                //     $(event.currentTarget).focus();
-                // })
-
                 element.find('.carousel-control-next').click((event) => {
                     $('#' + $(event.currentTarget).attr('data-subformId')).carousel('next');
                 })
@@ -1456,10 +1510,10 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             element.click((event) => {
                 // this.addElements(this.actions.style.addStyleCurrentBox, this.currentBox ,'click');
                 this.removeStyleElements(this.actions.style.removeAllStyleBoxCurrent);
-                this.setCurrentToolbar(this.actions.toolbar.templateDocTool);
-                this.addToolBarBox(this.actions.toolbar.cancelTool, element);
-                this.setCurrentBox($(event.currentTarget))
-                this.addOptionToolBar();
+                // this.setCurrentToolbar(this.actions.toolbar.templateDocTool);
+                // this.addToolBarBox(this.actions.toolbar.cancelTool, element);
+                // this.setCurrentBox($(event.currentTarget))
+                // this.addOptionToolBar();
             })
             // element.on('input', (event) => {
             //     if (!$(event.currentTarget).text()) {
@@ -1722,22 +1776,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                         this.videos[targetVideoIndex].condition.isMustWatchingEnd = false;
                         this.documentTrack.contents[targetVideoTrackIndex].conditions.videoCondition.isMustWatchingEnd = false;
                     }
-              
-
-                    // if ($('.option-video').find('.video-tracker').prop('checked')) {
-                    //     if (!this.documentTrack.contents.find(content => content.id === this.currentBox.attr('id'))) {
-                    //         this.documentTrack.contents.push({
-                    //             parentId: this.currentBox.attr('id'),
-                    //             id: this.currentBox.attr('id') + '-video',
-                    //             data: null,
-                    //             boxType: this.boxType.boxVideo,
-                    //             isTrackProgress: true,
-                    //             progress: 0
-                    //         })
-                    //     }
-                    // } else {
-                    //     this.documentTrack.contents = this.documentTrack.contents.filter((content) => content.parentId !== this.currentBox.attr('id'))
-                    // }
                 }
             });
 
@@ -1987,16 +2025,22 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         if (action === this.actions.event.removeElBox) {
             this.currentBox.remove();
             this.currentBox = null;
-        } else if (action === this.actions.toolbar.removeTool) {
-            this.rootElement.find('.content-box').find('.content-toolbar').remove();
+        } 
+        else if (action === this.actions.style.removeStyleBoxCurrent) {
+            this.rootElement.find('.content-box').find('[content-name][content-last!="true"]').hide();
+            this.rootElement.find('.content-box').removeClass('content-box-current');
+            this.rootElement.find('.content-box').removeClass('content-box-active');
+            this.rootElement.find('.content-box').removeClass('border border-primary');
+        }
+        else if (action === this.actions.toolbar.removeTool) {
+            // this.rootElement.find('.content-box').find('.content-toolbar').remove();
         } else if (action === this.actions.style.removeStyleBorderBox) {
             this.rootElement.find('.content-box').removeClass('border border-primary');
         } else if (action === this.actions.style.removeStyleBoxActive) {
             this.rootElement.find('.content-box').removeClass('content-box-active');
-        } else if (action === this.actions.style.removeStyleBoxCurrent) {
-            this.rootElement.find('.content-box').removeClass('content-box-current');
         }
         else if (action === this.actions.style.removeAllStyleBoxCurrent) {
+            this.rootElement.find('.content-box').find('[name="section-content"]').hide();
             this.rootElement.find('.content-box').removeClass('content-box-current');
             this.rootElement.find('.content-box').removeClass('content-box-active');
             this.rootElement.find('.content-box').removeClass('border border-primary');
@@ -2062,7 +2106,19 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         }
     }
     private addStyleElements(action: string, element?: JQuery<Element>, styles?: string, subaction?: string) {
-        if (action === this.actions.style.addStyleBoxBrowseImgSize) {
+        if (action === this.actions.style.addStyleBoxCurrent) {
+            this.removeStyleElements(this.actions.style.removeStyleBoxCurrent);
+            setTimeout(() => {
+                element.find('[content-name]').show();
+                element.addClass('border border-primary');
+                element.addClass('content-box-active');
+                element.addClass('content-box-current');            
+            });
+                    
+          
+
+        }
+        else if (action === this.actions.style.addStyleBoxBrowseImgSize) {
             element.addClass('box-browse-img-size');
         }
         else if (action === this.actions.style.addStyleBoxBrowseVideoSize) {
@@ -2079,10 +2135,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         }
         else if (action === this.actions.style.addStyleBoxCommentSize) {
             element.addClass('box-comment-size');
-        }
-        else if (action === this.actions.style.addStyleBoxCurrent) {
-            this.removeStyleElements(this.actions.style.removeStyleBoxCurrent);
-            element.addClass('content-box-current');
         }
         else if (action === this.actions.style.addStyleBoxActive) {
             this.removeStyleElements(this.actions.style.removeStyleBoxActive);
@@ -2131,72 +2183,63 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 + '</div>';
             this.rootElement.find(element).append(htmlTootBar);
         } else if (action === this.actions.toolbar.addBrowseImgTool) {
-
-            htmlTootBar = '<div class="row content-toolbar toolbar-browse-img">'
-            + '<div class="col-5 toolbar-drag">'
-            + '<input type="file" class="content-browse-img" id="input-file">'
-            + '<img  src="assets/imgs/contentPage/browse-file.svg">'
-            + '<p class="content-font-title1">Drag & Drop your images</p>'
-            + '<button id="btn-file" type="button" class="btn btn-primary mt-1">Browse</button>'
-            + '</div>'
-            + '<div class="col-2">'
-            + 'OR'
-            + '</div>'
-            + '<div class="col-5 toolbar-drag">'
-            + '<div class="form-group">'
-            + '<input placeholder="https://example.com" type="text" class="form-control" id="img-input-url">'
-            + '</div>'
-            + '<p class="content-font-title1">Get your URL</p>'
-            + '</div>'
-            + '</div>';
-
-
+            //this.createContent();
+            // this.rootElement.find(element).append(this.createContent());
             // htmlTootBar = '<div class="row content-toolbar toolbar-browse-img">'
+            // + '<div class="col-5 toolbar-drag">'
+            // + '<input type="file" class="content-browse-img" id="input-file">'
+            // + '<img  src="assets/imgs/contentPage/browse-file.svg">'
+            // + '<p class="content-font-title1">Drag & Drop your images</p>'
+            // + '<button id="btn-file" type="button" class="btn btn-primary mt-1">Browse</button>'
+            // + '</div>'
+            // + '<div class="col-2">'
+            // + 'OR'
+            // + '</div>'
+            // + '<div class="col-5 toolbar-drag">'
+            // + '<div class="form-group">'
+            // + '<input placeholder="https://example.com" type="text" class="form-control" id="img-input-url">'
+            // + '</div>'
+            // + '<p class="content-font-title1">Get your URL</p>'
+            // + '</div>'
+            // + '</div>';
+            // this.rootElement.find(element).append(htmlTootBar);
+            // this.addStyleElements(this.actions.style.addStyleBoxBrowseImgSize, element);
+            // this.handles(this.actions.event.handleBrowseImg, element);
+        } 
+        else if (action === this.actions.toolbar.addBrowseFileTool) {
+            // htmlTootBar = '<div class="row content-toolbar toolbar-browse-file">'
             //     + '<div class="col-12">'
-            //     + '<input type="file" class="content-browse-img" id="input-file">'
+            //     + '<input type="file" class="content-browse-file" id="input-file">'
             //     + '<img  src="assets/imgs/contentPage/browse-file.svg">'
-            //     + '<p class="content-font-title1">Drag & Drop your images</p>'
+            //     + '<p class="content-font-title1">Drag & Drop your files</p>'
             //     + '<button id="btn-file" type="button" class="btn btn-primary mt-1">Browse</button>'
             //     + '</div>'
             //     + '</div>';
-            this.rootElement.find(element).append(htmlTootBar);
-            this.addStyleElements(this.actions.style.addStyleBoxBrowseImgSize, element);
-            this.handles(this.actions.event.handleBrowseImg, element);
-        } 
-        else if (action === this.actions.toolbar.addBrowseFileTool) {
-            htmlTootBar = '<div class="row content-toolbar toolbar-browse-file">'
-                + '<div class="col-12">'
-                + '<input type="file" class="content-browse-file" id="input-file">'
-                + '<img  src="assets/imgs/contentPage/browse-file.svg">'
-                + '<p class="content-font-title1">Drag & Drop your files</p>'
-                + '<button id="btn-file" type="button" class="btn btn-primary mt-1">Browse</button>'
-                + '</div>'
-                + '</div>';
-            this.rootElement.find(element).append(htmlTootBar);
-            this.addStyleElements(this.actions.style.addStyleBoxBrowseFileSize, element);
-            this.handles(this.actions.event.handleBrowseFile, element);
+            // this.rootElement.find(element).append(htmlTootBar);
+            // this.addStyleElements(this.actions.style.addStyleBoxBrowseFileSize, element);
+            // this.handles(this.actions.event.handleBrowseFile, element);
         }
         else if (action === this.actions.toolbar.addBrowseVideoTool) {
-            htmlTootBar = '<div class="row content-toolbar toolbar-browse-video">'
-                + '<div class="col-5 toolbar-drag">'
-                + '<input type="file" class="content-browse-video" accept="video/mp4,video/x-m4v,video/*" id="input-video">'
-                + '<img  src="assets/imgs/contentPage/browse-file.svg">'
-                + '<p class="content-font-title1">Drag & Drop your files</p>'
-                + '<button  id="btn-video" type="button" class="btn btn-primary mt-1">Browse</button>'
-                + '</div>'
-                + '<div class="col-2">'
-                + 'OR'
-                + '</div>'
-                + '<div class="col-5 toolbar-drag">'
-                + '<div class="form-group">'
-                + '<input placeholder="https://example.com" type="text" class="form-control" id="video-input-url">'
-                + '</div>'
-                + '<p class="content-font-title1">Get your URL</p>'
-                + '</div>'
-                + '</div>';
-            this.rootElement.find(element).append(htmlTootBar);
-            this.addStyleElements(this.actions.style.removeStyleBoxBrowseVideoSize, element);
-            this.handles(this.actions.event.handleBrowseVideo, element);
+            // htmlTootBar = '<div class="row content-toolbar toolbar-browse-video">'
+            //     + '<div class="col-5 toolbar-drag">'
+            //     + '<input type="file" class="content-browse-video" accept="video/mp4,video/x-m4v,video/*" id="input-video">'
+            //     + '<img  src="assets/imgs/contentPage/browse-file.svg">'
+            //     + '<p class="content-font-title1">Drag & Drop your files</p>'
+            //     + '<button  id="btn-video" type="button" class="btn btn-primary mt-1">Browse</button>'
+            //     + '</div>'
+            //     + '<div class="col-2">'
+            //     + 'OR'
+            //     + '</div>'
+            //     + '<div class="col-5 toolbar-drag">'
+            //     + '<div class="form-group">'
+            //     + '<input placeholder="https://example.com" type="text" class="form-control" id="video-input-url">'
+            //     + '</div>'
+            //     + '<p class="content-font-title1">Get your URL</p>'
+            //     + '</div>'
+            //     + '</div>';
+            // this.rootElement.find(element).append(htmlTootBar);
+            // this.addStyleElements(this.actions.style.removeStyleBoxBrowseVideoSize, element);
+            // this.handles(this.actions.event.handleBrowseVideo, element);
         } 
         else if (action === this.actions.toolbar.addBrowseLinkTool) {
             htmlTootBar = '<div class="row content-toolbar toolbar-browse-link">'
@@ -2234,43 +2277,43 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 + '</div>';
         }
         else if (action === this.actions.toolbar.addCreateSubformTool) {
-            this.currentSubFormType = { id: 'subform-link', name: 'link' };
-            let htmlDocumentList = '<div class="list-group text-left">';
-            this.createData(this.actions.data.createChildDocument)
-            console.log(this.childDocuments);
-            // this.subForms.forEach(()=>{
+            // this.currentSubFormType = { id: 'subform-link', name: 'link' };
+            // let htmlDocumentList = '<div class="list-group text-left">';
+            // this.createData(this.actions.data.createChildDocument)
+            // console.log(this.childDocuments);
+            // // this.subForms.forEach(()=>{
 
+            // // })
+            // let documentSubformList = this.documentDataService.documentNavList.filter((document) => document.nameDocument != this.documentDataService.currentDocumentName)
+            // this.childDocuments.forEach((document) => {
+            //     documentSubformList = documentSubformList.filter((documentSubform) => documentSubform.id != document.id);
             // })
-            let documentSubformList = this.documentDataService.documentNavList.filter((document) => document.nameDocument != this.documentDataService.currentDocumentName)
-            this.childDocuments.forEach((document) => {
-                documentSubformList = documentSubformList.filter((documentSubform) => documentSubform.id != document.id);
-            })
-            documentSubformList.forEach((document, index) => {
-                htmlDocumentList += '<input type="checkbox" value="' + document.nameDocument + '" id="subform-name-' + this.commonService.getPatternId(document.nameDocument) + '" />';
+            // documentSubformList.forEach((document, index) => {
+            //     htmlDocumentList += '<input type="checkbox" value="' + document.nameDocument + '" id="subform-name-' + this.commonService.getPatternId(document.nameDocument) + '" />';
 
-                if (index == 0) {
-                    htmlDocumentList += '<label class="list-group-item border-top-0" for="subform-name-' + this.commonService.getPatternId(document.nameDocument) + '">' + document.nameDocument + '</label>';
-                } else {
-                    htmlDocumentList += '<label class="list-group-item" for="subform-name-' + this.commonService.getPatternId(document.nameDocument) + '">' + document.nameDocument + '</label>';
-                }
-            });
-            htmlDocumentList += '</div>'
-            htmlTootBar = '<div class="row content-toolbar toolbar-subform">'
-                + '<nav>'
-                + '<div class="nav nav-tabs text-lightGrey ">'
-                + '<a data-subformtype="link" id="subform-link" class="nav-item nav-link cursor-pointer w-50 border-top-0 rounded-0 active text-primary" >Link (0)</a>'
-                + '<a data-subformtype="silde" id="subform-silde" class="nav-item nav-link cursor-pointer w-50   border-top-0 rounded-0">Silde (0)</a>'
-                + '</nav>'
-                + '<div class="col-12 subform-col">'
-                + htmlDocumentList
-                + '</div>'
-                + '<div  class="nav-footer nav-footer-custome">'
-                + '<button type="button" id="subform-btn-submit" class="btn btn-outline-success">Submit</button>'
-                + '</div>'
-                + '</div>';
-            this.addStyleElements(this.actions.style.addStyleBoxSubformSize, element);
-            this.rootElement.find(element).append(htmlTootBar);
-            this.handles(this.actions.event.handleSubForm, element);
+            //     if (index == 0) {
+            //         htmlDocumentList += '<label class="list-group-item border-top-0" for="subform-name-' + this.commonService.getPatternId(document.nameDocument) + '">' + document.nameDocument + '</label>';
+            //     } else {
+            //         htmlDocumentList += '<label class="list-group-item" for="subform-name-' + this.commonService.getPatternId(document.nameDocument) + '">' + document.nameDocument + '</label>';
+            //     }
+            // });
+            // htmlDocumentList += '</div>'
+            // htmlTootBar = '<div class="row content-toolbar toolbar-subform">'
+            //     + '<nav>'
+            //     + '<div class="nav nav-tabs text-lightGrey ">'
+            //     + '<a data-subformtype="link" id="subform-link" class="nav-item nav-link cursor-pointer w-50 border-top-0 rounded-0 active text-primary" >Link (0)</a>'
+            //     + '<a data-subformtype="silde" id="subform-silde" class="nav-item nav-link cursor-pointer w-50   border-top-0 rounded-0">Silde (0)</a>'
+            //     + '</nav>'
+            //     + '<div class="col-12 subform-col">'
+            //     + htmlDocumentList
+            //     + '</div>'
+            //     + '<div  class="nav-footer nav-footer-custome">'
+            //     + '<button type="button" id="subform-btn-submit" class="btn btn-outline-success">Submit</button>'
+            //     + '</div>'
+            //     + '</div>';
+            // this.addStyleElements(this.actions.style.addStyleBoxSubformSize, element);
+            // this.rootElement.find(element).append(htmlTootBar);
+            // this.handles(this.actions.event.handleSubForm, element);
         }
         else if (action === this.actions.toolbar.cancelTool || action === this.actions.toolbar.templateDocTool) {
             // htmlTootBar = '<div class="row content-toolbar toolbar-cancel">'
@@ -2385,36 +2428,36 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         }
         else if (this.currentToolbar === this.actions.toolbar.addVideoTool) {
 
-            htmlOptionToolBar =
-                '<div class="row p-0 m-0 mt-3 option-video">'
-                + '<div class="col-12 d-flex justify-content-center border-bottom">'
-                + '<div class="form-group text-center">'
-                + '<label>Property</label>'
-                + '<div class="custom-control custom-switch">'
-                + '<input  type="checkbox" class="custom-control-input video-tracker" id="switch">'
-                + '<label class="custom-control-label" for="switch">Must finish watching</label>'
-                + '</div>'
-                + '</div>'
-                + '</div>'
+            // htmlOptionToolBar =
+            //     '<div class="row p-0 m-0 mt-3 option-video">'
+            //     + '<div class="col-12 d-flex justify-content-center border-bottom">'
+            //     + '<div class="form-group text-center">'
+            //     + '<label>Property</label>'
+            //     + '<div class="custom-control custom-switch">'
+            //     + '<input  type="checkbox" class="custom-control-input video-tracker" id="switch">'
+            //     + '<label class="custom-control-label" for="switch">Must finish watching</label>'
+            //     + '</div>'
+            //     + '</div>'
+            //     + '</div>'
 
-                + '<div class="col-12 d-flex justify-content-center border-bottom">'
-                + '<div class="form-group text-center">'
-                + '<label>Action</label>'
-                + '<div >'
-                + '<img  class="option-action-trash" src="assets/imgs/contentPage/trash.svg">'
-                + '</div>'
-                + '</div>'
-                + '</div>'
+            //     + '<div class="col-12 d-flex justify-content-center border-bottom">'
+            //     + '<div class="form-group text-center">'
+            //     + '<label>Action</label>'
+            //     + '<div >'
+            //     + '<img  class="option-action-trash" src="assets/imgs/contentPage/trash.svg">'
+            //     + '</div>'
+            //     + '</div>'
+            //     + '</div>'
 
-                + '</div>'
-            this.rootOptionTool.html(htmlOptionToolBar)
-            let targetVideo = this.videos.find((video) => video.parentId === this.currentBox.attr('id'))
-            if (targetVideo) {
-                if (targetVideo.condition.isMustWatchingEnd) {
-                    $('.option-video').find('.video-tracker').prop('checked', true)
-                }
-            }
-            this.handles(this.actions.event.handleOptionToolVideo);
+            //     + '</div>'
+            // this.rootOptionTool.html(htmlOptionToolBar)
+            // let targetVideo = this.videos.find((video) => video.parentId === this.currentBox.attr('id'))
+            // if (targetVideo) {
+            //     if (targetVideo.condition.isMustWatchingEnd) {
+            //         $('.option-video').find('.video-tracker').prop('checked', true)
+            //     }
+            // }
+            // this.handles(this.actions.event.handleOptionToolVideo);
         }
 
         else if (this.currentToolbar === this.actions.toolbar.addLinkTool) {
@@ -2653,10 +2696,19 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     }
     private setCurrentBox(element?) {
         if (element) {
-            this.currentBox = element;
+            this.currentBox =  this.contentDCtrlService.currentBox =  element;
         } else {
-            this.currentBox = $(this.rootElement).find('.content-box-current');
+            this.currentBox = this.contentDCtrlService.currentBox = $(this.rootElement).find('.content-box-current');
         }
+        this.addStyleElements(this.actions.style.addStyleBoxCurrent,this.currentBox)
+        
+        let targetContent  = ContentRouting.routes.find((content)=>content.contentName === this.currentBox.find('[content-name]').attr('content-name'))
+        if(targetContent){
+            this.rootOptionTool.html(this.createContentOption(targetContent.option))
+        }
+        // let targetOption =  this.currentBox.find('[name="section-option"]');
+        // console.log("targetOption",targetOption)
+        // this.rootOptionTool.html(targetOption)
     }
     private setCurrentToolbar(action?) {
         if (action) {
@@ -2715,21 +2767,23 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         this.createData(this.actions.data.createChildDocument);
         this.documentService.captureHTML('contentTemplate').subscribe((imgData) => {
             this.createData(this.actions.data.createDataToSave).then(() => {
-                let contents: ContentsModel = {
-                    boxes: this.boxes,
-                    exams:this.exams,
-                    textAreas: this.textAreas,
-                    files:this.files,
-                    imgs: this.imgs,
-                    videos: this.videos,
-                    subFroms: this.subForms,
-                    comments: this.comments,
-                    todoList: this.toDoLists,
-                    links:this.links,
-                    progressBar: this.progressBars,
-                    notes:this.notes
 
-                }
+                // let contents: ContentsModel = {
+                //     boxes: this.boxes,
+                //     exams:this.exams,
+                //     textAreas: this.textAreas,
+                //     files:this.files,
+                //     imgs: this.imgs,
+                //     videos: this.videos,
+                //     subFroms: this.subForms,
+                //     comments: this.comments,
+                //     todoList: this.toDoLists,
+                //     links:this.links,
+                //     progressBar: this.progressBars,
+                //     notes:this.notes
+
+                // }
+                let contents = this.contentDCtrlService.poolContents;
                 let otherDetail:OtherDetailModel = new OtherDetailModel();
                 otherDetail.screenDevDetail.height = this.contentTemplateSize.height;
                 otherDetail.screenDevDetail.width = this.contentTemplateSize.width;
@@ -2761,7 +2815,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     progress: this.findData(this.actions.data.findProgressDocumentTrack),
                     contents: this.documentTrack.contents
                 }
-                // console.log(saveObjectTrackTemplate);
+                console.log("saveObjectTrackTemplate==>",saveobjectTemplate);
                 this.documentService.uploadFile(this.files).subscribe((status)=>{
                     if (status ===Constants.common.message.status.success.text) {
                         this.documentService.saveDocument(nameDocument, saveobjectTemplate).subscribe((status) => {
@@ -2886,6 +2940,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.textAreas = results.contents.textAreas ||  new Array<TextAreaContentModel>();
             this.links = results.contents.links ||  new Array<LinkContentModel>();
             this.exams  = results.contents.exams ||  new Array<ExamContentModel>();
+            
             this.textAreas.forEach((textArea) => {
                 if (element) {
                     $(element).find('[id="' + textArea.id + '"]').val(textArea.value);
@@ -2898,12 +2953,70 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     }
     private async createData(action: string, element?: JQuery<Element>) {
         if (action === this.actions.data.createDataToSave) {
-            this.textAreas = new Array<TextAreaContentModel>();
-            await $(this.rootElement).find('.content-textarea').each((index, element) => {
-                const elementTextArea = $(element);
-                const objectTextArea: TextAreaContentModel = { id: elementTextArea.attr('id'), value: elementTextArea.val() && elementTextArea.val().toString() };
-                this.textAreas.push(objectTextArea);
-            });
+            return new Promise((resolve,reject)=>{
+                this.textAreas = new Array<TextAreaContentModel>();
+            
+                $(this.rootElement).find('.content-textarea').each((index, element) => {
+                    const elementTextArea = $(element);
+                    const objectTextArea: TextAreaContentModel = { id: elementTextArea.attr('id'), value: elementTextArea.text() };
+                    this.textAreas.push(objectTextArea);
+                    // console.log("this.textAreas",this.textAreas)
+                });
+                     resolve(Constants.common.message.status.success.text)
+                // $(this.rootElement).find('.content-textarea').each((index, element) => {
+
+                // })
+                // let numberUploadImg = 0;
+                // $(this.rootElement).find('.content-img').each((index, element) => {
+                //     const elementImg = $(element);
+                //     let targetImg =   this.imgs.find((img)=>img.id === elementImg.attr('id'))
+                //     let targetImgIndex =   this.imgs.findIndex((img)=>img.id === elementImg.attr('id'))
+                //         if(targetImg && !targetImg.path){
+                //             this.imgs[targetImgIndex].database64 =  null
+                //             let  awsFileName =  this.commonService.getPatternAWSName(targetImg.originFile.name)|| 'fileName';
+                //             let file:UploadFileModel[] = [{
+                //                 awsFileName:awsFileName,
+                //                 data:targetImg.originFile
+                //             }];
+                //             this.documentService.uploadFile(file).subscribe(()=>{
+                //                 $(elementImg).attr('src',Constants.common.host.storage + awsFileName)
+                //                 this.imgs[targetImgIndex].path  =  Constants.common.host.storage + awsFileName;
+                //                 this.imgs[targetImgIndex].originFile = null;
+                //                 numberUploadImg+=1;
+                //                 if(numberUploadImg ===  this.imgs.length){
+                //                     resolve(Constants.common.message.status.success.text)
+                //                 }
+                //             });
+                //         }else{
+                //             numberUploadImg+=1;
+                //             if(numberUploadImg ===  this.imgs.length){
+                //                 resolve(Constants.common.message.status.success.text)
+                //             }
+                //         }
+              
+                //     })
+       
+
+              
+
+            })
+
+            // let  awsFileName =  this.commonService.getPatternAWSName(this.currentBrowseFile[0].name)|| 'fileName';
+            // let fileName = this.commonService.fileNameAndExt(this.currentBrowseFile[0].name)[0] || 'fileName';
+            // let file = [{
+            //     parentId:element.attr('id'),
+            //     id:element.attr('id') + '-file',
+            //     fileName:this.commonService.fileNameAndExt(this.currentBrowseFile[0].name)[0],
+            //     awsFileName:awsFileName,
+            //     data:this.currentBrowseFile[0]
+            // }];
+            // this.imgs.push(img);
+            // this.documentService.uploadFile(file).subscribe((result)=>{
+            
+            //     element.append('<img src="https://e-learning-dev.s3.eu-central-1.amazonaws.com/public/' + awsFileName + '" id="' + element.attr('id') + '-img" class="content-img"></img>');
+
+
+            // })
         }
         else if (action === this.actions.data.createChildDocument) {
             this.childDocuments = new Array<SubFormContentDetailModel>();
@@ -3238,5 +3351,25 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             //   });
             // this.rootElement.find('.freedom-layout').draggable("option", "containment", this.contentTemplate.nativeElement);
         }
+    }
+    public createContent(Componnent:Type<any>){
+        if(Componnent){
+            const componentFactory = this.componentFactoryResolver.resolveComponentFactory(Componnent)
+            const viewContainerRef = this.adHost.viewContainerRef;
+        //    viewContainerRef.clear();
+            const componentRef = viewContainerRef.createComponent(componentFactory);
+            (<ContentInterFace>componentRef.instance).parentBox  = this.currentBox;
+            return componentRef.location.nativeElement;
+        }
+    }
+    public createContentOption(Componnent:Type<any>){
+        if(Componnent){
+            const componentFactory = this.componentFactoryResolver.resolveComponentFactory(Componnent)
+            const viewContainerRef = this.adHost.viewContainerRef;
+            const componentRef = viewContainerRef.createComponent(componentFactory);
+            (<ContentInterFace>componentRef.instance).parentBox  = this.currentBox;
+            return componentRef.location.nativeElement;
+        }
+
     }
 }

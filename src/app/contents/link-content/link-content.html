@@ -1,0 +1,13 @@
+<section [hidden]="currentCase!==actionCase.browseLink">
+    <div class="row content-toolbar toolbar-browse-link">
+        <div class="col-12 toolbar-drag">
+            <div class="w-70 form-group m-auto">
+                <input placeholder="https://example.com" type="text" class="form-control mb-3" id="link-input-url">
+            </div>
+            <p class="content-font-title1">Get your URL</p>
+        </div>
+    </div>
+</section>
+<section [hidden]="currentCase!==actionCase.showLink">
+    <a class="content-link cursor-pointer "></a>
+</section>

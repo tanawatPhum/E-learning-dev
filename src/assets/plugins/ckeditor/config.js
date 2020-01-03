@@ -16,7 +16,10 @@ CKEDITOR.editorConfig = function(config) {
         { name: 'colors', items: ['TextColor', 'BGColor'] },
 
     ];
+    config.protectedSource.push(/<img \/="\/" .*?>/g)
     config.floatSpacePinnedOffsetY = 120;
+    config.disableAutoInline = false;
+    config.allowedContent = true;
     // config.removePlugins = 'dragdrop,basket';
     // Define changes to default configuration here. For example:
     // config.language = 'fr';

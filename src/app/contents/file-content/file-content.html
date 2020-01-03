@@ -1,0 +1,13 @@
+<section [hidden]="currentCase!==actionCase.browseFile">
+    <div class="row content-toolbar toolbar-browse-file">
+        <div class="col-12">
+            <input type="file" class="content-browse-file" id="input-file">
+            <img src="assets/imgs/contentPage/browse-file.svg">
+            <p class="content-font-title1">Drag & Drop your files</p>
+            <button id="btn-file" type="button" class="btn btn-primary mt-1">Browse</button>
+        </div>
+    </div>;
+</section>
+<section [hidden]="currentCase!==actionCase.showFile">
+    <a class="content-file cursor-pointer "></a>
+</section>
