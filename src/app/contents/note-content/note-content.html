@@ -1,0 +1,11 @@
+<!--component html goes here -->
+<div [attr.id]="parentBox.attr('id')+'-note'" class="content-note">
+    <img [attr.data-parentId]="parentBox.attr('id')" src="assets/imgs/contentPage/note-writing.svg" class="rounded-circle note-icon writing hideCK">
+
+    <div [attr.data-parentId]="parentBox.attr('id')" class="note-icon writing showCK">
+        <img src="assets/imgs/contentPage/others/arrow-button-left.svg" class="rounded-circle note-icon arrow pointer-events">
+        <img src="assets/imgs/contentPage/note-writing.svg" class="rounded-circle note-icon writing pointer-events">
+    </div>
+    <div contenteditable [attr.id]="parentBox.attr('id')+'-note-area'" class="note-area border">
+    </div>
+</div>

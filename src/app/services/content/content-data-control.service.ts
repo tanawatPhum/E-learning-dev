@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ContentsModel } from '../../models/document/content.model';
 import { Subject, Observable } from 'rxjs';
 import { UpdateContentModel } from 'src/app/models/common/common.model';
+import { ToDoListCurrentModel } from 'src/app/models/document/elements/todoList-content.model';
 
 
 @Injectable()
@@ -9,6 +10,8 @@ export class ContentDataControlService {
     private _currentBox: Subject<JQuery<Element>> = new Subject();
     private _poolContents: ContentsModel = new ContentsModel();
     private _updateContentOption: Subject<UpdateContentModel> = new Subject<UpdateContentModel>();
+    private _currentSelectTaskList: ToDoListCurrentModel[] = new Array<ToDoListCurrentModel>();
+ 
 
     
     public getUpdateContentOption(): Observable<UpdateContentModel> {
@@ -28,6 +31,12 @@ export class ContentDataControlService {
 
     public getcurrentBox(): Observable<JQuery<Element>> {
        return this._currentBox.asObservable();
+    }
+    public get currentSelectTaskList(): ToDoListCurrentModel[] {
+        return this._currentSelectTaskList;
+    }
+    public set currentSelectTaskList(value: ToDoListCurrentModel[]) {
+        this._currentSelectTaskList = value;
     }
     public set currentBox(value: JQuery<Element>) {
         this._currentBox.next(value);

@@ -897,7 +897,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                     });
 
                     if (summaryOfProgress === task.objectTodoList.length * 100) {
-                        $('#' + todoList.parentBoxId).find('.content-toDoList').find('#' + task.id).find('p').css('text-decoration', 'line-through');
+                        $('#' + todoList.parentId).find('.content-toDoList').find('#' + task.id).find('p').css('text-decoration', 'line-through');
                     }
                     todoList.progress =  summaryOfProgress;
 

@@ -1,0 +1,45 @@
+<div class="row p-0 m-0 mt-3 option-toDoList">
+    <div class="col-12">
+        <div class="row p-0 m-0">
+            <div class="col-1">
+            </div>
+            <div class="col-8 item-middle">
+                <input id="toDoList-inputTask" type="text" class="form-control " placeholder="ToDoList...">
+            </div>
+            <div class="col-3 item-middle toDoList-btnPlus">
+                <img (click)="addTaskList()" src="assets/imgs/contentPage/optionTool/plus.svg">
+            </div>
+            <div class="col">
+            </div>
+        </div>
+    </div>
+    <div class="col-12 mt-3">
+        <div class="border border-left-0 border-right-0 toDoList-taskList-text d-flex align-items-center">
+            <p class="pl-3">Task List</p>
+        </div>
+        <div class="list-group text-left toDoList-taskList">
+            <div *ngFor="let order of toDoListOrder" [attr.data-boxId]="parentBox.attr('id')" [attr.id]="order.id" [attr.data-taskName]="order.name" class="rounded-0 list-group-item border-0 pl-4 cursor-pointer" (click)="handleTaskList($event,'click')">
+                <p (input)="handleTaskList($event,'input')" [attr.data-taskId]="order.id" class="taskList-text" contenteditable="true"> Step {{order.step}} : {{order.name}}
+                </p>
+                <div [attr.data-taskId]="order.id" class="float-right ml-3 taskList-trash"><img id="trash" src="assets/imgs/contentPage/trash.svg"></div>
+            </div>
+        </div>
+        <div class="border border-left-0 border-right-0 toDoList-componentList-text d-flex align-items-center">
+            <p class="pl-3">Component List</p>
+        </div>
+        <div class="list-group text-left toDoList-componentList">
+            <div *ngFor="let component of toDoListComponentList">
+                <input #componentList (click)="handleComponentList($event,'click')" type="checkbox" [value]="component.id" [attr.id]="'compontentList-box-' + component.id" />
+                <label class="list-group-item border-0" [attr.for]="'compontentList-box-' + component.id">{{component.name}} ({{component.boxTypeName}})</label>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 mt-3">
+        <div class="border border-left-0 border-right-0 toDoList-label-text d-flex align-items-center">
+            <p class="pl-3">Action</p>
+        </div>
+        <div class="list-group toDoList-trash">
+            <img (click)="removeToDoList()" class="option-action-trash m-auto" src="assets/imgs/contentPage/trash.svg">
+        </div>
+    </div>
+</div>

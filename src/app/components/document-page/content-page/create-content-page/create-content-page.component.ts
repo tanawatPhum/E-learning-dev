@@ -974,7 +974,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.addStyleElements(this.actions.style.addStyleBoxCommentSize, element)
         }
         else if (action === this.actions.event.addElToDoList) {
-            let targetTodoList = this.toDoLists.find((parentBox) => parentBox.parentBoxId === this.currentBox.attr('id'));
+            let targetTodoList = this.toDoLists.find((parentBox) => parentBox.parentId === this.currentBox.attr('id'));
             let orderList = "";
             if (targetTodoList) {
                 targetTodoList.toDoListOrder.forEach((order) => {
@@ -1032,6 +1032,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 }else{
                     this.setCurrentBox(this.currentElement.parents('.content-box'));
                 }
+
+          
                 // this.addStyleElements(this.actions.style.addStyleBoxCurrent,this.currentBox)
                 // this.addElements(this.actions.style.addStyleBoxCurrent, this.currentBox, 'click');
                 
@@ -1637,9 +1639,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
 
                 if (taskName) {
                     $('.option-toDoList').find('.toDoList-taskList').append(task);
-                    if (!this.toDoLists.find(parentBox => parentBox.parentBoxId === this.currentBox.attr('id') + '-todoList')) {
+                    if (!this.toDoLists.find(parentBox => parentBox.parentId === this.currentBox.attr('id') + '-todoList')) {
                         let todoList: ToDoListContentModel = {
-                            parentBoxId: this.currentBox.attr('id'),
+                            parentId: this.currentBox.attr('id'),
                             id: this.currentBox.attr('id') + '-todoList',
                             progress: 0,
                             toDoListOrder: new Array<ToDoListContentOrderModel>()
@@ -1654,7 +1656,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                         step: taskLength,
                         objectTodoList: new Array<ObjectToDoList>()
                     }
-                    let targetTodoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentBoxId === this.currentBox.attr('id'))
+                    let targetTodoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentId === this.currentBox.attr('id'))
                     if (targetTodoListIndex >= 0 && !this.toDoLists[targetTodoListIndex].toDoListOrder.find(order => order.id === 'taskList-' + taskLength)) {
                         this.toDoLists[targetTodoListIndex].toDoListOrder.push(toDoListOrder)
                     }
@@ -1687,7 +1689,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     $('.option-toDoList').find('.toDoList-componentList').html(listBox);
                 }
 
-                let targetTodoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentBoxId === this.currentBox.attr('id'))
+                let targetTodoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentId === this.currentBox.attr('id'))
                 let targetIndexTodoOrder = this.toDoLists[targetTodoListIndex].toDoListOrder.findIndex((order) => order.id === $(element.currentTarget).attr('id'));
                 this.toDoLists[targetTodoListIndex].toDoListOrder[targetIndexTodoOrder].objectTodoList.forEach((object) => {
                     $('.option-toDoList').find('.toDoList-componentList').find('input[type="checkbox"]').each((index, element) => {
@@ -1700,7 +1702,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 this.handles(this.actions.event.handleOptionToolToDoList)
             });
             $('.option-toDoList').find('.toDoList-componentList').find('input[type="checkbox"]').unbind().bind('click', (element) => {
-                let targetToDoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentBoxId === this.currentBox.attr('id'))
+                let targetToDoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentId === this.currentBox.attr('id'))
                 let targetToDoOrderIndex = this.toDoLists[targetToDoListIndex].toDoListOrder.findIndex((order) => order.id === $(element.currentTarget).attr('data-taskId'));
                  let targetDocumentTrackContentIndex =  this.documentTrack.contents.findIndex(content=>content.parentId ===$(element.currentTarget).val().toString());
                 if ($(element.currentTarget).prop('checked')) {
@@ -1724,7 +1726,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             })
             $('.option-toDoList').find('.toDoList-taskList').find('.taskList-text').unbind().bind('input', (element) => {
                 let taskId   =  $(element.currentTarget).attr('data-taskId');
-                let targetToDoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentBoxId === this.currentBox.attr('id'))
+                let targetToDoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentId === this.currentBox.attr('id'))
                 let targetToDoListTaskIndex  =   this.toDoLists[targetToDoListIndex].toDoListOrder.findIndex(task=>task.id===taskId);
                 this.toDoLists[targetToDoListIndex].toDoListOrder[targetToDoListTaskIndex].displayName  =  $(element.currentTarget).text();
                 this.currentBox.find('.content-toDoList').find('#'+taskId).find('p').text($(element.currentTarget).text())
@@ -1741,7 +1743,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 let taskId =  $(element.currentTarget).attr('data-taskid');
                 this.currentBox.find('.content-toDoList').find('#'+taskId).remove();
                  $('.option-toDoList').find('.toDoList-taskList').find('#'+taskId).remove();
-                let  targetParentBoxIndex =    this.toDoLists.findIndex((parentBox)=>parentBox.parentBoxId === this.currentBox.attr('id'));
+                let  targetParentBoxIndex =    this.toDoLists.findIndex((parentBox)=>parentBox.parentId === this.currentBox.attr('id'));
                 if(targetParentBoxIndex>=0){
                     this.toDoLists[targetParentBoxIndex].toDoListOrder =  this.toDoLists[targetParentBoxIndex].toDoListOrder.filter((task)=>task.id !== taskId);
                 }
@@ -2566,7 +2568,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.handles(this.actions.event.handleOptionToolSubform);
         }
         else if (this.currentToolbar === this.actions.toolbar.addToDoListTool) {
-            let targetToDoListIndex = this.toDoLists.findIndex(toDoList => toDoList.parentBoxId === this.currentBox.attr('id'))
+            let targetToDoListIndex = this.toDoLists.findIndex(toDoList => toDoList.parentId === this.currentBox.attr('id'))
             let taskList = "";
             if (targetToDoListIndex >= 0) {
                 this.toDoLists[targetToDoListIndex].toDoListOrder.forEach(order => {
@@ -2636,7 +2638,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                         $('.option-toDoList').find('.toDoList-componentList').html(listBox);
                     }
 
-                    let targetTodoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentBoxId === this.currentBox.attr('id'))
+                    let targetTodoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentId === this.currentBox.attr('id'))
                     let targetIndexTodoOrder = this.toDoLists[targetTodoListIndex].toDoListOrder.findIndex((order) => order.id === targetBox.taskId);
                     this.toDoLists[targetTodoListIndex].toDoListOrder[targetIndexTodoOrder].objectTodoList.forEach((object) => {
                         $('.option-toDoList').find('.toDoList-componentList').find('input[type="checkbox"]').each((index, element) => {
@@ -2956,12 +2958,12 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             return new Promise((resolve,reject)=>{
                 this.textAreas = new Array<TextAreaContentModel>();
             
-                $(this.rootElement).find('.content-textarea').each((index, element) => {
-                    const elementTextArea = $(element);
-                    const objectTextArea: TextAreaContentModel = { id: elementTextArea.attr('id'), value: elementTextArea.text() };
-                    this.textAreas.push(objectTextArea);
-                    // console.log("this.textAreas",this.textAreas)
-                });
+                // $(this.rootElement).find('.content-textarea').each((index, element) => {
+                //     const elementTextArea = $(element);
+                //     const objectTextArea: TextAreaContentModel = { id: elementTextArea.attr('id'), value: elementTextArea.text() };
+                //     this.textAreas.push(objectTextArea);
+                //     // console.log("this.textAreas",this.textAreas)
+                // });
                      resolve(Constants.common.message.status.success.text)
                 // $(this.rootElement).find('.content-textarea').each((index, element) => {
 

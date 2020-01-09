@@ -1,0 +1,57 @@
+<div class="row p-0 m-0 mt-3 option-textArea">
+    <div class="col-12 d-flex justify-content-center border-bottom">
+        <div class="form-group w-70 text-center">
+            <label>Style</label>
+            <select id="option-format-paragraph" class="form-control">
+                <option value="h1">Heading 1</option>
+                <option value="h2">Heading 2</option>
+                <option value="h3">Heading 3</option>
+                <option value="pre">Formatted</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-12 d-flex justify-content-center">
+        <div class="form-group w-70 text-center">
+            <label class="mt-2">Font</label>
+            <input value="Arial" id="option-font-family" class="form-control mb-2 pl-5">
+            <select class="form-control custom-select" id="option-font-size">
+                <option *ngFor="let number of fontSizeList">{{number}}</option>
+            </select>
+            <input type="text" id="option-font-color" class="form-control mb-2 pl-5">
+        </div>
+    </div>
+    <div class="col-12 d-flex justify-content-center border-bottom">
+        <div class="form-group w-70 d-flex justify-content-between p-1">
+            <img data-font-style="bold" class="option-font-style" src="assets/imgs/contentPage/optionTool/bold.svg">
+            <img data-font-style="italic" class="option-font-style" src="assets/imgs/contentPage/optionTool/italic.svg">
+            <img data-font-style="underline" class="option-font-style" src="assets/imgs/contentPage/optionTool/underlined.svg">
+        </div>
+    </div>
+    <div class="col-12 d-flex justify-content-center border-bottom">
+        <div class="form-group w-70 text-center">
+            <label class="mt-2">Paragraph</label>
+            <div class="row">
+                <div class="col-3">
+                    <img data-font-alignment="left" class="option-font-alignment" src="assets/imgs/contentPage/optionTool/left-alignment.svg">
+                </div>
+                <div class="col-3">
+                    <img data-font-alignment="center" class="option-font-alignment" src="assets/imgs/contentPage/optionTool/center-alignment.svg">
+                </div>
+                <div class="col-3">
+                    <img data-font-alignment="right" class="option-font-alignment" src="assets/imgs/contentPage/optionTool/right-alignment.svg">
+                </div>
+                <div class="col-3">
+                    <img data-font-alignment="justify" class="option-font-alignment" src="assets/imgs/contentPage/optionTool/justify.svg">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 d-flex justify-content-center border-bottom">
+        <div class="form-group text-center pt-1">
+            <label>Action</label>
+            <div>
+                <img (click)="removeTextarea()" class="option-action-trash" src="assets/imgs/contentPage/trash.svg">
+            </div>
+        </div>
+    </div>
+</div>

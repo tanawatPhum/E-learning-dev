@@ -87,15 +87,19 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
                 this.rootElement.find('.toolbar-subform').find('#subform-silde').text('Silde (0)');
                 this.rootElement.find('.toolbar-subform').find('#subform-link').text('Link (0)');
                 let targetSubformIndex = this.contentDCtrlService.poolContents.subFroms.findIndex((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
-                if (this.currentSubFormType.id === "subform-silde") {
-                    this.rootElement.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Silde (' + this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.length + ')');
+                
+                if(targetSubformIndex >= 0){
+                    if (this.currentSubFormType.id === "subform-silde") {
+                        this.rootElement.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Silde (' + this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.length + ')');
+                    }
+                    else if (this.currentSubFormType.id === "subform-link") {
+                        this.rootElement.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Link (' + this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.length + ')');
+                    }
+                    this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.forEach((detail) => {
+                        detail.type = this.currentSubFormType.id;
+                    });
                 }
-                else if (this.currentSubFormType.id === "subform-link") {
-                    this.rootElement.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Link (' + this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.length + ')');
-                }
-                this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.forEach((detail) => {
-                    detail.type = this.currentSubFormType.id;
-                });
+      
             });
 
             this.rootElement.find('.toolbar-subform').find('input[type="checkbox"]').click((itemElement) => {
@@ -200,6 +204,7 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
             htmlSubform += '<div  class="container content-subform p-0 full-screen">'
             htmlSubform += '<div  data-subformType="subform-silde" id="' + this.parentBox.attr('id') + '-subform" class="border carousel slide full-screen" data-interval="false" data-ride="carousel">'
             htmlSubform += '<div class="carousel-inner full-screen">'
+            console.log("targetSubform.subformList",targetSubform.subformList, this.documentDService.documentList)
             targetSubform.subformList.forEach((subform, index) => {
                 let targetDocument = this.documentDService.documentList.find((document) => document.id === subform.id);
                 if (targetDocument) {
@@ -226,7 +231,11 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
             htmlSubform += '</div>'
             htmlSubform += '</div>'
         }
+        console.log(htmlSubform)
         this.rootElement.html(htmlSubform)
+        if (this.currentSubFormType.id === 'subform-silde') {
+            this.handleSubformSildeRatio();
+        }
         // element.css('display', 'initial');
         // element.css('text-align', 'initial');
         // element.removeClass('box-subform-size');
@@ -246,6 +255,22 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
 
 
     }
+    handleSubformSildeRatio(){
+        let ratioW = this.rootElement.find('.subform-preview').width() / this.contentTemplateSize.width;
+        let ratioH = this.rootElement.height() / this.contentTemplateSize.height;
+        if (ratioW > ratioH) {
+            this.rootElement.find('#contentTemplate').css({
+                transform: "scale(" + ratioW + ")"
+            });
+    
+        } else {
+            this.rootElement.find('#contentTemplate').css({
+                transform: "scale(" + ratioH + ")"
+            });
+    
+        }
+    }
+
     
     
 

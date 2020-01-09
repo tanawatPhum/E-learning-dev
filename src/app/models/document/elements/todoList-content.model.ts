@@ -1,5 +1,5 @@
 export class ToDoListContentModel {
-    public parentBoxId:string;
+    public parentId:string;
     public id:string;
     public progress:number;
     public toDoListOrder:ToDoListContentOrderModel[] = new Array<ToDoListContentOrderModel>();
