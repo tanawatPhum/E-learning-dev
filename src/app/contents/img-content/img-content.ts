@@ -38,6 +38,14 @@ export class ImgContentComponent implements OnInit,ContentInterFace  {
         ){}
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement); 
+        this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
+            if(detail.actionCase === Constants.common.event.load.component){
+                this.parentBox  = this.rootElement.parents('.content-box');
+                let targetimg =  this.contentDCtrlService.poolContents.imgs.find((img)=>img.parentId === this.parentBox.attr('id'))
+                this.loadImg(targetimg.path)
+
+            }
+        })
     }
  
     ngAfterViewInit(){
@@ -112,6 +120,11 @@ export class ImgContentComponent implements OnInit,ContentInterFace  {
             this.contentDCtrlService.setLastContent(this.parentBox);
             // this.parentBox.find('[content-name]').attr('content-last','true')
         })
+    }
+    private loadImg(imgPath){
+        this.currentCase = this.actionCase.showImg;
+        this.rootElement.find('img').attr('src',imgPath)
+        .attr('id',this.parentBox.attr('id') + '-img')
     }
 
 }

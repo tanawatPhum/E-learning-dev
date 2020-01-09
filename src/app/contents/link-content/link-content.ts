@@ -71,7 +71,7 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
         .text(hostname)
         let updateAction:UpdateContentModel = new UpdateContentModel()
         updateAction.actionCase  = 'showLink'
-        this.contentDCtrlService.updateContentOption = updateAction
+        this.contentDCtrlService.updateContent = updateAction
     }
 
 }

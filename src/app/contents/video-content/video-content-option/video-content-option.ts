@@ -29,7 +29,7 @@ export class VideoContentOptionComponent implements ContentOptionInterFace,OnIni
         this.rootElement = $(this.element.nativeElement);
         this.handleSection();
         this.handleOptionToolVideo();
-        this.contentDCtrlService.getUpdateContentOption().subscribe((detail)=>{
+        this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
             this.handleSection();
             this.handleOptionToolVideo();        
         })

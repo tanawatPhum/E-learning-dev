@@ -13,14 +13,14 @@ import Amplify, { Storage, Auth } from 'aws-amplify';
 import { SocketIoService } from '../common/socket.service';
 import { CommonDataControlService } from '../common/common-data-control.service';
 import { AdHost } from '../../directives/ad-host/ad-host.directive';
-
+import domtoimage from 'dom-to-image';
 
 declare var electron: any;
 declare var rangy: any;
 declare var CKEDITOR: any;
 @Injectable()
 export class DocumentService {
-    @ViewChild(AdHost, {static: true}) adHost: AdHost;
+    @ViewChild(AdHost, { static: true }) adHost: AdHost;
     constructor(
         private documentDataService: DocumentDataControlService,
         private commonDataService: CommonDataControlService,
@@ -514,14 +514,14 @@ export class DocumentService {
             let numberOfFiles = 0;
             if (files.length > 0) {
                 files.forEach(async (file) => {
-                    await Storage.put(file.awsFileName, file.data, { contentType: file.data.type})
+                    await Storage.put(file.awsFileName, file.data, { contentType: file.data.type })
                         .then(result => {
                             numberOfFiles += 1;
                             if (numberOfFiles === files.length) {
                                 console.log("Upload Success")
                                 subscriber.next(Constants.common.message.status.success.text);
                             }
-                           
+
                         })
                         .catch(err => subscriber.next(Constants.common.message.status.success.text));
                 })
@@ -545,26 +545,21 @@ export class DocumentService {
     // public getFile
     public captureHTML(id): Observable<string> {
         return new Observable((subscriber) => {
-            html2canvas(document.querySelector('#' + id)).then((canvas) => {
-                canvas.toBlob((blob) => {
-                    let fileImg = new File([blob], this.documentDataService.currentDocumentName)
+            domtoimage.toBlob(document.getElementById(id))
+                .then((blob) => {
+                    let fileImg = new File([blob], this.documentDataService.currentDocumentName + '.png', { type: "image/png" })
                     let awsFileName = this.commonService.getPatternAWSName(fileImg.name) || 'fileName';
                     let uploadFile: UploadFileModel = {
                         data: fileImg,
-                        awsFileName:awsFileName
+                        awsFileName: awsFileName
                     }
                     this.uploadFile([uploadFile]).subscribe(() => {
-                        let urlFile  = Constants.common.host.storage +awsFileName;
+                        let urlFile = Constants.common.host.storage + awsFileName;
                         subscriber.next(urlFile)
                     });
-                    // formData.append('file', blob, this.documentDataService.currentDocumentName)
-                }, 'image/jpeg')
-                // let imgdata = canvas.toDataURL('image/png');
-                // subscriber.next(imgdata)             
-            });
+                });
         });
     }
-
     public creaetDocumentModel(value): Observable<DocumentModel> {
         return new Observable((subscriber) => {
             // console.log('☛ Result Document from Flie : ', value);

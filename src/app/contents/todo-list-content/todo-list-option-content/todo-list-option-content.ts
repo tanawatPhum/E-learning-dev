@@ -179,7 +179,7 @@ export class TodoListOptionContentComponent implements ContentOptionInterFace,On
         let updateData:UpdateContentModel  = new UpdateContentModel();
         updateData.actionCase =  actionCase;
         updateData.data =  data
-        this.contentDCtrlService.updateContentOption = updateData;
+        this.contentDCtrlService.updateContent = updateData;
     }
     private async createToDoListComponentList(){
         this.toDoListComponentList = new Array<ToDoListBoxListModel>();

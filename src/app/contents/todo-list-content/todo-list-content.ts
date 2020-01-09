@@ -36,7 +36,7 @@ export class TodoListContentComponent implements OnInit,ContentInterFace  {
         
     }
     ngAfterViewInit(){ 
-        this.contentDCtrlService.getUpdateContentOption().subscribe((detail)=>{
+        this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
             this.targetToDoList = detail.data;
         })
  

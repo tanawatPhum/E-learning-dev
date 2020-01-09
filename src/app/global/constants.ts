@@ -22,7 +22,8 @@ export class Constants {
             },
             load:{
                 success:'success',
-                html:'html'
+                html:'html',
+                component:'component'
             }
         },
         element :{

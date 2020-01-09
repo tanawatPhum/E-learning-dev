@@ -1,12 +1,13 @@
-import { Component, Input, ElementRef, OnInit, AfterViewInit } from '@angular/core';
+import { Component, Input, ElementRef, OnInit, AfterViewInit, HostListener } from '@angular/core';
 import { DocumentService } from 'src/app/services/document/document.service';
 import { ContentDataControlService } from '../../services/content/content-data-control.service';
 import { ContentInterFace } from '../interface/content.interface';
-import { VideoConetentDataModel, VideoConetentConditionModel } from '../../models/document/elements/video-content.model';
+import { VideoConetentDataModel, VideoConetentConditionModel, VideoContentModel } from '../../models/document/elements/video-content.model';
 import { CommonService } from '../../services/common/common.service';
 import { UpdateContentModel } from '../../models/common/common.model';
 import { DocumentTrackContent } from '../../models/document/document.model';
 import { DocumentDataControlService } from '../../services/document/document-data-control.service';
+import { Constants } from '../../../../dist/E-learning/app/global/constants';
 
 @Component({
     moduleId: module.id,
@@ -16,6 +17,11 @@ import { DocumentDataControlService } from '../../services/document/document-dat
 })
 export class VideoContentComponent implements OnInit, ContentInterFace, AfterViewInit {
     @Input() parentBox: JQuery<Element>;
+    @Input() data: any;
+    @HostListener('click',['$event']) onClick(event) {
+  console.log('Hello world')
+    }
+
     private rootElement: JQuery<Element>;
     private targetFile;
     private actionCase = {
@@ -36,6 +42,15 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
     ) { }
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement);
+        this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
+            if(detail.actionCase === Constants.common.event.load.component){
+                this.parentBox  = this.rootElement.parents('.content-box');
+                let targetVideo =  this.contentDCtrlService.poolContents.videos.find((video)=>video.parentId === this.parentBox.attr('id'))
+                if(targetVideo.data.channelStream === 'wistia'){
+                   this.loadVideo(targetVideo)
+                }
+            }
+        })
     }
     ngAfterViewInit() {
         this.handleBrowseVideo();
@@ -152,11 +167,22 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
                 video.path = this.targetFile;
                 this.rootElement.find('.wistia_responsive').addClass('wistia_async_' + this.targetFile)
                 this.contentDCtrlService.poolContents.videos.push(video)
+                this.contentDCtrlService.setLastContent(this.parentBox);
         }
         let updateAction:UpdateContentModel = new UpdateContentModel()
         updateAction.actionCase  = 'showVideo'
-        this.contentDCtrlService.updateContentOption = updateAction
+        this.contentDCtrlService.updateContent = updateAction
         this.addDocumentTrackVideo();
+    }
+    private loadVideo(targetVideo:VideoContentModel){
+        if (targetVideo.data.channelStream === 'videoSource') {
+
+        }else if (targetVideo.data.channelStream === 'youtube') {
+
+        }else if (targetVideo.data.channelStream === 'wistia') {
+            this.currentCase = this.actionCase.videoWistia;
+            this.rootElement.find('.wistia_responsive').addClass('wistia_async_' + targetVideo.data.streamId)
+        }
     }
     private addDocumentTrackVideo(){
         let documentTrackContent = new DocumentTrackContent;

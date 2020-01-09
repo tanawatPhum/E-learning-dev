@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterContentInit, ViewEncapsulation, ViewChild, ElementRef, Input, EventEmitter, Output, AfterViewInit, ComponentFactoryResolver, Type } from '@angular/core';
+import { Component, OnInit, AfterContentInit, ViewEncapsulation, ViewChild, ElementRef, Input, EventEmitter, Output, AfterViewInit, ComponentFactoryResolver, Type, Compiler, Injector, NgModuleRef, NgModule, ComponentRef, Renderer2 } from '@angular/core';
 import { catchError, mergeMap, toArray, map, find } from 'rxjs/operators';
 import { Observable, of, Subject, empty, fromEvent, VirtualTimeScheduler } from 'rxjs';
 import { Constants } from 'src/app/global/constants';
@@ -14,7 +14,7 @@ import 'splitting/dist/splitting-cells.css';
 import Splitting from 'splitting';
 import { TriggerEventModel, DocumentNavigatorModel, DocumentTrackContentCondition } from 'src/app/models/document/document.model';
 import { SubFormContentModel, SubFormContentDetailModel, SubFormContentConditionModel, SubFormContentLinkModel } from '../../../../models/document/elements/subForm-content.model';
-import { ScreenDetailModel, RulerDetailModel, UploadFileModel } from '../../../../models/common/common.model';
+import { ScreenDetailModel, RulerDetailModel, UploadFileModel, UpdateContentModel } from '../../../../models/common/common.model';
 import { DocumentDataControlService } from '../../../../services/document/document-data-control.service';
 import { element } from 'protractor';
 import html2canvas from 'html2canvas';
@@ -36,6 +36,9 @@ import { AdHost } from '../../../../directives/ad-host/ad-host.directive';
 import { ContentRouting } from '../../../../app-content-routing';
 import { ContentDataControlService } from 'src/app/services/content/content-data-control.service';
 import { ContentInterFace } from 'src/app/contents/interface/content.interface';
+import { createCustomElement, NgElement, WithProperties } from '@angular/elements';
+import { VideoContentComponent } from '../../../../contents/video-content/video-content';
+import { ImgContentComponent } from '../../../../contents/img-content/img-content';
 declare var electron: any;
 declare var rangy: any;
 declare var CKEDITOR: any;
@@ -84,6 +87,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     public rulerDetailSubject: Subject<RulerDetailModel> = new Subject<RulerDetailModel>();
 
     public boxType = Constants.document.boxes.types;
+
+    private cmpRef: ComponentRef<any>;
 
     public actions = {
         event: {
@@ -239,9 +244,11 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         private commonService: CommonService,
         private documentService: DocumentService,
         private documentDataService: DocumentDataControlService,
-        private http:HttpClientService,
         private contentDCtrlService:ContentDataControlService,
-        private componentFactoryResolver: ComponentFactoryResolver
+        private componentFactoryResolver: ComponentFactoryResolver,
+        private injector:Injector,
+        private render:Renderer2
+        
     ) { }
     ngOnInit() {
         this.loading = true;
@@ -254,7 +261,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.rulerDetailSubject.next(result.otherDetail.rulerDevDetail)
             this.setTemplate(this.actions.template.setDocument);
             this.setTemplate(this.actions.template.setDocumentTrack);
-        
+           
         
           
           
@@ -367,12 +374,23 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             })
         }
         else if(action === this.actions.template.setHTML){
-            this.rootElement.html(this.currentDocument.html); 
+
+            //this.createComponentFromRaw(this.currentDocument.html)
+  
+            
+   
+           
+             this.rootElement.html(this.currentDocument.html); 
+            
+         
+
+
             if (this.currentDocument.status!== Constants.common.message.status.notFound.text) {
                this.addElements(this.actions.event.addEventBox).then(() => {
                    this.removeData(this.actions.data.removeAllContentObj);
                    this.retrieveData(this.actions.data.retrieveBoxData, this.currentDocument);
                    this.retrieveData(this.actions.data.retrieveContentsData, this.currentDocument);
+                   this.loadComponent();
 
                });
            } 
@@ -2767,7 +2785,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     }
     private saveDocument(nameDocument: string, eventAction?: string) {
         this.createData(this.actions.data.createChildDocument);
-        this.documentService.captureHTML('contentTemplate').subscribe((imgData) => {
+        this.documentService.captureHTML('contentTemplate' ).subscribe((imgData) => {
             this.createData(this.actions.data.createDataToSave).then(() => {
 
                 // let contents: ContentsModel = {
@@ -2932,24 +2950,25 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         if (action === this.actions.data.retrieveBoxData) {
             this.boxes = results.contents.boxes;
         } else if (action === this.actions.data.retrieveContentsData) {
-            this.subForms = results.contents.subFroms || new Array<SubFormContentModel>();
-            this.imgs = results.contents.imgs||  new Array<ImgContentModel>();
-            this.comments = results.contents.comments ||  new Array<commentContentModel>();
-            this.toDoLists = results.contents.todoList ||  new Array<ToDoListContentModel>();
-            this.videos = results.contents.videos ||  new Array<VideoContentModel>();
-            this.progressBars = results.contents.progressBar ||  new Array<ProgressBarContentModel>();
-            this.files =   results.contents.files ||  new Array<FileContentModel>();
-            this.textAreas = results.contents.textAreas ||  new Array<TextAreaContentModel>();
-            this.links = results.contents.links ||  new Array<LinkContentModel>();
-            this.exams  = results.contents.exams ||  new Array<ExamContentModel>();
+            this.contentDCtrlService.poolContents =  results.contents;
+            // this.subForms = results.contents.subFroms || new Array<SubFormContentModel>();
+            // this.imgs = results.contents.imgs||  new Array<ImgContentModel>();
+            // this.comments = results.contents.comments ||  new Array<commentContentModel>();
+            // this.toDoLists = results.contents.todoList ||  new Array<ToDoListContentModel>();
+            // this.videos = results.contents.videos ||  new Array<VideoContentModel>();
+            // this.progressBars = results.contents.progressBar ||  new Array<ProgressBarContentModel>();
+            // this.files =   results.contents.files ||  new Array<FileContentModel>();
+            // this.textAreas = results.contents.textAreas ||  new Array<TextAreaContentModel>();
+            // this.links = results.contents.links ||  new Array<LinkContentModel>();
+            // this.exams  = results.contents.exams ||  new Array<ExamContentModel>();
             
-            this.textAreas.forEach((textArea) => {
-                if (element) {
-                    $(element).find('[id="' + textArea.id + '"]').val(textArea.value);
-                } else {
-                    $(this.rootElement).find('[id="' + textArea.id + '"]').val(textArea.value);
-                }
-            });
+            // this.textAreas.forEach((textArea) => {
+            //     if (element) {
+            //         $(element).find('[id="' + textArea.id + '"]').val(textArea.value);
+            //     } else {
+            //         $(this.rootElement).find('[id="' + textArea.id + '"]').val(textArea.value);
+            //     }
+            // });
         }
 
     }
@@ -3373,5 +3392,21 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             return componentRef.location.nativeElement;
         }
 
+    }
+
+    private loadComponent() {
+        console.log(this.contentDCtrlService.poolContents)
+        ContentRouting.routes.forEach((route)=>{
+            const customElement = createCustomElement(route.component, { injector:this.injector });
+            customElements.get(route.contentName) || customElements.define(route.contentName, customElement)
+            // let divElement =  this.render.createElement(route.contentName) as NgElement & WithProperties<{data:any}>;
+            // divElement.data =  'ccccc';
+
+        })
+        let updateAction:UpdateContentModel = new UpdateContentModel()
+        updateAction.actionCase  = Constants.common.event.load.component;
+        this.contentDCtrlService.updateContent = updateAction
+    
+        
     }
 }

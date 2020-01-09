@@ -9,16 +9,17 @@ import { ToDoListCurrentModel } from 'src/app/models/document/elements/todoList-
 export class ContentDataControlService {
     private _currentBox: Subject<JQuery<Element>> = new Subject();
     private _poolContents: ContentsModel = new ContentsModel();
-    private _updateContentOption: Subject<UpdateContentModel> = new Subject<UpdateContentModel>();
+    private _updateContent: Subject<UpdateContentModel> = new Subject<UpdateContentModel>();
     private _currentSelectTaskList: ToDoListCurrentModel[] = new Array<ToDoListCurrentModel>();
+
  
 
     
-    public getUpdateContentOption(): Observable<UpdateContentModel> {
-        return this._updateContentOption.asObservable();
+    public getUpdateContent(): Observable<UpdateContentModel> {
+        return this._updateContent.asObservable();
     }
-    public set updateContentOption(value:UpdateContentModel) {
-        this._updateContentOption.next(value);
+    public set updateContent(value:UpdateContentModel) {
+        this._updateContent.next(value);
     }
 
 
