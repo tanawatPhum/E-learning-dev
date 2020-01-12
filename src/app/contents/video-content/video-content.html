@@ -17,6 +17,14 @@
         </div>
     </div>
 </section>
+<section [hidden]="currentCase!==actionCase.loadingVideo">
+    <div class="loading-video">
+        <div class="spinner-border text-warning" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+</section>
 <section [hidden]="currentCase!==actionCase.videoSource">
     <video class="content-video video-source" controls></video>
 </section>

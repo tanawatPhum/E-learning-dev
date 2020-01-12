@@ -14,6 +14,7 @@ import { ToDoListContentModel } from '../../models/document/elements/todoList-co
 })
 export class TodoListContentComponent implements OnInit,ContentInterFace  {
     private targetFile;
+    @Input() lifeCycle:string;
     @Input() parentBox: JQuery<Element>;
     private actionCase = {
         browseImg:'browseImg',
@@ -33,6 +34,7 @@ export class TodoListContentComponent implements OnInit,ContentInterFace  {
         ){}
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement); 
+        this.parentBox = this.rootElement.parents('.content-box');
         
     }
     ngAfterViewInit(){ 

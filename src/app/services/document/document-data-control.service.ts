@@ -20,6 +20,14 @@ export class DocumentDataControlService {
     private _currentScreenSize: ScreenDetailModel = new ScreenDetailModel();
     private _previousPage: string;
     private _documentTrack: DocumentTrackModel = new DocumentTrackModel();
+    private _lifeCycle: string;
+    public get lifeCycle(): string {
+        return this._lifeCycle;
+    }
+    public set lifeCycle(value: string) {
+        this._lifeCycle = value;
+    }
+
     public get documentTrack(): DocumentTrackModel {
         return this._documentTrack;
     }

@@ -23,7 +23,11 @@ export class Constants {
             load:{
                 success:'success',
                 html:'html',
-                component:'component'
+                component:'component',
+                preview:'preview'
+            },
+            save:{
+                document:'document'
             }
         },
         element :{
@@ -65,6 +69,11 @@ export class Constants {
         }
     }
     public static readonly document = {
+        lifeCycle:{
+            loadEditor:"loadEditor",
+            createContent:"createContent",
+            loadPreview:"loadPreview"
+        },
         contents: {
             types: {
                 oneLayout: {name : 'oneLayout', id: 1 },

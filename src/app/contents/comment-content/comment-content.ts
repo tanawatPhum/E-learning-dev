@@ -13,6 +13,7 @@ import { commentContentModel } from '../../models/document/elements/comment-cont
 })
 export class CommentContentComponent implements OnInit,ContentInterFace {
     @Input() parentBox: JQuery<Element>;
+    @Input() lifeCycle:string;
     private rootElement:JQuery<Element>;
     constructor(
         private commonService :CommonService,
@@ -23,6 +24,7 @@ export class CommentContentComponent implements OnInit,ContentInterFace {
     ){}
     ngOnInit(){
         this.rootElement = $(this.element.nativeElement); 
+        this.parentBox = this.rootElement.parents('.content-box');
     }
     ngAfterViewInit(){
         this.addComment();   

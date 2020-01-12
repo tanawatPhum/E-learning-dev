@@ -15,6 +15,19 @@ import { CommonDataControlService } from '../common/common-data-control.service'
 import { AdHost } from '../../directives/ad-host/ad-host.directive';
 import domtoimage from 'dom-to-image';
 
+Amplify.configure({
+    Auth: {
+        identityPoolId: 'eu-central-1:4c9f1222-30c0-4db9-b9ed-57938e9684be',
+        region: 'eu-central-1',
+        // userPoolId: 'us-east-2_qCW1BuFYV',
+        // userPoolWebClientId:'663n1uidmi0ao3lrsk7ldsvv3q'
+    },
+    Storage: {
+        bucket: 'e-learning-dev',
+
+    }
+});
+
 declare var electron: any;
 declare var rangy: any;
 declare var CKEDITOR: any;
@@ -357,13 +370,16 @@ export class DocumentService {
     }
 
     public compileStyles(styles: string, tagElement?: string) {
+        console.log(tagElement)
         let editor = CKEDITOR.instances[this.documentDataService.nameTemplate];
+       
         let style = new CKEDITOR.style({
             element: tagElement || 'span',
             attributes: {
                 'style': styles
             }
         });
+        console.log(style)
         editor.applyStyle(style);
     }
     public saveDocument(nameDocument, saveobjectTemplate): Observable<string> {
@@ -497,20 +513,8 @@ export class DocumentService {
         });
     }
     public uploadFile(files: UploadFileModel[] | FileContentModel[]): Observable<string> {
-        console.log(files);
         return new Observable((subscriber) => {
-            Amplify.configure({
-                Auth: {
-                    identityPoolId: 'eu-central-1:4c9f1222-30c0-4db9-b9ed-57938e9684be',
-                    region: 'eu-central-1',
-                    // userPoolId: 'us-east-2_qCW1BuFYV',
-                    // userPoolWebClientId:'663n1uidmi0ao3lrsk7ldsvv3q'
-                },
-                Storage: {
-                    bucket: 'e-learning-dev',
-
-                }
-            });
+  
             let numberOfFiles = 0;
             if (files.length > 0) {
                 files.forEach(async (file) => {

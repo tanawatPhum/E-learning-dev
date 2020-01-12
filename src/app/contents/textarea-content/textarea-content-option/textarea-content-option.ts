@@ -53,7 +53,7 @@ export class TextareaContentOptionComponent  implements ContentOptionInterFace,O
         });
         this.rootElement.find('#option-format-paragraph').change((element) => {
             let style = '';
-            this.addStyles(style, $(element.currentTarget).val().toString())
+            this.addStyles(style,'div')
         });
         this.rootElement.find('#option-font-size').change((element) => {
             let style = 'font-size:' + $(element.currentTarget).val() + 'px';
@@ -64,7 +64,7 @@ export class TextareaContentOptionComponent  implements ContentOptionInterFace,O
             let editor = CKEDITOR.instances[this.documentDCtrlService.nameTemplate];
             let selectedElement = $(editor.getSelection().getStartElement().$);
             let tagName;
-            this.addStyles(style, 'p')
+            this.addStyles(style, 'div')
         });
         this.rootElement.find('.option-font-style').click((element) => {
             let style;

@@ -16,6 +16,7 @@ import { ScreenDetailModel } from 'src/app/models/common/common.model';
 })
 export class SubformContentComponent  implements OnInit,ContentInterFace,AfterViewInit  {
     @Input() parentBox: JQuery<Element>;
+    @Input() lifeCycle:string;
     private rootElement:JQuery<Element>;
     private childDocuments: SubFormContentDetailModel[] = new Array<SubFormContentDetailModel>();
     private currentSubFormType;
@@ -34,6 +35,7 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
     ){}
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement); 
+        this.parentBox = this.rootElement.parents('.content-box');
         this.contentTemplateSize =    JSON.parse(localStorage.getItem('contentTemplateSize'))
     }
     ngAfterViewInit(){

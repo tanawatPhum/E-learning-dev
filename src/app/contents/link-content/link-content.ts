@@ -14,6 +14,7 @@ import { UpdateContentModel } from '../../models/common/common.model';
     styleUrls: ['link-content.scss']
 })
 export class LinkContentComponent implements OnInit, ContentInterFace, AfterViewInit {
+    @Input() lifeCycle:string;
     @Input() parentBox: JQuery<Element>;
     private rootElement: JQuery<Element>;
     private targetLink;
@@ -32,6 +33,7 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
     ) { }
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement);
+        this.parentBox = this.rootElement.parents('.content-box');
     }
     ngAfterViewInit() {
         this.handleBrowseLink();

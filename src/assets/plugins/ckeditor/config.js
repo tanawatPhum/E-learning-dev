@@ -5,8 +5,9 @@
 
 CKEDITOR.editorConfig = function(config) {
     config.removePlugins = 'magicline'
-    config.extraAllowedContent = 'div(*){*}[*]; ol li span a(*){*}[*]'
+    config.extraAllowedContent = 'div(*){*}[*]; ol li span a(*){*}[*] input'
     config.toolbarLocation = 'top';
+    config.title = false;
     config.toolbar = [
 
 

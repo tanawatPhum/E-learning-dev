@@ -8,6 +8,13 @@
         </div>
     </div>;
 </section>
+<section [hidden]="currentCase!==actionCase.loadingFile">
+    <div class="loading-file">
+        <div class="spinner-border text-warning" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+</section>
 <section [hidden]="currentCase!==actionCase.showFile">
     <a class="content-file cursor-pointer "></a>
 </section>

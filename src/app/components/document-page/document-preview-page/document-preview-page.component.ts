@@ -1,9 +1,9 @@
-import { Component, ViewChild, ElementRef, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, OnDestroy, HostListener, Injector } from '@angular/core';
 import { DocumentDataControlService } from '../../../services/document/document-data-control.service';
 import { DocumentService } from '../../../services/document/document.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DocumentModel } from '../../../models/document/content.model';
-import { ScreenDetailModel } from 'src/app/models/common/common.model';
+import { ScreenDetailModel, UpdateContentModel } from 'src/app/models/common/common.model';
 import { CommonService } from '../../../services/common/common.service';
 import { find } from 'rxjs/operators';
 import { commentContentModel, commentDetailModel } from '../../../models/document/elements/comment-content.model';
@@ -25,7 +25,9 @@ import { CommonDataControlService } from '../../../services/common/common-data-c
 import { NoteContentModel } from '../../../models/document/elements/note-content.model';
 import { RulerDetailModel } from '../../../models/common/common.model';
 import { Constants } from 'src/app/global/constants';
-
+import { ContentDataControlService } from '../../../services/content/content-data-control.service';
+import { ContentRouting } from '../../../app-content-routing';
+import { createCustomElement, NgElement, WithProperties } from '@angular/elements';
 
 declare var CKEDITOR: any;
 
@@ -102,11 +104,14 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
     private systemDocument:DocumentModel = new DocumentModel();
     constructor(
         private documentDataService: DocumentDataControlService,
+        private documentDCtrlService:DocumentDataControlService,
+        private contentDCtrlService:ContentDataControlService,
         private documentService: DocumentService,
         private CommonDataService:CommonDataControlService,
         private commonService: CommonService,
         private router: Router,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        private injector:Injector
     ) { }
     // @HostListener('window:beforeunload', [ '$event' ])
     // beforeUnloadHander(event) {
@@ -124,7 +129,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         this.documentDataService.previousPage =  DocumentPreviewPageComponent.name
     }
     ngAfterContentInit() {
-
+        this.documentDCtrlService.lifeCycle  = Constants.document.lifeCycle.loadPreview;
 
 // $(window).resize((event)=>{
 //     this.contentTemplateSize.width = $(document).width();
@@ -150,6 +155,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             }
            // console.log(this.documentDataService.currentDocumentName);
             this.loadHtml(this.documentDataService.currentDocumentName);
+      
         })
         
 
@@ -183,6 +189,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                         }, 1000);
                         this.setElements(this.actions.element.setResultElement, null, result);
                         this.setTemplate(this.actions.template.setDocumentTrack);
+                        this.defineComponent()
                         
                 });
   
@@ -253,49 +260,52 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
        // let html = data.html; 
             this.rootElement.html(html);
             this.retrieveData(this.actions.data.retrieveResultData, data);
+            this.defineComponent()
             this.setElements(this.actions.element.previewElement);
-            this.handles(this.actions.handle.handleSubForm);
-            this.handles(this.actions.handle.handleVideo);
+            // this.handles(this.actions.handle.handleSubForm);
+            // this.handles(this.actions.handle.handleVideo);
         
-            this.handles(this.actions.handle.handleFile);
-            this.handles(this.actions.handle.handleLink);
-            this.handles(this.actions.handle.handleExam);
-            this.handles(this.actions.handle.handleNote);
+            // this.handles(this.actions.handle.handleFile);
+            // this.handles(this.actions.handle.handleLink);
+            // this.handles(this.actions.handle.handleExam);
+            // this.handles(this.actions.handle.handleNote);
      
            // this.handles(this.actions.handle.handleToDoList);
         //    this.handles(this.actions.handle.handleComment);
         //     this.setElements(this.actions.element.setCommentElement);
         }
         else if (action === this.actions.element.previewElement) {
-            this.rootElement.find('.content-box').removeClass('content-box-active border border-primary');
-            this.rootElement.find('.content-box').removeClass('ui-draggable ui-draggable-handle');
-            this.rootElement.find('.content-box').removeClass('ui-resizable');
-            this.rootElement.find('.content-box').removeClass('content-box-current');
-            this.rootElement.find('.content-box').find('.ui-resizable-handle').remove();
-            this.rootElement.find('.content-box').css('border', 'none');
-            this.rootElement.find('.content-box').css('cursor', 'default');
-            this.rootElement.find('.content-box').find('.content-toolbar').remove();
-            this.rootElement.find('.content-box').find('.content-video').css('pointer-events', 'initial');
-            this.rootElement.find('.content-box').find('.content-textarea').each((index, element) => {
-                let targetTextArea = this.currentResult.contents.textAreas.find((textArea) => textArea.id == $(element).attr('id'));
-                $('[id="' + $(element).attr('id') + '"]').val(targetTextArea.value);
-                $('[id="' + $(element).attr('id') + '"]').attr('disabled', 'true');
-            });
-            this.rootElement.find('.content-box').find('.content-subform').find('li').attr('contenteditable', 'false');
-            this.rootElement.find('.content-box').find('.content-box-label').remove();
+            // this.rootElement.find('.content-box').resizable('destroy')
+            // this.rootElement.find('.content-box').draggable('destroy')
+
+            // this.rootElement.find('.content-box').children().css('cursor', 'default');
+            // this.rootElement.find('.content-box').removeClass('content-box-active border border-primary');
+            // this.rootElement.find('.content-box').removeClass('ui-draggable ui-draggable-handle');
+            // this.rootElement.find('.content-box').removeClass('ui-resizable');
+            // this.rootElement.find('.content-box').removeClass('content-box-current');
+            // this.rootElement.find('.content-box').find('.ui-resizable-handle').remove();
+            // this.rootElement.find('.content-box').css('border', 'none');
+            // this.rootElement.find('.content-box').css('cursor', 'default');
+            // this.rootElement.find('.content-box').find('.content-toolbar').remove();
+            // this.rootElement.find('.content-box').find('.content-video').css('pointer-events', 'initial');
+            // this.rootElement.find('.content-box').find('.content-textarea').each((index, element) => {
+            //     let targetTextArea = this.currentResult.contents.textAreas.find((textArea) => textArea.id == $(element).attr('id'));
+            //     $('[id="' + $(element).attr('id') + '"]').val(targetTextArea.value);
+            //     $('[id="' + $(element).attr('id') + '"]').attr('disabled', 'true');
+            // });
+            // this.rootElement.find('.content-box').find('.content-subform').find('li').attr('contenteditable', 'false');
+            // this.rootElement.find('.content-box').find('.content-box-label').remove();
             this.rootElement.find('.template-doc').attr('contenteditable', 'false');
-            
-            // this.rootElement.find('.template-doc').css('width', this.documentDataService.currentScreenSize.width +'px');
-            this.rootElement.find('.content-box').find('.content-progress-bar').find('.progress-bar').css('width', 0)
-            this.rootElement.find('.content-comment').css('height', 'auto');
-            this.rootElement.find('.content-comment').find('.comment-form').css('padding-bottom', '2.5%');
-            this.rootElement.find('.note-area').hide();
-            this.rootElement.find('.content-textarea').attr('contenteditable', 'false');
-            this.rootElement.find('.content-textarea').css('cursor', 'default');
-            $(document).find('body').css('overflow-x','hidden');
-            $(document).find('body').css('overflow-y','hidden');
-
-
+            this.rootElement.find('.template-doc').removeAttr("title");
+            // // this.rootElement.find('.template-doc').css('width', this.documentDataService.currentScreenSize.width +'px');
+            // this.rootElement.find('.content-box').find('.content-progress-bar').find('.progress-bar').css('width', 0)
+            // this.rootElement.find('.content-comment').css('height', 'auto');
+            // this.rootElement.find('.content-comment').find('.comment-form').css('padding-bottom', '2.5%');
+            // this.rootElement.find('.note-area').hide();
+            // this.rootElement.find('.content-textarea').attr('contenteditable', 'false');
+            // this.rootElement.find('.content-textarea').css('cursor', 'default');
+            // $(document).find('body').css('overflow-x','hidden');
+            // $(document).find('body').css('overflow-y','hidden');
             this.documentDataService.currentScreenSize.height =  $('.document-preview-content').height();
             this.documentDataService.currentScreenSize.width =  $('.document-preview-content').width();
              
@@ -1119,20 +1129,21 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             html: $('#contentTemplate').html(),
             status: this.currentResult.status,
             otherDetail: this.currentResult.otherDetail,
-            contents: {
-                boxes: this.boxes,
-                files:this.files,
-                links:this.links,
-                textAreas: this.textAreas,
-                imgs: this.imgs,
-                videos: this.videos,
-                subFroms: this.subForms,
-                comments: this.comments,
-                todoList: this.toDoLists,
-                exams:this.exams,
-                notes:this.notes,
-                progressBar: this.progressBars
-            }
+            contents:this.contentDCtrlService.poolContents
+            // contents: {
+            //     boxes: this.boxes,
+            //     files:this.files,
+            //     links:this.links,
+            //     textAreas: this.textAreas,
+            //     imgs: this.imgs,
+            //     videos: this.videos,
+            //     subFroms: this.subForms,
+            //     comments: this.comments,
+            //     todoList: this.toDoLists,
+            //     exams:this.exams,
+            //     notes:this.notes,
+            //     progressBar: this.progressBars
+            // }
         }
         console.log('saveobjectTemplate',saveobjectTemplate)
         this.documentService.saveDocument(this.currentResult.nameDocument, saveobjectTemplate).subscribe((status) => {
@@ -1199,22 +1210,36 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
     }
     private retrieveData(action: string, results: DocumentModel, element?: JQuery<Element>) {
         if (action === this.actions.data.retrieveResultData) {
-            this.boxes = results.contents.boxes || new Array<BoxContentModel>();
-            this.subForms = results.contents.subFroms || new Array<SubFormContentModel>();
-            this.imgs = results.contents.imgs||  new Array<ImgContentModel>();
-            //this.comments = results.contents.comments ||  new Array<commentContentModel>();
-            this.toDoLists = results.contents.todoList ||  new Array<ToDoListContentModel>();
-            this.exams =  results.contents.exams ||  new Array<ExamContentModel>()
-            this.videos = results.contents.videos ||  new Array<VideoContentModel>();
-            this.progressBars = results.contents.progressBar ||  new Array<ProgressBarContentModel>();
-            this.files =   results.contents.files ||  new Array<FileContentModel>();
-            this.links =   results.contents.links ||  new Array<LinkContentModel>();
-            this.textAreas = results.contents.textAreas ||  new Array<TextAreaContentModel>();
-            this.notes  = results.contents.notes||  new Array<NoteContentModel>();
+            this.contentDCtrlService.poolContents =  results.contents;
+            // this.boxes = results.contents.boxes || new Array<BoxContentModel>();
+            // this.subForms = results.contents.subFroms || new Array<SubFormContentModel>();
+            // this.imgs = results.contents.imgs||  new Array<ImgContentModel>();
+            // //this.comments = results.contents.comments ||  new Array<commentContentModel>();
+            // this.toDoLists = results.contents.todoList ||  new Array<ToDoListContentModel>();
+            // this.exams =  results.contents.exams ||  new Array<ExamContentModel>()
+            // this.videos = results.contents.videos ||  new Array<VideoContentModel>();
+            // this.progressBars = results.contents.progressBar ||  new Array<ProgressBarContentModel>();
+            // this.files =   results.contents.files ||  new Array<FileContentModel>();
+            // this.links =   results.contents.links ||  new Array<LinkContentModel>();
+            // this.textAreas = results.contents.textAreas ||  new Array<TextAreaContentModel>();
+            // this.notes  = results.contents.notes||  new Array<NoteContentModel>();
         }
 
     }
+    private defineComponent() {
+        ContentRouting.routes.forEach((route)=>{
+            const customElement = createCustomElement(route.component, { injector:this.injector });
+            customElements.get(route.contentName) || customElements.define(route.contentName, customElement)
+            // let divElement =  this.render.createElement(route.contentName) as NgElement & WithProperties<{data:any}>;
+            // divElement.data =  'ccccc';
 
+        })
+        let updateAction:UpdateContentModel = new UpdateContentModel()
+        updateAction.actionCase  = Constants.common.event.load.preview;
+        this.contentDCtrlService.updateContent = updateAction
+    
+        
+    }
     private addStyleElements(action: string, element?: JQuery<Element>, styles?: string, subaction?: string) {
         if(action===this.actions.style.addStyleBoxContentNote && element){
             let parentId = element.attr('data-parentid')

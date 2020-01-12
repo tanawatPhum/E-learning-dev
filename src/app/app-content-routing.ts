@@ -21,7 +21,7 @@ import { TextareaContentOptionComponent } from './contents/textarea-content/text
 
 export class ContentRouting {
     public static routes  = [
-        {component:TextareaContentComponent,contentName:'text-area-content',option:TextareaContentOptionComponent},
+        {component:TextareaContentComponent,contentName:'textarea-content',option:TextareaContentOptionComponent},
         {component:ImgContentComponent,contentName:'img-content',option:ImgContentOptionComponent},
         {component:VideoContentComponent,contentName:'video-content',option:VideoContentOptionComponent},
         {component:FileContentComponent,contentName:'file-content',option:FileContentOptionComponent},

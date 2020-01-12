@@ -14,6 +14,7 @@ import { NoteContentModel } from 'src/app/models/document/elements/note-content.
 })
 export class NoteContentComponent implements OnInit, ContentInterFace, AfterViewInit {
     @Input() parentBox: JQuery<Element>;
+    @Input() lifeCycle:string;
     private rootElement: JQuery<Element>;
     constructor(
         private commonService: CommonService,
@@ -25,6 +26,7 @@ export class NoteContentComponent implements OnInit, ContentInterFace, AfterView
     ) { }
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement);
+        this.parentBox = this.rootElement.parents('.content-box');
     }
     ngAfterViewInit() {
         this.addNote();

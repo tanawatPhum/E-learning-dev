@@ -12,6 +12,7 @@ import { DocumentDataControlService } from '../../../services/document/document-
 export class VideoContentOptionComponent implements ContentOptionInterFace,OnInit{
     @Input() parentBox: JQuery<Element>;
     private rootElement: JQuery<Element>;
+    private sourceType:string;
 
     constructor(
         private contentDCtrlService:ContentDataControlService,
@@ -44,6 +45,8 @@ export class VideoContentOptionComponent implements ContentOptionInterFace,OnIni
                 this.currentCase =  this.actionCase.showVideo;
                 let targetVideo = this.contentDCtrlService.poolContents.videos.find((video) => video.parentId === this.parentBox.attr('id'))
                 if (targetVideo) {
+                    this.sourceType = targetVideo.data.channelStream;
+                    console.log( this.sourceType)
                     if (targetVideo.condition.isMustWatchingEnd) {
                         $('.option-video').find('.video-tracker').prop('checked', true)
                     }

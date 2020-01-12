@@ -13,6 +13,7 @@ import { ProgressBarContentModel, ProgressBarContentObjectModel } from 'src/app/
 })
 export class ProgressBarContentComponent implements OnInit,ContentInterFace  {
     @Input() parentBox: JQuery<Element>;
+    @Input() lifeCycle:string;
     private actionCase = {
         browseImg:'browseImg',
         loadingImg:'loadingImg',
@@ -28,6 +29,7 @@ export class ProgressBarContentComponent implements OnInit,ContentInterFace  {
         ){}
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement); 
+        this.parentBox = this.rootElement.parents('.content-box');
     }
  
     ngAfterViewInit(){

@@ -12,10 +12,12 @@
 
     </div>
 </section>
+
+
 <section [hidden]="currentCase!==actionCase.showVideo">
 
     <div class="row p-0 m-0 mt-3 option-video">
-        <div class="col-12 d-flex justify-content-center border-bottom">
+        <div *ngIf="sourceType!=='youtube' && sourceType!=='videoSource'" class="col-12 d-flex justify-content-center border-bottom">
             <div class="form-group text-center">
                 <label>Property</label>
                 <div class="custom-control custom-switch">

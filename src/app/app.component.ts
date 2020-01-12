@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonService } from './services/common/common.service';
 import { DocumentDataControlService } from './services/document/document-data-control.service';
 import { SocketIoService } from './services/common/socket.service';
@@ -12,6 +12,12 @@ import { Router, ActivatedRoute } from '@angular/router';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
+//   @HostListener('window:click', ['$event']) onClick(event) {
+//     console.log(event)
+//     event.preventDefault();
+//     event.stopPropagation();
+
+// }
   title = 'E-learning';
   constructor(
     private commonService: CommonService, 

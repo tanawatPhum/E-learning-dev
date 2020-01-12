@@ -3,6 +3,5 @@ export class FileContentModel {
     public id: string;
     public fileName:string;
     public awsFileName:string;
-    // public data: any
-    public data: any;
+    public data: any
 }

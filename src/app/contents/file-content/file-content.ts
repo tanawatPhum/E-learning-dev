@@ -1,10 +1,11 @@
-import { Component, OnInit, AfterViewInit, AfterContentInit, Input, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, AfterContentInit, Input, ElementRef, HostListener } from '@angular/core';
 import { ContentInterFace } from '../interface/content.interface';
 import { DocumentService } from 'src/app/services/document/document.service';
 import { ContentDataControlService } from '../../services/content/content-data-control.service';
 import { DocumentDataControlService } from '../../services/document/document-data-control.service';
 import { CommonService } from '../../services/common/common.service';
 import { FileContentModel } from 'src/app/models/document/elements/file-content.model';
+import { Constants } from '../../global/constants';
 
 @Component({
     moduleId: module.id,
@@ -15,10 +16,16 @@ import { FileContentModel } from 'src/app/models/document/elements/file-content.
 export class FileContentComponent implements OnInit, ContentInterFace, AfterViewInit  {
 
     @Input() parentBox: JQuery<Element>;
+    @HostListener('click', ['$event']) onClick(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+    }
     private rootElement: JQuery<Element>;
     private targetFile;
     private actionCase = {
         browseFile: 'browseFile',
+        loadingFile:'loadingFile',
         showFile:'showFile'
     }    
 
@@ -33,12 +40,26 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
     ) { }
     ngOnInit(){
         this.rootElement = $(this.element.nativeElement);
+        this.parentBox = this.rootElement.parents('.content-box');
     }
     ngAfterViewInit(){
-        this.handleBrowseFile();
+        if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.createContent){
+            this.handleBrowseFile(); 
+        }
+        else if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadEditor || Constants.document.lifeCycle.loadPreview){
+            let targetFile = this.contentDCtrlService.poolContents.files.find((file) => file.parentId === this.parentBox.attr('id'))
+            this.showFile(targetFile);
+            if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadPreview){
+                this.handleLoadFile();
+            }
+        }
+        
     }
     handleBrowseFile(){
         this.rootElement.find('#btn-file').click((event) => {
+            this.rootElement.find('.content-browse-file').click((event) => {
+                event.stopPropagation();
+            })      
             this.rootElement.find('.content-browse-file').trigger('click');
             this.rootElement.find('.content-browse-file').change((event) => {
                 const target = event.target as HTMLInputElement;
@@ -64,7 +85,7 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
         });
     }
     private addFile(){
-        this.currentCase = this.actionCase.showFile;
+        this.currentCase = this.actionCase.loadingFile;
         let  awsFileName =  this.commonService.getPatternAWSName(this.targetFile[0].name)|| 'fileName';
         let fileName = this.commonService.fileNameAndExt(this.targetFile[0].name)[0] || 'fileName';
         let file:FileContentModel = {
@@ -74,11 +95,38 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
             awsFileName:awsFileName,
             data:this.targetFile[0]
         };
-        this.contentDCtrlService.poolContents.files.push(file);
-        this.rootElement.find('.content-file').attr('download',fileName)
-        .attr('data-awsname',awsFileName)
+        this.documentService.uploadFile([file]).subscribe((status)=>{
+            this.currentCase = this.actionCase.showFile;
+            file.data = null;
+            this.contentDCtrlService.poolContents.files.push(file);
+            this.rootElement.find('.content-file').attr('download',fileName)
+            .attr('data-awsname',awsFileName)
+            .attr('id',this.parentBox.attr('id') + '-file')
+            .text(fileName)
+            this.contentDCtrlService.setLastContent(this.parentBox);
+        })
+
+        
+    }
+
+    private showFile(targetFile:FileContentModel) {
+        this.currentCase = this.actionCase.showFile;
+        this.rootElement.find('.content-file').attr('download',targetFile.fileName)
+        .attr('data-awsname',targetFile.awsFileName)
         .attr('id',this.parentBox.attr('id') + '-file')
-        .text(fileName)
+        .text(targetFile.fileName)
+    }
+    private handleLoadFile(){
+        this.rootElement.find('.content-file').bind('click',(element)=>{
+            let targetFile = this.contentDCtrlService.poolContents.files.find((file)=>file.awsFileName === $(element.currentTarget).attr('data-awsname'))
+            this.documentService.downloadFile(targetFile.awsFileName).subscribe((blobFile)=>{
+                let url = window.URL.createObjectURL(blobFile);
+                let link = document.createElement('a');
+                link.download = targetFile.awsFileName;
+                link.href = url;
+                link.click();
+            })
+        })
     }
 
 
