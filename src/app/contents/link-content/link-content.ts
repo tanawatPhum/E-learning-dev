@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, Input, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Input, ElementRef, HostListener } from '@angular/core';
 import { ContentInterFace } from '../interface/content.interface';
 import { CommonService } from 'src/app/services/common/common.service';
 import { DocumentService } from 'src/app/services/document/document.service';
@@ -6,6 +6,8 @@ import { ContentDataControlService } from 'src/app/services/content/content-data
 import { DocumentDataControlService } from 'src/app/services/document/document-data-control.service';
 import { LinkContentModel } from '../../models/document/elements/link-content.model';
 import { UpdateContentModel } from '../../models/common/common.model';
+import { Constants } from 'src/app/global/constants';
+import { ContentsModel } from 'src/app/models/document/content.model';
 
 @Component({
     moduleId: module.id,
@@ -16,8 +18,15 @@ import { UpdateContentModel } from '../../models/common/common.model';
 export class LinkContentComponent implements OnInit, ContentInterFace, AfterViewInit {
     @Input() lifeCycle:string;
     @Input() parentBox: JQuery<Element>;
+
+    @HostListener('click', ['$event']) onClick(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+    }
     private rootElement: JQuery<Element>;
-    private targetLink;
+    private targetLinkInsert;
+    private targetLink:LinkContentModel  = new LinkContentModel();
     private actionCase = {
         browseLink: 'browseLink',
         showLink:'showLink'
@@ -34,17 +43,38 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
+        this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
+            if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm){
+                let targetDocumentContent:ContentsModel = detail.data;
+                this.targetLink = targetDocumentContent.links.find((link) => link.parentId === this.parentBox.attr('id'))
+                this.initialLink()
+            }
+        })
     }
     ngAfterViewInit() {
-        this.handleBrowseLink();
+        this.targetLink = this.contentDCtrlService.poolContents.links.find((link) => link.parentId === this.parentBox.attr('id'))
+        this.initialLink();
         
+    }
+    private initialLink(){
+        if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.createContent) {
+            this.handleBrowseLink()
+        }
+        else if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor || this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadPreview) {
+            if(this.targetLink){
+                this.loadLink()
+                if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadPreview){
+                    this.handleLink();
+                }
+            }
+        }
     }
     private handleBrowseLink(){
         this.rootElement.find('.toolbar-browse-link').find('#link-input-url').click(() => {
             this.rootElement.find('.toolbar-browse-link').find('#link-input-url').focus();
             this.rootElement.find('.toolbar-browse-link').find('#link-input-url').on('input', this.commonService.debounce((event) => {
                 if (event.target.value) {
-                    this.targetLink = event.target.value;
+                    this.targetLinkInsert = event.target.value;
                     this.addLink();
                 }
             }, 2000));
@@ -53,16 +83,16 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
             event.preventDefault();
             event.stopPropagation();
             let pastedData = event.originalEvent.clipboardData.getData('text');
-            this.targetLink = pastedData;
+            this.targetLinkInsert = pastedData;
             this.addLink();
         });
     }
     private addLink(){
-        let hostname = (new URL(this.targetLink)).hostname;
+        let hostname = (new URL(this.targetLinkInsert)).hostname;
         let links:LinkContentModel = {
             parentId:this.parentBox.attr('id'),
             id:this.parentBox.attr('id') + '-link',
-            path:this.targetLink,
+            path:this.targetLinkInsert,
             name:hostname,
         };
         this.currentCase =  this.actionCase.showLink;
@@ -74,6 +104,18 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
         let updateAction:UpdateContentModel = new UpdateContentModel()
         updateAction.actionCase  = 'showLink'
         this.contentDCtrlService.updateContent = updateAction
+        this.contentDCtrlService.setLastContent(this.parentBox);
+    }
+    private loadLink(){
+        this.currentCase  = this.actionCase.showLink;
+        this.rootElement.find('.content-link').attr('data-name',this.targetLink.name)
+        .attr('id', this.parentBox.attr('id') + '-link')
+        .text(this.targetLink.name)
+    }
+    private handleLink(){
+        this.rootElement.find('.content-link').unbind().bind('click',(element)=>{
+            window.open(this.targetLink.path)
+        });
     }
 
 }

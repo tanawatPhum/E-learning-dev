@@ -183,13 +183,13 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                         this.comments = systemResult.contents.comments ||  new Array<commentContentModel>();
                
                         
-                        setTimeout(() => {
-                            this.setElements(this.actions.element.setCommentElement);
-                            this.handles(this.actions.handle.handleComment);
-                        }, 1000);
-                        this.setElements(this.actions.element.setResultElement, null, result);
+                        // setTimeout(() => {
+                        //     this.setElements(this.actions.element.setCommentElement);
+                        //     this.handles(this.actions.handle.handleComment);
+                        // }, 1000);
+                        this.currentResult = result;
                         this.setTemplate(this.actions.template.setDocumentTrack);
-                        this.defineComponent()
+                        // this.defineComponent()
                         
                 });
   
@@ -216,13 +216,14 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         }
         else if (action === this.actions.template.setDocumentTrack) {
             this.documentService.loadDocTrackFromDB().subscribe((documentTrack) => {
-                this.documentTracks = documentTrack;
+                this.documentTracks = this.documentDCtrlService.documentTracks = documentTrack;
                 console.log('documentTrack',documentTrack)
                 if (this.documentTracks.length > 0) {
-                    this.currentDocumentTrack = documentTrack.find((documentTrack) => documentTrack.id === this.commonService.getPatternId(this.documentDataService.currentDocumentName));
-                    this.handles(this.actions.handle.handleDocumentTrack);
-                    this.handles(this.actions.handle.handleToDoList);
-                    this.handles(this.actions.handle.handleProgressBar);
+                    this.currentDocumentTrack = this.documentDataService.currentDocumentTrack = documentTrack.find((documentTrack) => documentTrack.id === this.commonService.getPatternId(this.documentDataService.currentDocumentName));
+                    this.setElements(this.actions.element.setResultElement, null, this.currentResult);
+                    // this.handles(this.actions.handle.handleDocumentTrack);
+                    // this.handles(this.actions.handle.handleToDoList);
+                    // this.handles(this.actions.handle.handleProgressBar);
                 //    this.documentTrackInterval = setInterval(()=>{
                 //         this.handles(this.actions.handle.handleDocumentTrack);
                 //     },2000)
@@ -639,7 +640,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         else if (action === this.actions.handle.handleVideo) {
             setTimeout(() => {
                 this.currentDocumentTrack.contents.forEach((content)=>{
-                    if(content.boxType === this.boxType.boxVideo){
+                    if(content.contentType === this.boxType.boxVideo){
                     let targetVideo = this.videos.find((video)=>video.id === content.id)
                     let targetWistiaVideo =  Wistia.api(targetVideo.data.wistiaId);
                     targetWistiaVideo.time(content.data);
@@ -732,18 +733,18 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                 parentBox.contentList.forEach((content)=>{
                     let targetDocumentTrack  =  this.currentDocumentTrack.contents.find((contentTrack)=>contentTrack.id === content.id);
                     if(targetDocumentTrack){
-                        if(targetDocumentTrack.boxType === this.boxType.boxVideo){
+                        if(targetDocumentTrack.contentType === this.boxType.boxVideo){
                             summaryOfPercent += targetDocumentTrack.progress
                             numberOfContentProgress += 1;
                         }
-                        else if(targetDocumentTrack.boxType === this.boxType.boxSubform){
+                        else if(targetDocumentTrack.contentType === this.boxType.boxSubform){
                             targetDocumentTrack.conditions.subformCondition.isClickLinks.forEach((link)=>{
                                 let targetDoc = this.documentTracks.find((docTrack)=>docTrack.id ===link.linkId);
                                 summaryOfPercent += targetDoc.progress;
                                 numberOfContentProgress += 1;
                             });
                         } 
-                        else if(targetDocumentTrack.boxType === this.boxType.boxExam){
+                        else if(targetDocumentTrack.contentType === this.boxType.boxExam){
                             summaryOfPercent += targetDocumentTrack.progress
                             numberOfContentProgress += 1;
                         }
@@ -898,7 +899,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                       let targetContent =  this.currentDocumentTrack.contents.find(contentTrack=>contentTrack.parentId === content.id);
 
                       if(targetContent){
-                          if( targetContent.boxType === this.boxType.boxVideo && !targetContent.conditions.videoCondition.isMustWatchingEnd&&targetContent.conditions.videoCondition.isClickPlay ){
+                          if( targetContent.contentType === this.boxType.boxVideo && !targetContent.conditions.videoCondition.isMustWatchingEnd&&targetContent.conditions.videoCondition.isClickPlay ){
                                 summaryOfProgress += 100;
                           }else {
                             summaryOfProgress += targetContent.progress;
@@ -937,14 +938,14 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             let numberOfProgress =0;
             // console.log(this.currentDocumentTrack.contents[targetVideoTrackIndex])
             this.currentDocumentTrack.contents.forEach((content) => {
-                if(content.boxType === this.boxType.boxVideo){
+                if(content.contentType === this.boxType.boxVideo){
                     if(content.conditions.videoCondition.isMustWatchingEnd){
                         numberOfProgress +=content.progress
                     }else if(content.conditions.videoCondition.isClickPlay){
                         numberOfProgress +=100
                     }
                 }
-                else if(content.boxType === this.boxType.boxSubform){
+                else if(content.contentType === this.boxType.boxSubform){
                     let numberOfLinks = content.conditions.subformCondition.isClickLinks.length;
                     let numberOfProgressLink =0;
                     content.conditions.subformCondition.isClickLinks.forEach((link)=>{
@@ -1234,9 +1235,9 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             // divElement.data =  'ccccc';
 
         })
-        let updateAction:UpdateContentModel = new UpdateContentModel()
-        updateAction.actionCase  = Constants.common.event.load.preview;
-        this.contentDCtrlService.updateContent = updateAction
+        // let updateAction:UpdateContentModel = new UpdateContentModel()
+        // updateAction.actionCase  = Constants.common.event.load.preview;
+        // this.contentDCtrlService.updateContent = updateAction
     
         
     }

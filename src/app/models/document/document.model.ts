@@ -31,7 +31,7 @@ export class DocumentTrackContent{
     public id:string;
     public data:any;
     public name:string;
-    public boxType:string;
+    public contentType:string;
     public progress:number;
     public conditions:DocumentTrackContentCondition = new DocumentTrackContentCondition();
 }

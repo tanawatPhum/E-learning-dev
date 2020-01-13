@@ -72,15 +72,41 @@ export class Constants {
         lifeCycle:{
             loadEditor:"loadEditor",
             createContent:"createContent",
-            loadPreview:"loadPreview"
+            loadPreview:"loadPreview",
         },
-        contents: {
+        layouts:{
             types: {
+
                 oneLayout: {name : 'oneLayout', id: 1 },
                 twoLayout: {name : 'twoLayout', id: 2 },
                 threeLayout:  {name : 'threeLayout', id: 4 },
                 fourLayout: {name : 'fourLayout', id: 5 },
                 freedomLayout:  {name : 'freedomLayout', id: 6 }
+            }
+        },
+        contents: {
+            lifeCycle:{
+                loadsubForm:'loadsubForm',
+                playVideo:'playVideo'
+            },
+            types: {
+                img:'img',
+                video:'video',
+                link:'link',
+                file:'file',
+                progressBar:'progressBar',
+                subform:'subform',
+                textarea:'textarea',
+                todoList:'todoList',
+                comment:'comment',
+                note:'note',
+                exam:'exam'
+
+                // oneLayout: {name : 'oneLayout', id: 1 },
+                // twoLayout: {name : 'twoLayout', id: 2 },
+                // threeLayout:  {name : 'threeLayout', id: 4 },
+                // fourLayout: {name : 'fourLayout', id: 5 },
+                // freedomLayout:  {name : 'freedomLayout', id: 6 }
             }
         },
         modals:{

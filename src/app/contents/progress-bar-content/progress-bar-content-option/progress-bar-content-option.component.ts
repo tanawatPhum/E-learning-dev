@@ -23,6 +23,7 @@ export class ProgressBarContentOptionComponent implements OnInit, ContentOptionI
     ngOnInit(){
         this.rootElement = $(this.element.nativeElement); 
         this.handleAddProgressBar()
+        console.log(this.documentDCtrlService.documentTrack)
     }
     handleAddProgressBar(){
         this.createProgressBoxList();
@@ -35,8 +36,9 @@ export class ProgressBarContentOptionComponent implements OnInit, ContentOptionI
             this.rootElement.find('.option-progressBar').find('.progressBar-componentList').html(listBox);
         }
         this.rootElement.find('.option-progressBar').find('.progressBar-componentList').find('input[type="checkbox"]').each((index,element)=>{
-            let targetProgressBarIndex  =  this.contentDCtrlService.poolContents.progressBar.findIndex(progressBar=>progressBar.parentId  === this.parentBox.attr('id'));
+            let targetProgressBarIndex  =  this.contentDCtrlService.poolContents.progressBar.findIndex(progressBar=>progressBar.parentId  === this.parentBox.attr('id'));         
             if(targetProgressBarIndex>=0){
+                console.log(this.contentDCtrlService.poolContents.progressBar[targetProgressBarIndex].contentList)
                if(this.contentDCtrlService.poolContents.progressBar[targetProgressBarIndex].contentList.find(content=>content.parentId === $(element).val().toString())){
                      $(element).prop('checked',true);
                }
@@ -67,7 +69,7 @@ export class ProgressBarContentOptionComponent implements OnInit, ContentOptionI
                       let progressBarContentObj:ProgressBarContentObjectModel = {
                             id:targetDocTrack.id,
                             parentId:targetDocTrack.parentId,
-                            boxType:targetdocumentTrack.boxType
+                            boxType:targetdocumentTrack.contentType
                         }
                         this.contentDCtrlService.poolContents.progressBar[targetProgressBarIndex].contentList.push(progressBarContentObj)
                        }
@@ -105,6 +107,7 @@ export class ProgressBarContentOptionComponent implements OnInit, ContentOptionI
             });
         })
     }
+
     removeProgressBar(){
         this.contentDCtrlService.poolContents.progressBar = this.contentDCtrlService.poolContents.progressBar.filter((progressBar)=>progressBar.parentId !== this.parentBox.attr('id'));
         this.parentBox.remove();

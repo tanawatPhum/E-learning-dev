@@ -6,6 +6,7 @@ import { DocumentDataControlService } from '../../services/document/document-dat
 import { CommonService } from '../../services/common/common.service';
 import { FileContentModel } from 'src/app/models/document/elements/file-content.model';
 import { Constants } from '../../global/constants';
+import { ContentsModel } from 'src/app/models/document/content.model';
 
 @Component({
     moduleId: module.id,
@@ -22,7 +23,8 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
 
     }
     private rootElement: JQuery<Element>;
-    private targetFile;
+    private targetFileUpload;
+    private targetFile:FileContentModel  = new FileContentModel();
     private actionCase = {
         browseFile: 'browseFile',
         loadingFile:'loadingFile',
@@ -41,19 +43,32 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
     ngOnInit(){
         this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
+        this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
+            if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm){
+                let targetDocumentContent:ContentsModel = detail.data;
+                this.targetFile = targetDocumentContent.files.find((file) => file.parentId === this.parentBox.attr('id'))
+                this.initialFile();
+            } 
+        })
+
     }
     ngAfterViewInit(){
+        this.targetFile = this.contentDCtrlService.poolContents.files.find((file) => file.parentId === this.parentBox.attr('id'))
+        this.initialFile();
+    }
+    private initialFile(){
         if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.createContent){
             this.handleBrowseFile(); 
         }
-        else if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadEditor || Constants.document.lifeCycle.loadPreview){
-            let targetFile = this.contentDCtrlService.poolContents.files.find((file) => file.parentId === this.parentBox.attr('id'))
-            this.showFile(targetFile);
-            if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadPreview){
-                this.handleLoadFile();
+        else if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadEditor || this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadPreview){
+            if( this.targetFile){
+                this.showFile(this.targetFile);
+                if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadPreview){
+                    this.handleLoadFile();
+                }
             }
-        }
-        
+
+        } 
     }
     handleBrowseFile(){
         this.rootElement.find('#btn-file').click((event) => {
@@ -63,8 +78,8 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
             this.rootElement.find('.content-browse-file').trigger('click');
             this.rootElement.find('.content-browse-file').change((event) => {
                 const target = event.target as HTMLInputElement;
-                this.targetFile = target.files;
-                console.log(' ❏ File :', this.targetFile);
+                this.targetFileUpload = target.files;
+                console.log(' ❏ File :', this.targetFileUpload);
                 this.addFile();
             });
         });
@@ -79,21 +94,21 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
         this.rootElement.find('.toolbar-browse-file').on('drop', (event:any) => {
             event.preventDefault();
             event.stopPropagation();
-            this.targetFile = event.originalEvent.dataTransfer.files;
-            console.log(' ❏ File :', this.targetFile);
+            this.targetFileUpload = event.originalEvent.dataTransfer.files;
+            console.log(' ❏ File :', this.targetFileUpload);
             this.addFile();
         });
     }
     private addFile(){
         this.currentCase = this.actionCase.loadingFile;
-        let  awsFileName =  this.commonService.getPatternAWSName(this.targetFile[0].name)|| 'fileName';
-        let fileName = this.commonService.fileNameAndExt(this.targetFile[0].name)[0] || 'fileName';
+        let  awsFileName =  this.commonService.getPatternAWSName(this.targetFileUpload[0].name)|| 'fileName';
+        let fileName = this.commonService.fileNameAndExt(this.targetFileUpload[0].name)[0] || 'fileName';
         let file:FileContentModel = {
             parentId:this.parentBox.attr('id'),
             id:this.parentBox.attr('id') + '-file',
-            fileName:this.commonService.fileNameAndExt(this.targetFile[0].name)[0],
+            fileName:this.commonService.fileNameAndExt(this.targetFileUpload[0].name)[0],
             awsFileName:awsFileName,
-            data:this.targetFile[0]
+            data:this.targetFileUpload[0]
         };
         this.documentService.uploadFile([file]).subscribe((status)=>{
             this.currentCase = this.actionCase.showFile;

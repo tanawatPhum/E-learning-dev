@@ -5,11 +5,12 @@ import { ContentInterFace } from '../interface/content.interface';
 import { VideoConetentDataModel, VideoConetentConditionModel, VideoContentModel } from '../../models/document/elements/video-content.model';
 import { CommonService } from '../../services/common/common.service';
 import { UpdateContentModel, UploadFileModel } from '../../models/common/common.model';
-import { DocumentTrackContent } from '../../models/document/document.model';
+import { DocumentTrackContent, DocumentTrackModel } from '../../models/document/document.model';
 import { DocumentDataControlService } from '../../services/document/document-data-control.service';
 import { Constants } from 'src/app/global/constants';
 import { promise } from 'protractor';
-
+import { ContentsModel } from '../../models/document/content.model';
+declare var Wistia: any;
 
 @Component({
     moduleId: module.id,
@@ -29,6 +30,10 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
 
     private rootElement: JQuery<Element>;
     private targetFile;
+    private contentTypes = Constants.document.contents.types;
+    private targetVideo: VideoContentModel = new VideoContentModel();
+    private updateAction: UpdateContentModel = new UpdateContentModel();
+    private documentTrackInterval: any;
     private actionCase = {
         browseVideo: 'browseVideo',
         loadingVideo: 'loadingVideo',
@@ -49,32 +54,35 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
-        // this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
-        //     if(detail.actionCase === Constants.common.event.load.component || Constants.common.event.load.preview){
-        //         this.parentBox  = this.rootElement.parents('.content-box');
-        //         let targetVideo =  this.contentDCtrlService.poolContents.videos.find((video)=>video.parentId === this.parentBox.attr('id'))
-        //         if(targetVideo.data.channelStream === 'wistia'){
-        //            this.loadVideo(targetVideo)
-        //         }
-        //     }
-        // })
+        this.contentDCtrlService.getUpdateContent().subscribe((detail) => {
+            if (detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm) {
+                let targetDocumentContent: ContentsModel = detail.data;
+                this.targetVideo = targetDocumentContent.videos.find((video) => video.parentId === this.parentBox.attr('id'))
+                this.intialVideo();
+            }
+        })
     }
     ngAfterViewInit() {
+        this.targetVideo = this.contentDCtrlService.poolContents.videos.find((video) => video.parentId === this.parentBox.attr('id'))
+        this.intialVideo();
+    }
+    private intialVideo() {
         if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.createContent) {
             this.handleBrowseVideo();
         }
         else if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor || this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadPreview) {
-            let targetVideo = this.contentDCtrlService.poolContents.videos.find((video) => video.parentId === this.parentBox.attr('id'))
-            if (targetVideo) {
-                if(this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor){
-                    this.rootElement.find('.content-video').css('pointer-events','none')
+            if (this.targetVideo) {
+                this.loadVideo(this.targetVideo)
+                if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor) {
+                    this.rootElement.find('.content-video').css('pointer-events', 'none')
 
-                }else if(this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadPreview){
-                    this.rootElement.find('.content-video').css('pointer-events','auto')
+                } else if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadPreview) {
+                    this.rootElement.find('.content-video').css('pointer-events', 'auto')
+                    setTimeout(() => {
+                        this.handleVideo();
+                    }, 500);
                 }
-                this.loadVideo(targetVideo)
             }
-
         }
     }
     private handleBrowseVideo() {
@@ -88,9 +96,6 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
                 dataStreaming.channelStream = 'videoSource';
                 const target = event.target as HTMLInputElement;
                 this.targetFile = target.files;
-
-
-
                 // dataStreaming.channelStream = 
                 console.log(' ❏ Video :', this.targetFile);
                 this.addVideo(dataStreaming, 'videoSource');
@@ -208,18 +213,17 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
         else if (sourceType === 'wistia') {
             this.currentCase = this.actionCase.videoWistia;
             video.path = this.targetFile;
-            this.rootElement.find('.wistia_responsive').addClass('wistia_async_' + this.targetFile)
+            this.rootElement.find('.content-wistia').addClass('wistia_responsive wistia_embed wistia_async_' + this.targetFile)
             this.contentDCtrlService.poolContents.videos.push(video)
             this.contentDCtrlService.setLastContent(this.parentBox);
         }
-        let updateAction: UpdateContentModel = new UpdateContentModel()
-        updateAction.actionCase = 'showVideo'
-        this.contentDCtrlService.updateContent = updateAction
+        this.updateAction.actionCase = 'showVideo'
+        this.contentDCtrlService.updateContent = this.updateAction
         this.contentDCtrlService.setLastContent(this.parentBox);
         this.addDocumentTrackVideo();
     }
     private loadVideo(targetVideo: VideoContentModel) {
-        
+
         if (targetVideo.data.channelStream === 'videoSource') {
             this.rootElement.find('video').attr('src', targetVideo.path)
                 .attr('id', this.parentBox.attr('id') + '-video')
@@ -232,13 +236,52 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
 
         } else if (targetVideo.data.channelStream === 'wistia') {
             this.currentCase = this.actionCase.videoWistia;
-            this.rootElement.find('.wistia_responsive').addClass('wistia_async_' + targetVideo.data.streamId)
-                .attr('id', this.parentBox.attr('id') + '-video')
+            this.rootElement.find('.content-wistia').addClass('wistia_responsive wistia_embed wistia_async_' + targetVideo.data.streamId)
+            // .attr('id', this.parentBox.attr('id') + '-video')
         }
     }
-
+    private handleVideo() {
+        let targetDocumentTrackIndex = this.documentDCtrlService.currentDocumentTrack.contents.findIndex((content) => content.parentId === this.parentBox.attr('id'))
+        let targetDocumentTrack = this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex]
+        if (targetDocumentTrack) {
+            let targetVideo = this.contentDCtrlService.poolContents.videos.find((video) => video.parentId === targetDocumentTrack.parentId)
+            if (targetVideo) {
+                let isHasProgressBar = $('.content-progress-bar')
+                let targetWistiaVideo = Wistia.api(targetVideo.data.streamId);
+                targetWistiaVideo.time(targetDocumentTrack.data);
+                // this.rootElement.find('.content-video').click((event) => {
+                targetWistiaVideo.bind("play", (e) => {
+                    this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex].conditions.videoCondition.isClickPlay = true;
+                    return targetWistiaVideo.unblind;
+                });
+                targetWistiaVideo.bind("secondchange", () => {
+                    if (isHasProgressBar.length > 0) {
+                        this.updateAction.actionCase = Constants.document.contents.lifeCycle.playVideo;
+                        this.contentDCtrlService.updateContent = this.updateAction
+                    }
+                    this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex].data = targetWistiaVideo.time()
+                    this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex].progress = (targetWistiaVideo.time() / targetWistiaVideo.duration()) * 100;
+                    this.documentTrackInterval = setInterval(() => {
+                        this.handleDocumentTrack();
+                    }, 4000)
+                })
+                targetWistiaVideo.bind("end", (e) => {
+                    this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex].progress = 100;
+                    this.updateAction.actionCase = Constants.document.contents.lifeCycle.playVideo;
+                    this.contentDCtrlService.updateContent = this.updateAction
+                    this.handleDocumentTrack();
+                    clearInterval(this.documentTrackInterval)
+                })
+                targetWistiaVideo.bind("pause",  (e)=> {
+                    this.handleDocumentTrack();
+                    clearInterval(this.documentTrackInterval)
+                });
+            }
+        }
+    }
     private addDocumentTrackVideo() {
         let documentTrackContent = new DocumentTrackContent;
+        documentTrackContent.contentType = this.contentTypes.video;
         documentTrackContent.parentId = this.parentBox.attr('id');
         documentTrackContent.name = this.parentBox.attr('name');
         documentTrackContent.id = this.parentBox.attr('id') + '-video'
@@ -246,6 +289,35 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
         documentTrackContent.conditions.videoCondition.isMustWatchingEnd = false;
         documentTrackContent.conditions.videoCondition.isClickPlay = false;
         this.documentDCtrlService.documentTrack.contents.push(documentTrackContent)
+    }
+    private handleDocumentTrack() {
+        let numberOfCondition = this.documentDCtrlService.currentDocumentTrack.contents.length;
+        let numberOfProgress = 0;
+        let currentDocumentTrack = this.documentDCtrlService.currentDocumentTrack.contents.filter((content) => content.contentType === this.contentTypes.video)
+        currentDocumentTrack.forEach((content) => {
+            if (content.conditions.videoCondition.isMustWatchingEnd) {
+                numberOfProgress += content.progress
+            } else if (content.conditions.videoCondition.isClickPlay) {
+                numberOfProgress += 100
+            }
+        })
+        this.documentDCtrlService.currentDocumentTrack.progress = numberOfProgress / numberOfCondition;
+        this.saveDocumentTrack(this.documentDCtrlService.currentDocumentName).subscribe((status) => {
+            // console.log(" this.currentDocumentTrack", this.currentDocumentTrack)          
+        });
+    }
+    private saveDocumentTrack(nameDocument) {
+        let saveObjectTrackTemplate: DocumentTrackModel = {
+            id: this.commonService.getPatternId(nameDocument),
+            nameDocument: nameDocument,
+            userId: Constants.common.user.id,
+            status: Constants.common.message.status.created.text,
+            isTrackProgress: this.documentDCtrlService.currentDocumentTrack.contents.length > 0 ? true : false,
+            progress: this.documentDCtrlService.currentDocumentTrack.contents.length === 0 ? 100 : this.documentDCtrlService.currentDocumentTrack.progress,
+            contents: this.documentDCtrlService.currentDocumentTrack.contents
+        }
+
+        return this.documentService.saveDocumentTrack(nameDocument, saveObjectTrackTemplate)
     }
 
 }

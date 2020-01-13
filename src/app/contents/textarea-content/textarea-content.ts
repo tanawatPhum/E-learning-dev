@@ -6,6 +6,7 @@ import { ContentDataControlService } from 'src/app/services/content/content-data
 import { TextAreaContentModel } from 'src/app/models/document/elements/textarea-content.model';
 import { Constants } from 'src/app/global/constants';
 import { DocumentDataControlService } from '../../services/document/document-data-control.service';
+import { ContentsModel } from 'src/app/models/document/content.model';
 
 @Component({
     moduleId: module.id,
@@ -15,6 +16,7 @@ import { DocumentDataControlService } from '../../services/document/document-dat
 })
 export class TextareaContentComponent implements OnInit, ContentInterFace, AfterViewInit {
     private rootElement: JQuery<Element>;
+    private targetTextArea:TextAreaContentModel = new TextAreaContentModel();
     @Input() lifeCycle:string;
     @Input() parentBox: JQuery<Element>;
     @HostListener('click', ['$event']) onClick(event) {
@@ -41,6 +43,13 @@ export class TextareaContentComponent implements OnInit, ContentInterFace, After
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
+        this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
+            if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm){
+                let targetDocumentContent:ContentsModel = detail.data;
+                this.targetTextArea = targetDocumentContent.textAreas.find((textarea) => textarea.parentId === this.parentBox.attr('id'));
+                this.initialTextarea()
+            }
+        })
         // this.contentDCtrlService.getUpdateContent().subscribe((detail) => {
          
         //     // if (detail.actionCase === Constants.common.event.save.document) {
@@ -56,6 +65,10 @@ export class TextareaContentComponent implements OnInit, ContentInterFace, After
         // })
     }
     ngAfterViewInit() {
+        this.targetTextArea = this.contentDCtrlService.poolContents.textAreas.find((textarea) => textarea.parentId === this.parentBox.attr('id'));
+        this.initialTextarea();
+    }
+    private initialTextarea(){
         if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.createContent){
             this.addTextarea() 
         }
@@ -67,7 +80,7 @@ export class TextareaContentComponent implements OnInit, ContentInterFace, After
         }
     }
 
-    addTextarea() {
+    private addTextarea() {
         let textArea: TextAreaContentModel = { 
             parentId: this.parentBox.attr('id'), 
             id: this.parentBox.attr('id') + '-img', 
@@ -99,17 +112,15 @@ export class TextareaContentComponent implements OnInit, ContentInterFace, After
         this.parentBox.draggable({
             handle: this.parentBox.find('.content-box-label')
         })
-        let targetTextArea = this.contentDCtrlService.poolContents.textAreas.find((textarea) => textarea.parentId === this.parentBox.attr('id'));
-        if(targetTextArea){
-            this.rootElement.html(targetTextArea.html)
+        if(this.targetTextArea){
+            this.rootElement.html(this.targetTextArea.html)
             this.rootElement.find('.content-textarea').attr('contenteditable', 'true');
         }
         
     }
     private setPreview() {
-        let targetTextArea = this.contentDCtrlService.poolContents.textAreas.find((textarea) => textarea.parentId === this.parentBox.attr('id'));
-        if(targetTextArea){
-            this.rootElement.html(targetTextArea.html)
+        if(this.targetTextArea){
+            this.rootElement.html(this.targetTextArea.html)
             this.rootElement.find('.content-textarea').attr('contenteditable', 'false')
             .css('cursor', 'default');
         }

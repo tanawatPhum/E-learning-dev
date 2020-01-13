@@ -3,6 +3,7 @@ import { ContentOptionInterFace } from '../../interface/content-option.interface
 import { ContentDataControlService } from '../../../services/content/content-data-control.service';
 import { DocumentTrackModel } from '../../../models/document/document.model';
 import { DocumentDataControlService } from '../../../services/document/document-data-control.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
     selector: 'video-content-option',
@@ -46,7 +47,6 @@ export class VideoContentOptionComponent implements ContentOptionInterFace,OnIni
                 let targetVideo = this.contentDCtrlService.poolContents.videos.find((video) => video.parentId === this.parentBox.attr('id'))
                 if (targetVideo) {
                     this.sourceType = targetVideo.data.channelStream;
-                    console.log( this.sourceType)
                     if (targetVideo.condition.isMustWatchingEnd) {
                         $('.option-video').find('.video-tracker').prop('checked', true)
                     }
@@ -56,7 +56,6 @@ export class VideoContentOptionComponent implements ContentOptionInterFace,OnIni
     }
     handleOptionToolVideo(){
         $('.option-video').find('.video-tracker').unbind().on('click',(element) => {
-            console.log("this.documentDCtrlService.documentTrack",this.documentDCtrlService.documentTrack)
             let targetVideoIndex = this.contentDCtrlService.poolContents.videos.findIndex((video) => video.parentId === this.parentBox.attr('id'))
             let targetVideoTrackIndex =  this.documentDCtrlService.documentTrack.contents.findIndex((video)=>video.parentId === this.contentDCtrlService.poolContents.videos[targetVideoIndex].parentId);
             if (targetVideoIndex >= 0) {
@@ -73,6 +72,10 @@ export class VideoContentOptionComponent implements ContentOptionInterFace,OnIni
 
     private removeVideo(){
         this.contentDCtrlService.poolContents.videos = this.contentDCtrlService.poolContents.videos.filter((video)=>video.parentId !== this.parentBox.attr('id'));
+        this.documentDCtrlService.documentTrack.contents =  this.documentDCtrlService.documentTrack.contents.filter((video)=>video.parentId !==this.parentBox.attr('id'));
+        this.contentDCtrlService.poolContents.progressBar.forEach((progressBar,index)=>{
+            this.contentDCtrlService.poolContents.progressBar[index].contentList =  progressBar.contentList.filter((content)=>content.parentId != this.parentBox.attr('id'));
+        })
         this.parentBox.remove();
     }
 

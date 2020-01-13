@@ -1,12 +1,14 @@
-import { Component, OnInit, Input, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, AfterViewInit, HostListener } from '@angular/core';
 import { ContentInterFace } from '../interface/content.interface';
 import { CommonService } from 'src/app/services/common/common.service';
 import { DocumentService } from 'src/app/services/document/document.service';
 import { ContentDataControlService } from 'src/app/services/content/content-data-control.service';
 import { DocumentDataControlService } from '../../services/document/document-data-control.service';
 import { SubFormContentDetailModel } from 'src/app/models/document/elements/subForm-content.model';
-import { SubFormContentConditionModel } from '../../models/document/elements/subForm-content.model';
+import { SubFormContentConditionModel, SubFormContentModel } from '../../models/document/elements/subForm-content.model';
 import { ScreenDetailModel } from 'src/app/models/common/common.model';
+import { UpdateContentModel } from '../../models/common/common.model';
+import { Constants } from '../../global/constants';
 
 @Component({
     moduleId: module.id,
@@ -17,17 +19,25 @@ import { ScreenDetailModel } from 'src/app/models/common/common.model';
 export class SubformContentComponent  implements OnInit,ContentInterFace,AfterViewInit  {
     @Input() parentBox: JQuery<Element>;
     @Input() lifeCycle:string;
+    @HostListener('click', ['$event']) onClick(event) {
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+    }
     private rootElement:JQuery<Element>;
     private childDocuments: SubFormContentDetailModel[] = new Array<SubFormContentDetailModel>();
-    private currentSubFormType;
+    private currentSubFormType ={
+        id:null,
+        name:null
+    };
     private contentTemplateSize: ScreenDetailModel = new ScreenDetailModel();
+    private targetSubform:SubFormContentModel = new SubFormContentModel();
     private actionCase = {
         addSubform:'addSubform',
     }
     private currentCase = this.actionCase.addSubform;
     constructor(
         private commonService :CommonService,
-        private documentDService:DocumentDataControlService,
+        private documentDCtrlService:DocumentDataControlService,
         private documentService:DocumentService,
         private contentDCtrlService:ContentDataControlService,
         private element: ElementRef
@@ -39,13 +49,27 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
         this.contentTemplateSize =    JSON.parse(localStorage.getItem('contentTemplateSize'))
     }
     ngAfterViewInit(){
-        this.handleAddSubform();
+        this.initialSubform();
+     
+    }
+    private initialSubform(){
+        this.targetSubform =  this.contentDCtrlService.poolContents.subFroms.find((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
+        if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.createContent) {
+            this.handleAddSubform();
+        }else if(this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor || this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadPreview){
+            if(this.targetSubform){
+                this.currentSubFormType.id =  this.targetSubform.subformType;
+                this.addSubform();
+            }
+          
+        }
+
     }
     handleAddSubform(){
         this.currentSubFormType = { id: 'subform-link', name: 'link' };
         let htmlDocumentList = '<div class="list-group text-left">';
         this.createDocumentChild();
-        let documentSubformList = this.documentDService.documentNavList.filter((document) => document.nameDocument != this.documentDService.currentDocumentName)
+        let documentSubformList = this.documentDCtrlService.documentNavList.filter((document) => document.nameDocument != this.documentDCtrlService.currentDocumentName)
         this.childDocuments.forEach((document) => {
             documentSubformList = documentSubformList.filter((documentSubform) => documentSubform.id != document.id);
         })
@@ -62,7 +86,6 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
         this.handleSubform();
     }
     handleSubform(){
-  
             let targetSubform = this.contentDCtrlService.poolContents.subFroms.find(parentBox => parentBox.parentBoxId === this.parentBox.attr('id'))
             if (targetSubform) {
                 targetSubform.subformList.forEach((detail) => {
@@ -105,7 +128,7 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
             });
 
             this.rootElement.find('.toolbar-subform').find('input[type="checkbox"]').click((itemElement) => {
-                let targetDocument = this.documentDService.documentNavList.find((document) => document.nameDocument === $(itemElement.currentTarget).val())
+                let targetDocument = this.documentDCtrlService.documentNavList.find((document) => document.nameDocument === $(itemElement.currentTarget).val())
                 let condition:SubFormContentConditionModel =  new SubFormContentConditionModel();
                 let newSubform: SubFormContentDetailModel = {
                     id: targetDocument.id,
@@ -120,12 +143,14 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
                     this.contentDCtrlService.poolContents.subFroms.push(
                         {
                             parentBoxId: this.parentBox.attr('id'),
+                            subformType:this.currentSubFormType.id,
                             subformList: [newSubform]
                         }
                     )
                 } else {
                     let targetSubformIndex = this.contentDCtrlService.poolContents.subFroms.findIndex((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
-                    if ($(itemElement.currentTarget).is(':checked')) {
+                    let targetDocument = this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.find((document)=>document.id === newSubform.id)
+                    if ($(itemElement.currentTarget).is(':checked') && !targetDocument) {
                         this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.push(newSubform)
                     } else {
                         this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList = this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.filter((detail) => detail.documentName != $(itemElement.currentTarget).val())
@@ -148,14 +173,13 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
             this.rootElement.find('.carousel-control-prev').click((event) => {
                 $('#' + $(event.currentTarget).attr('data-subformId')).carousel('prev');
             })
-
-            console.log( this.rootElement.find('.toolbar-subform').find('#subform-btn-submit'))
             this.rootElement.find('.toolbar-subform').find('#subform-btn-submit').click((btnElement) => {
                 btnElement.stopPropagation();
                 let targetSubformIndex = this.contentDCtrlService.poolContents.subFroms.findIndex((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
                 this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.forEach((subform) => {
                     subform.isConfirm = true;
                 })
+                this.targetSubform =  this.contentDCtrlService.poolContents.subFroms.find((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
                 this.addSubform();
             })
 
@@ -166,6 +190,7 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
             $('#' + $(event.currentTarget).attr('data-subformId')).carousel('prev');
         })
     }
+
     createDocumentChild(){
         this.childDocuments = new Array<SubFormContentDetailModel>();
         this.contentDCtrlService.poolContents.subFroms.forEach((parentBox) => {
@@ -189,10 +214,11 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
     }
     addSubform(){
         let htmlSubform = '';
-        let targetSubform = this.contentDCtrlService.poolContents.subFroms.find((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
+       
+
         if (this.currentSubFormType.id === 'subform-link') {
             htmlSubform += '<ul id="' + this.parentBox.attr('id') + '-subform" data-subformType="subform-link" class="list-group content-subform mt-3">';
-            targetSubform.subformList.forEach((subform, index) => {
+            this.targetSubform.subformList.forEach((subform, index) => {
                 if (index == 0) {
                     htmlSubform += '<li  data-subformId="' + subform.id + '"  data-subformName="' + subform.documentName + '" class="subform-list cursor-pointer list-group-item rounded-0 border-left-0 border-right-0 border-top-0">' + subform.linkName + '</li>'
                 } else {
@@ -206,21 +232,26 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
             htmlSubform += '<div  class="container content-subform p-0 full-screen">'
             htmlSubform += '<div  data-subformType="subform-silde" id="' + this.parentBox.attr('id') + '-subform" class="border carousel slide full-screen" data-interval="false" data-ride="carousel">'
             htmlSubform += '<div class="carousel-inner full-screen">'
-            console.log("targetSubform.subformList",targetSubform.subformList, this.documentDService.documentList)
-            targetSubform.subformList.forEach((subform, index) => {
-                let targetDocument = this.documentDService.documentList.find((document) => document.id === subform.id);
+            this.targetSubform.subformList.forEach((subform, index) => {
+                let targetDocument = this.documentDCtrlService.documentList.find((document) => document.id === subform.id);
+    
                 if (targetDocument) {
                     if (index == 0) {
                         htmlSubform += '<div  class="carousel-item active full-screen subform-preview">'
                     } else {
                         htmlSubform += '<div  class="carousel-item  full-screen subform-preview">'
                     }
-                    htmlSubform += '<div class="full-screen item-middle"><div id="contentTemplate" style="position:absolute; width:' + this.contentTemplateSize.width + 'px;height:' + this.contentTemplateSize.height + 'px">' + targetDocument.html + '</div></div>'
+                    htmlSubform += `<div class="full-screen item-middle">
+                    <div id="contentTemplate" style="position:absolute; 
+                    width: ${this.contentTemplateSize.width}px;
+                    height:${this.contentTemplateSize.height}px"> 
+                    ${targetDocument.html}
+                    </div></div>`
                     htmlSubform += '</div>'
                 }
             });
             htmlSubform += '</div>'
-            if (targetSubform.subformList.length > 1) {
+            if (this.targetSubform.subformList.length > 1) {
                 htmlSubform += '<div data-subformId="' + this.parentBox.attr('id') + '-subform" class="carousel-control-prev" data-slide="prev">'
                 htmlSubform += '<i style="font-size:200%" class="text-dark fa fa-angle-left cursor-pointer"></i>'
                 // htmlSubform += '<span class="carousel-control-prev-icon cursor-pointer"><i class="fa fa-angle-left"></i>  </span>'
@@ -233,11 +264,27 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
             htmlSubform += '</div>'
             htmlSubform += '</div>'
         }
-        console.log(htmlSubform)
+        
         this.rootElement.html(htmlSubform)
+        this.targetSubform.subformList.forEach((subform, index) => {
+            let targetDocument = this.documentDCtrlService.documentList.find((document) => document.id === subform.id);
+            let updateAction: UpdateContentModel = new UpdateContentModel()
+            updateAction.actionCase = Constants.document.contents.lifeCycle.loadsubForm;
+            updateAction.data  = targetDocument.contents;
+            this.contentDCtrlService.updateContent = updateAction
+        })
         if (this.currentSubFormType.id === 'subform-silde') {
             this.handleSubformSildeRatio();
+            setTimeout(() => {
+                this.setPreviewSubformSilde();
+            });
+            this.parentBox.resize(()=>{
+                this.handleSubformSildeRatio();
+            })
         }
+        this.contentDCtrlService.setLastContent(this.parentBox);
+   
+
         // element.css('display', 'initial');
         // element.css('text-align', 'initial');
         // element.removeClass('box-subform-size');
@@ -259,18 +306,25 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
     }
     handleSubformSildeRatio(){
         let ratioW = this.rootElement.find('.subform-preview').width() / this.contentTemplateSize.width;
-        let ratioH = this.rootElement.height() / this.contentTemplateSize.height;
-        if (ratioW > ratioH) {
-            this.rootElement.find('#contentTemplate').css({
-                transform: "scale(" + ratioW + ")"
-            });
-    
-        } else {
-            this.rootElement.find('#contentTemplate').css({
-                transform: "scale(" + ratioH + ")"
-            });
-    
-        }
+        let ratioH = this.rootElement.find('.subform-preview').height() / this.contentTemplateSize.height;
+        this.rootElement.find('.subform-preview').find('#contentTemplate').css({
+            transform: 'scale( ' + ratioW +',' + ratioH + ')'
+        });
+    }
+    setPreviewSubformSilde(){
+            this.rootElement.find('.subform-preview').find('.template-doc').attr('contenteditable','false')
+            .css('cursor','default')
+            .css('pointer-events','none')
+            
+            this.rootElement.find('.subform-preview').find('.content-box').removeClass('ui-resizable');
+            this.rootElement.find('.subform-preview').find('.content-box').find('.ui-resizable-handle').remove();
+            this.rootElement.find('.subform-preview').find('.content-box').removeClass('.ui-draggable ui-draggable-handle');
+            this.rootElement.find('.subform-preview').find('.content-box').find('.content-box-label').hide()
+            this.rootElement.find('.subform-preview').find('.content-box').css('border', 'none');
+            this.rootElement.find('.subform-preview').find('.content-box').css('cursor', 'default');
+            this.rootElement.find('.subform-preview').find('.content-box').find('.content-textarea').attr('contenteditable','false')
+            this.rootElement.find('.subform-preview').find('.content-box').find('.content-textarea').css('cursor','default')
+            // this.rootElement.find('.subform-preview').find('.content-box').find('.content-video').css('pointer-events', 'initial');
     }
 
     

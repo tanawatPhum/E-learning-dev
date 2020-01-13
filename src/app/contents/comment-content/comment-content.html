@@ -7,29 +7,112 @@
                         <img src="assets/imgs/documentPage/profileIcon.svg">
                     </div>
                 </div>
-                <div class="col-10 pt-4 pl-5 half-height">
-                    <textarea disabled placeholder="Leave your comment here..." class="comment-textarea"></textarea>
-                    <div class="comment-massege-img"></div>
+                <div class="col-11 pt-4 pl-5">
+                    <textarea placeholder="Leave your comment here..." class="comment-textarea"></textarea>
+                    <div class="comment-massege-img mb-3"></div>
                 </div>
-                <div class="col-12 pr-3 pt-2">
+                <div class="col-12 mb-2">
                     <div class="row m-0">
                         <div class="col-1  half-height">
                         </div>
-                        <div class="col-6 pl-5">
+                        <div class="col-6 pl-5 d-flex align-items-center">
                             <div id="comment-attach" class="comment-tool attach">
-                                <input type="file" class="comment-browse-file" id="comment-input-file">
+                                <input #commentInputFile type="file" class="comment-browse-file" id="comment-input-file">
                                 <img src="assets/imgs/contentPage/attachment.svg">
                             </div>
                             <!-- <div id="comment-question" class="comment-tool question">
                                 <img src="assets/imgs/contentPage/question.svg">
                             </div> -->
                         </div>
-                        <div class="col pt-3 ">
-                            <button type="button" class="btn btn-primary float-right comment-btn-post">Post Comment</button>
+                        <div class="col">
+                            <button (click)="postComment($event)" type="button" class="btn btn-primary float-right comment-btn-post">Post Comment</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+    <div class="row comment-replys">
+        <div class="col-12">
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div [hidden]="true" class="row comment-form-draft submit m-0 w-100">
+    <div class="col-12">
+        <div class="row m-0 max-height">
+            <div class="col-1 half-height pl-3">
+                <div class="comment-profile icon">
+                    <img src="assets/imgs/documentPage/profileIcon.svg">
+                </div>
+            </div>
+            <div class="col-11 pt-4 pl-5">
+                <textarea placeholder="Leave your comment here..." class="comment-textarea"></textarea>
+                <div class="comment-massege-img mb-3"></div>
+            </div>
+            <div class="col-12 mb-2">
+                <div class="row m-0">
+                    <div class="col-1  half-height">
+                    </div>
+                    <div class="col-6 pl-5 d-flex align-items-center">
+                        <div id="comment-attach" class="comment-tool attach">
+                            <input type="file" class="comment-browse-file" id="comment-input-file">
+                            <img src="assets/imgs/contentPage/attachment.svg">
+                        </div>
+                        <!-- <div id="comment-question" class="comment-tool question">
+                            <img src="assets/imgs/contentPage/question.svg">
+                        </div> -->
+                    </div>
+                    <div class="col">
+                        <button (click)="postComment()" type="button" class="btn btn-primary float-right comment-btn-post">Post Comment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div [hidden]="true" class="row m-0 w-100 h-auto comment-reply-draft">
+    <div class="col-12">
+        <div class="row m-0 max-height">
+            <div class="col-1  pl-3 pt-1 ">
+                <div class="comment-profile-reply icon">
+                    <img src="assets/imgs/documentPage/profileIcon.svg">
+                </div>
+            </div>
+            <div class="col-11 pt-4 pl-5 ">
+                <div class="reply-user-name">userId: {{userId}}</div>
+                <div class="reply-user-massege">
+                    <p class="reply-user-massege-text"></p>
+                    <div class="reply-user-massege-img"></div>
+                </div>
+
+            </div>
+            <div class="col-12 pr-3 pt-2">
+                <div class="row m-0">
+                    <div class="col-1  half-height">
+                    </div>
+                    <div class="col-6 pl-5">
+                        <div class="reply-tool">
+                            <span [attr.data-numberLike]="0" class="liked-text">Liked <span class="liked-number"></span></span>
+                            <span class="reply-text">Reply</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div [hidden]="true" class="loading border">
+    <div class="spinner-border text-warning" role="status">
+        <span class="sr-only">Loading...</span>
     </div>
 </div>

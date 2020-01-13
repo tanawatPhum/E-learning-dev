@@ -62,7 +62,6 @@ export class RangeSliderPageComponent  implements OnInit {
         
         $('.range-slider').jRange('setValue', '0,100');
         this.rulerDetailSubject.subscribe((rulerDetail)=>{
-            console.log(rulerDetail)
             if(rulerDetail&&rulerDetail.pointerLeft && rulerDetail.pointerRight){
                 $('.range-slider').jRange('setValue',rulerDetail.pointerLeft+','+rulerDetail.pointerRight);
                 this.changePositionToPercent().then((res:RulerDetailModel)=>{

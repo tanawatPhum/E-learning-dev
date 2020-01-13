@@ -394,7 +394,7 @@ input:focus {
 .content-comment {
     top: 0;
     width: 100%;
-    height: auto;
+    min-height: 100%;
     position: absolute;
     // padding-left: 8rem;
     // padding-right: 8rem;
@@ -434,6 +434,7 @@ input:focus {
         border: none;
         width: 100%;
         height: auto;
+        overflow: auto;
         font-size: 1.2rem;
         &::placeholder {
             color: #D9D9D9;
@@ -445,6 +446,10 @@ input:focus {
             width: 50%;
             height: 50%;
         }
+        // & .loading {
+        //     width: 50%;
+        //     height: 50%;
+        // }
     }
     & .comment-tool {
         display: inline-flex;

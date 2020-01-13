@@ -13,6 +13,8 @@ export class DocumentDataControlService {
 
     private _currentDocument: string = "New Document1";
     private _currentDocumentNav: string = "New Document1";
+    private _currentDocumentTrack: DocumentTrackModel = new DocumentTrackModel();
+ 
     private _contentSize: ScreenDetailModel = new ScreenDetailModel();
     private _documentNavList: DocumentNavigatorModel[] = new Array<DocumentNavigatorModel>();
     private _documentList: DocumentModel[] = new Array<DocumentModel>();
@@ -20,7 +22,23 @@ export class DocumentDataControlService {
     private _currentScreenSize: ScreenDetailModel = new ScreenDetailModel();
     private _previousPage: string;
     private _documentTrack: DocumentTrackModel = new DocumentTrackModel();
+    private _documentTracks: DocumentTrackModel[] = new Array<DocumentTrackModel>();
+
     private _lifeCycle: string;
+    public get documentTracks(): DocumentTrackModel[] {
+        return this._documentTracks;
+    }
+    public set documentTracks(value: DocumentTrackModel[]) {
+        this._documentTracks = value;
+    }
+
+    public get currentDocumentTrack(): DocumentTrackModel {
+        return this._currentDocumentTrack;
+    }
+    public set currentDocumentTrack(value: DocumentTrackModel) {
+        this._currentDocumentTrack = value;
+    }
+
     public get lifeCycle(): string {
         return this._lifeCycle;
     }

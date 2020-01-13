@@ -80,7 +80,6 @@ export class DocumentService {
         })
     }
     public loadDocFromDB(documentName?, userId?): Observable<DocumentModel> {
-        console.log(userId)
         return new Observable(subscriber => {
             let idDoc = null
             if (documentName) {

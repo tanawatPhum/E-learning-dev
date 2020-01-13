@@ -72,7 +72,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     public currentDocument: DocumentModel = new DocumentModel();
     public currentSelectTaskList: ToDoListSelectCurrentModel[] = new Array<ToDoListSelectCurrentModel>();
     public currentSubFormType = { id: 'subform-link', name: 'link' };
-    public contentTypes = Constants.document.contents.types;
+    public layoutTypes = Constants.document.layouts.types;
     public toolTypes = Constants.document.tools.types;
     public rootElement: JQuery<Element>;
     public templateDoc: JQuery<Element>;
@@ -95,7 +95,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             addElBox: 'addElBox',
             addElVideo: 'addElVideo',
             addElExam:'addElExam',
-            addElLink:'addElLink',
             addElNote:'addElNote',
             addElProgressBar: 'addElProgressBar',
             addElToDoList: 'addElToDoList',
@@ -109,8 +108,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             handleDragBoxes: 'handleDragBoxes',
             handleToolbars: 'handleToolbars',
             handleNote:'handleNote',
-            handleBrowseLink: 'handleBrowseLink',
-            handleBrowseVideo: 'handleBrowseVideo',
             handleSubForm: 'handleSubForm',
             handleBrowseExam: 'handleBrowseExam',
             handleTemplateDoc: 'handleTemplateDoc',
@@ -157,11 +154,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             templateDocTool: 'templateDocTool',
             addInitalTool: 'addInitalTool',
             addTextareaTool: 'addTextareaTool',
-            addBrowseImgTool: 'addBrowseImgTool',
             addBrowseLinkTool:'addBrowseLinkTool',
             addExamTool:'addExamTool',
             addBrowseExamTool:'addBrowseExamTool',
-            addBrowseVideoTool: 'addBrowseVideoTool',
             addProgressBarTool: 'addProgressBarTool',
             addNote:'addNote',
             addToDoListTool: 'addToDoListTool',
@@ -272,7 +267,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         this.dropElement.subscribe((tool) => {
 
             if (tool.action === this.actions.event.dropTool) {
-                this.currentContentType = this.contentTypes.freedomLayout;
+                this.currentContentType = this.layoutTypes.freedomLayout;
                 this.currentElementTool = tool.data.element;
                 this.addElements(this.actions.event.addElBox, null, this.actions.event.dropTool,null,tool.data.contentName)
                 //remove tranfer img icon to ckeditor
@@ -327,7 +322,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         else if (action === this.actions.template.setDocumentTrack) {
             this.documentService.loadDocTrackFromDB().subscribe((documentTrack) => {
                if(documentTrack&&documentTrack.length>0){
-                this.documentTrack = documentTrack.find((documentTrack)=>documentTrack.id === this.commonService.getPatternId(this.documentDataService.currentDocumentName)) || new DocumentTrackModel();
+                this.documentTrack = this.documentDataService.documentTrack =  documentTrack.find((documentTrack)=>documentTrack.id === this.commonService.getPatternId(this.documentDataService.currentDocumentName)) || new DocumentTrackModel();
                 //remove progress preview
                 this.removeData(this.actions.data.removeDocTrackProgress);
                 }
@@ -446,7 +441,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             if (action === this.actions.event.addElBox) {
                 const numberOfBox = this.commonService.getBoxId();
                 // const numberOfBox = this.rootElement.find('.content-box').length;
-                if (this.currentContentType.name === this.contentTypes.freedomLayout.name) {
+                if (this.currentContentType.name === this.layoutTypes.freedomLayout.name) {
                     this.rootElement.append('<div contenteditable="false" style="z-index:999" id=box-' + numberOfBox + ' class="content-box ' + this.boxType.boxInitial + ' freedom-layout" name="box-' + numberOfBox + '" ><div class="content-box-label">box-' + numberOfBox + '</div> </div>');
                     $('[id="box-' + numberOfBox + '"]').css('position', 'absolute');
                     if (subaction === this.actions.event.dropTool) {
@@ -476,7 +471,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 this.addData(this.actions.data.retrieveBoxData, 'box-' + numberOfBox, $('[id="box-' + numberOfBox + '"]'));
                 if (subaction === this.actions.event.dropTool) {
                     let targetContent  = ContentRouting.routes.find((content)=>content.contentName === data)
-                    let targetContentHtml  = await this.createContent(targetContent.component, targetContent.contentName);
+                    await this.createContent(targetContent.component, targetContent.contentName);
+                    this.documentDataService.lifeCycle  = Constants.document.lifeCycle.loadEditor;
                     // this.currentBox.append(targetContentHtml);
                     this.currentBox.find('[content-name]').show();
                     $('.content-box').find('[content-name][content-last!="true"]').hide();
@@ -533,6 +529,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 // .find('.ui-resizable-handle').removeClass('ui-icon ui-icon-gripsmall-diagonal-se'); 
                 this.rootElement.find('.content-box').css("border", "");
                 this.rootElement.find('.content-box').find('.content-box-label').show();
+                // this.rootElement.find('.content-box').css('cursor','move')
 
 
             this.handles(this.actions.event.handleCurrentBox);
@@ -566,16 +563,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             //     }
             // }
             //this.addOptionToolBar();
-        }
-        else if (action === this.actions.event.addElLink) {
-            let hostname = (new URL(this.currentBrowseLink)).hostname;
-            this.links.push({
-                parentId:element.attr('id'),
-                id:element.attr('id') + '-link',
-                path:this.currentBrowseLink,
-                name:hostname,
-            });
-            element.append('<a  data-name="'+hostname+'" id="' + element.attr('id') + '-link" class="content-link cursor-pointer ">'+hostname+'</a>');
         }
         else if (action === this.actions.event.addElExam) {
             
@@ -958,124 +945,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             // });
             // this.rootElement.find('.content-toolbar').find('.form-group').attr('contenteditable','false')
         }
-        else if (action === this.actions.event.handleBrowseVideo) {
-            // element.find('#btn-video').click((event) => {
-            //     element.find('.content-browse-video').trigger('click');
-            //     element.find('.content-browse-video').change((fileEvent) => {
-                    
-            //         this.removeStyleElements(this.actions.style.removeStyleBoxType);
-            //         this.currentBox.addClass(this.boxType.boxVideo);
-            //         this.setCurrentToolbar(this.actions.toolbar.cancelTool);
-            //         this.addToolBarBox(this.actions.toolbar.cancelTool, element);
-            //         this.currentBrowseFile = fileEvent.target.files;
-            //         console.log(' ❏ Video :', this.currentBrowseFile);
-
-            //         this.addElements(this.actions.event.addElVideo, element);
-            //     });
-            // });
-            // element.find('.toolbar-browse-video').find('.toolbar-drag').on('dragover', (event) => {
-            //     event.preventDefault();
-            //     event.stopPropagation();
-            // });
-            // element.find('.toolbar-browse-video').find('.toolbar-drag').on('dragleave', (event) => {
-            //     event.preventDefault();
-            //     event.stopPropagation();
-            // });
-            // element.find('.toolbar-browse-video').find('.toolbar-drag').on('drop', (event) => {
-            //     event.preventDefault();
-            //     event.stopPropagation();
-            //     this.removeStyleElements(this.actions.style.removeStyleBoxType);
-            //     this.currentBox.addClass(this.boxType.boxVideo);
-            //     this.setCurrentToolbar(this.actions.toolbar.cancelTool);
-            //     this.addToolBarBox(this.actions.toolbar.cancelTool, element);
-            //     this.currentBrowseFile = event.originalEvent.dataTransfer.files;
-            //     console.log(' ❏ Video :', this.currentBrowseFile);
-
-            //     this.addElements(this.actions.event.addElVideo, element, 'videoSource');
-            // });
-            // element.find('.toolbar-browse-video').find('#video-input-url').click(() => {
-            //     element.find('.toolbar-browse-video').find('#video-input-url').focus();
-
-            //     element.find('.toolbar-browse-video').find('#video-input-url').bind("paste", (event)=>{
-            //         event.preventDefault();
-            //         event.stopPropagation();
-            //         let pastedData = event.originalEvent.clipboardData.getData('text');
-            //         $(event.currentTarget).val(pastedData)
-            //         const url = pastedData;
-            //         let dataStreaming = new VideoConetentDataModel();
-            //        // let streamId = event.target.value;
-            //        const streamId = this.commonService.getStreamId(url);
-
-            //         if (streamId.streamId != null && streamId.channelStream == 'youtube') {
-            //             this.currentBrowseFile = 'https://www.youtube.com/embed/' + streamId.streamId;
-            //             dataStreaming.streamId = streamId.streamId;
-            //             dataStreaming.channelStream = streamId.channelStream;
-            //         }else{
-            //             this.currentBrowseFile = streamId.streamId;
-            //             dataStreaming.streamId = streamId.streamId;
-            //             dataStreaming.channelStream = streamId.channelStream;
-            //         }
-            //         this.removeStyleElements(this.actions.style.removeStyleBoxType);
-            //         this.currentBox.addClass(this.boxType.boxVideo);
-            //         this.setCurrentToolbar(this.actions.toolbar.cancelTool);
-            //         this.addToolBarBox(this.actions.toolbar.cancelTool, element);
-            //         this.addElements(this.actions.event.addElVideo, element, dataStreaming.channelStream, null, dataStreaming);
-
-
-            //     })
-
-            //     element.find('.toolbar-browse-video').find('#video-input-url').on('input', this.commonService.debounce((event) => {
-            //         event.preventDefault();
-            //         if (event.target.value) {
-            //             const url = event.target.value;
-            //             let dataStreaming = new VideoConetentDataModel();
-            //            // let streamId = event.target.value;
-            //            const streamId = this.commonService.getStreamId(url);
-
-            //             if (streamId.streamId != null && streamId.channelStream == 'youtube') {
-            //                 this.currentBrowseFile = 'https://www.youtube.com/embed/' + streamId.streamId;
-            //                 dataStreaming.streamId = streamId.streamId;
-            //                 dataStreaming.channelStream = streamId.channelStream;
-            //             }else{
-            //                 this.currentBrowseFile = streamId.streamId;
-            //                 dataStreaming.streamId = streamId.streamId;
-            //                 dataStreaming.channelStream = streamId.channelStream;
-            //             }
-    
-            //            // const streamId = this.commonService.getStreamId(url);
-
-
-            //             // if (streamId.streamId != null && streamId.channelStream == 'youtube') {
-            //             //     this.currentBrowseFile = 'https://www.youtube.com/embed/' + streamId.streamId;
-            //             //     dataStreaming.streamId = streamId.streamId;
-            //             //     dataStreaming.channelStream = streamId.channelStream;
-            //             // }
-            //             // if (streamId.streamId != null && streamId.channelStream == 'wistia') {
-            //             //     this.currentBrowseFile = streamId.streamId;
-            //             //     dataStreaming.streamId = streamId.streamId;
-            //             //     dataStreaming.channelStream = streamId.channelStream;
-            //             // } else {
-            //             //     let streamId = event.target.value;
-            //             //     this.currentBrowseFile = streamId;
-            //             //     let dataStreaming = new VideoConetentDataModel();
-            //             //     dataStreaming.streamId = streamId;
-            //             //     dataStreaming.channelStream = 'wistia';
-            //             // }
-            //             // else {
-            //             //     console.log('The youtube url is not valid.');
-            //             //     this.currentBrowseFile = event.target.value;
-            //             // }
-            //             this.removeStyleElements(this.actions.style.removeStyleBoxType);
-            //             this.currentBox.addClass(this.boxType.boxVideo);
-            //             this.setCurrentToolbar(this.actions.toolbar.cancelTool);
-            //             this.addToolBarBox(this.actions.toolbar.cancelTool, element);
-            //             this.addElements(this.actions.event.addElVideo, element, dataStreaming.channelStream, null, dataStreaming);
-            //         }
-            //     }, 2000));
-            // });
-            
-
-        } else if (action === this.actions.event.handleSubForm) {
+         else if (action === this.actions.event.handleSubForm) {
             if (element) {
                 let targetSubform = this.subForms.find(parentBox => parentBox.parentBoxId === element.attr('id'))
                 if (targetSubform) {
@@ -1147,6 +1017,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                         this.subForms.push(
                             {
                                 parentBoxId: element.attr('id'),
+                                subformType:null,
                                 subformList: [newSubform]
                             }
                         )
@@ -1407,13 +1278,13 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     }
         
                     this.toDoLists[targetToDoListIndex].toDoListOrder[targetToDoOrderIndex].objectTodoList.push(objectTodoList)
-                    if( this.documentTrack.contents[targetDocumentTrackContentIndex].boxType === this.boxType.boxSubform){
+                    if( this.documentTrack.contents[targetDocumentTrackContentIndex].contentType === this.boxType.boxSubform){
                         this.documentTrack.contents[targetDocumentTrackContentIndex].conditions.subformCondition.haveInDoList = true;
                     }
                 } else {
                     this.toDoLists[targetToDoListIndex].toDoListOrder[targetToDoOrderIndex].objectTodoList =
                     this.toDoLists[targetToDoListIndex].toDoListOrder[targetToDoOrderIndex].objectTodoList.filter((object) => object.id != $(element.currentTarget).val().toString())
-                    if( this.documentTrack.contents[targetDocumentTrackContentIndex].boxType === this.boxType.boxSubform){
+                    if( this.documentTrack.contents[targetDocumentTrackContentIndex].contentType === this.boxType.boxSubform){
                         this.documentTrack.contents[targetDocumentTrackContentIndex].conditions.subformCondition.haveInDoList = false;
                     }
                 }
@@ -1625,7 +1496,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                           let progressBarContentObj:ProgressBarContentObjectModel = {
                                 id:targetDocTrack.id,
                                 parentId:targetDocTrack.parentId,
-                                boxType:targetdocumentTrack.boxType
+                                boxType:targetdocumentTrack.contentType
                             }
                             this.progressBars[targetProgressBarIndex].contentList.push(progressBarContentObj)
                            }
@@ -1643,34 +1514,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             });
 
         }
-        else if(action === this.actions.event.handleBrowseLink){
-            element.find('.toolbar-browse-link').find('#link-input-url').click(() => {
-                element.find('.toolbar-browse-link').find('#link-input-url').focus();
-                element.find('.toolbar-browse-link').find('#link-input-url').on('input', this.commonService.debounce((event) => {
-                    if (event.target.value) {
-                        this.currentBrowseLink = event.target.value;
-                        this.removeStyleElements(this.actions.style.removeStyleBoxType);
-                        this.currentBox.addClass(this.boxType.boxLink);
-                        this.setCurrentToolbar(this.actions.toolbar.addLinkTool);
-                        this.addToolBarBox(this.actions.toolbar.addLinkTool, element);
-                        this.addElements(this.actions.event.addElLink, element);
-                        // console.log(' ❏ Video :', this.currentBrowseFile);
-                        // this.addElements(this.actions.event.add, element);
-                    }
-                }, 2000));
-            });
-            element.find('.toolbar-browse-link').find('#link-input-url').bind("paste", (event)=>{
-                event.preventDefault();
-                event.stopPropagation();
-                let pastedData = event.originalEvent.clipboardData.getData('text');
-                this.currentBrowseLink = pastedData;
-                this.removeStyleElements(this.actions.style.removeStyleBoxType);
-                this.currentBox.addClass(this.boxType.boxLink);
-                this.setCurrentToolbar(this.actions.toolbar.addLinkTool);
-                this.addToolBarBox(this.actions.toolbar.addLinkTool, element);
-                this.addElements(this.actions.event.addElLink, element);
-            });
-        }
+ 
 
         else if(action === this.actions.event.handleBrowseExam){
 
@@ -1879,65 +1723,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 + '</div>'
                 + '</div>';
             this.rootElement.find(element).append(htmlTootBar);
-        } else if (action === this.actions.toolbar.addBrowseImgTool) {
-            //this.createContent();
-            // this.rootElement.find(element).append(this.createContent());
-            // htmlTootBar = '<div class="row content-toolbar toolbar-browse-img">'
-            // + '<div class="col-5 toolbar-drag">'
-            // + '<input type="file" class="content-browse-img" id="input-file">'
-            // + '<img  src="assets/imgs/contentPage/browse-file.svg">'
-            // + '<p class="content-font-title1">Drag & Drop your images</p>'
-            // + '<button id="btn-file" type="button" class="btn btn-primary mt-1">Browse</button>'
-            // + '</div>'
-            // + '<div class="col-2">'
-            // + 'OR'
-            // + '</div>'
-            // + '<div class="col-5 toolbar-drag">'
-            // + '<div class="form-group">'
-            // + '<input placeholder="https://example.com" type="text" class="form-control" id="img-input-url">'
-            // + '</div>'
-            // + '<p class="content-font-title1">Get your URL</p>'
-            // + '</div>'
-            // + '</div>';
-            // this.rootElement.find(element).append(htmlTootBar);
-            // this.addStyleElements(this.actions.style.addStyleBoxBrowseImgSize, element);
-            // this.handles(this.actions.event.handleBrowseImg, element);
-        }
-        else if (action === this.actions.toolbar.addBrowseVideoTool) {
-            // htmlTootBar = '<div class="row content-toolbar toolbar-browse-video">'
-            //     + '<div class="col-5 toolbar-drag">'
-            //     + '<input type="file" class="content-browse-video" accept="video/mp4,video/x-m4v,video/*" id="input-video">'
-            //     + '<img  src="assets/imgs/contentPage/browse-file.svg">'
-            //     + '<p class="content-font-title1">Drag & Drop your files</p>'
-            //     + '<button  id="btn-video" type="button" class="btn btn-primary mt-1">Browse</button>'
-            //     + '</div>'
-            //     + '<div class="col-2">'
-            //     + 'OR'
-            //     + '</div>'
-            //     + '<div class="col-5 toolbar-drag">'
-            //     + '<div class="form-group">'
-            //     + '<input placeholder="https://example.com" type="text" class="form-control" id="video-input-url">'
-            //     + '</div>'
-            //     + '<p class="content-font-title1">Get your URL</p>'
-            //     + '</div>'
-            //     + '</div>';
-            // this.rootElement.find(element).append(htmlTootBar);
-            // this.addStyleElements(this.actions.style.removeStyleBoxBrowseVideoSize, element);
-            // this.handles(this.actions.event.handleBrowseVideo, element);
-        } 
-        else if (action === this.actions.toolbar.addBrowseLinkTool) {
-            htmlTootBar = '<div class="row content-toolbar toolbar-browse-link">'
-
-                + '<div class="col-12 toolbar-drag">'
-                + '<div class="w-70 form-group m-auto">'
-                + '<input placeholder="https://example.com" type="text" class="form-control mb-3" id="link-input-url">'
-                + '</div>'
-                + '<p class="content-font-title1">Get your URL</p>'
-                + '</div>'
-                + '</div>';
-            this.rootElement.find(element).append(htmlTootBar);
-            this.handles(this.actions.event.handleBrowseLink, element);
-
         }
         else if (action === this.actions.toolbar.addBrowseExamTool) {
             htmlTootBar = '<div class="row content-toolbar toolbar-browse-exam">'
@@ -2086,9 +1871,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.rootOptionTool.html(htmlOptionToolBar)
             this.handles(this.actions.event.handleOptionToolTextArea);
         }
-        else if (this.currentToolbar === this.actions.toolbar.addBrowseImgTool
-            || this.currentToolbar === this.actions.toolbar.addCreateSubformTool
-            || this.currentToolbar === this.actions.toolbar.addBrowseVideoTool
+        else if (
+            this.currentToolbar === this.actions.toolbar.addCreateSubformTool
             || this.currentToolbar === this.actions.toolbar.addCommentTool
             || this.currentToolbar === this.actions.toolbar.addBrowseLinkTool
             || this.currentToolbar === this.actions.toolbar.addBrowseExamTool
@@ -2498,9 +2282,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     id: this.commonService.getPatternId(nameDocument),
                     nameDocument: nameDocument,
                     status: Constants.common.message.status.created.text,
-                    isTrackProgress: this.documentTrack.contents.length > 0 ? true : false,
+                    isTrackProgress: this.documentDataService.documentTrack.contents.length > 0 ? true : false,
                     progress: this.findData(this.actions.data.findProgressDocumentTrack),
-                    contents: this.documentTrack.contents
+                    contents: this.documentDataService.documentTrack.contents
                 }
                 console.log("saveObjectTrackTemplate==>",saveobjectTemplate);
                 // this.documentService.uploadFile(this.files).subscribe((status)=>{
@@ -2569,7 +2353,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             //     //     }
             //     // }
             // });
-            return this.documentTrack.contents.length > 0 ? 0:100;
+            return this.documentDataService.documentTrack.contents.length > 0 ? 0:100;
         }
         // if(action === this.actions.data.findContentId){
         //     if (this.currentBox.find('.'+this.boxType.boxAddSubform)) {
@@ -2646,10 +2430,12 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 updateAction.actionCase  = Constants.common.event.save.document;
                 this.contentDCtrlService.updateContent = updateAction
 
-                await this.rootElement.find('.content-box').find('[content-name = "textarea-content"]').each((index,event)=>{
+                await this.rootElement.find('.content-box ').find('[content-name = "textarea-content"]').each((index,event)=>{
                     let targetIndexTextArea = this.contentDCtrlService.poolContents.textAreas.findIndex((textarea) => textarea.parentId === $(event).parents('.content-box').attr('id'));
-                    this.contentDCtrlService.poolContents.textAreas[targetIndexTextArea].value = $(event).text().toString();
-                    this.contentDCtrlService.poolContents.textAreas[targetIndexTextArea].html = $(event).html();
+                    if(targetIndexTextArea >=0){
+                        this.contentDCtrlService.poolContents.textAreas[targetIndexTextArea].value = $(event).text().toString();
+                        this.contentDCtrlService.poolContents.textAreas[targetIndexTextArea].html = $(event).html();
+                    }
                 })
 
 
@@ -2901,7 +2687,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                         documentTrackContent.conditions.examCondition.isSubmitted = false;
 
                     }
-                    documentTrackContent.boxType  = targetBox.boxType;
+                    documentTrackContent.contentType  = targetBox.boxType;
         
                     this.documentTrack.contents.push(documentTrackContent);
                     console.log(this.documentTrack.contents);
@@ -2993,7 +2779,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         else if(action === this.actions.data.removeDocTrackProgress){
             this.documentTrack.contents.forEach((content)=>{
                 content.progress = 0;
-                if(content.boxType === this.boxType.boxSubform){
+                if(content.contentType === this.boxType.boxSubform){
                     content.conditions.subformCondition.isClickLinks.forEach((link)=>{
                         link.isClicked = false;
                         link.progress = 0;
@@ -3001,7 +2787,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     // content.conditions.subformCondition.haveInDoList = false;
                     content.progress = 0;
                 }
-                else if(content.boxType === this.boxType.boxVideo){
+                else if(content.contentType === this.boxType.boxVideo){
                     content.conditions.videoCondition.isClickPlay = false;
                 }
             })

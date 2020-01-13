@@ -161,13 +161,13 @@ export class TodoListOptionContentComponent implements ContentOptionInterFace,On
                 }
     
                 this.contentDCtrlService.poolContents.todoList[targetToDoListIndex].toDoListOrder[targetToDoOrderIndex].objectTodoList.push(objectTodoList)
-                if( this.documentDControlService.documentTrack.contents[targetDocumentTrackContentIndex].boxType === this.boxType.boxSubform){
+                if( this.documentDControlService.documentTrack.contents[targetDocumentTrackContentIndex].contentType === this.boxType.boxSubform){
                     this.documentDControlService.documentTrack.contents[targetDocumentTrackContentIndex].conditions.subformCondition.haveInDoList = true;
                 }
             } else {
                 this.contentDCtrlService.poolContents.todoList[targetToDoListIndex].toDoListOrder[targetToDoOrderIndex].objectTodoList =
                 this.contentDCtrlService.poolContents.todoList[targetToDoListIndex].toDoListOrder[targetToDoOrderIndex].objectTodoList.filter((object) => object.id != $(event.currentTarget).val().toString())
-                if( this.documentDControlService.documentTrack.contents[targetDocumentTrackContentIndex].boxType === this.boxType.boxSubform){
+                if( this.documentDControlService.documentTrack.contents[targetDocumentTrackContentIndex].contentType === this.boxType.boxSubform){
                     this.documentDControlService.documentTrack.contents[targetDocumentTrackContentIndex].conditions.subformCondition.haveInDoList = false;
                 }
             }

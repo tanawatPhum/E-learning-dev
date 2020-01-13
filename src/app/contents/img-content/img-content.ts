@@ -7,6 +7,7 @@ import { Constants } from '../../global/constants';
 import { DocumentDataControlService } from '../../services/document/document-data-control.service';
 import { ContentDataControlService } from 'src/app/services/content/content-data-control.service';
 import { ContentInterFace } from '../interface/content.interface';
+import { ContentsModel } from 'src/app/models/document/content.model';
 
 
 @Component({
@@ -17,6 +18,7 @@ import { ContentInterFace } from '../interface/content.interface';
 })
 export class ImgContentComponent implements OnInit, ContentInterFace {
     private targetFile;
+    private targetimg:ImgContentModel = new ImgContentModel();
     @Input() parentBox: JQuery<Element>;
     @ViewChild('inputFile', { static: true }) inputFile: ElementRef<HTMLElement>;
     @HostListener('click', ['$event']) onClick(event) {
@@ -44,27 +46,30 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
+        this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
+            if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm){
+                let targetDocumentContent:ContentsModel = detail.data;
+                this.targetimg = targetDocumentContent.imgs.find((img) => img.parentId === this.parentBox.attr('id'))
+                this.initialImg();
+            } 
+        })
     }
 
     ngAfterViewInit() {
+        this.targetimg = this.contentDCtrlService.poolContents.imgs.find((img) => img.parentId === this.parentBox.attr('id'))
+        this.initialImg();
+
+    }
+    private initialImg(){
         if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.createContent) {
             this.handleBrowseImg()
         }
-        else if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor || Constants.document.lifeCycle.loadPreview) {
-            let targetimg = this.contentDCtrlService.poolContents.imgs.find((img) => img.parentId === this.parentBox.attr('id'))
-            this.loadImg(targetimg.path)
+        else if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor || this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadPreview) {
+            if(this.targetimg){
+                this.loadImg(this.targetimg.path)
+            }
         }
     }
-    // private test(){
-    //     this.rootElement.find('.content-browse-img').trigger('click');
-    //     //this.inputFile.nativeElement.click();
-    //     this.rootElement.find('.content-browse-img').change((event) => {
-    //         const target = event.target as HTMLInputElement;
-    //         this.targetFile = target.files;
-    //         console.log(' ❏ File :', this.targetFile);
-    //         this.addImg('attach') 
-    //     });
-    // }
     private handleBrowseImg() {
         // setTimeout(() => {
         //     this.inputFile.nativeElement.click();       
