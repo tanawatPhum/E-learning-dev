@@ -87,6 +87,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     public rulerDetailSubject: Subject<RulerDetailModel> = new Subject<RulerDetailModel>();
 
     public boxType = Constants.document.boxes.types;
+    public contentType = Constants.document.contents.types;
 
     private cmpRef: ComponentRef<any>;
 
@@ -242,10 +243,14 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     ngOnInit() {
         this.loading = true;
         this.documentDataService.lifeCycle = Constants.document.lifeCycle.loadEditor; 
+        this.contentDCtrlService.poolContents = new ContentsModel();
+        this.documentDataService.documentTrack = new DocumentTrackModel();
         // this.http.httpPost().subscribe((result)=>{
         //     console.log(result)
         // });
         this.contentElement.subscribe((result) => {
+            this.contentDCtrlService.poolContents = new ContentsModel();
+            this.documentDataService.documentTrack = new DocumentTrackModel();
             this.documentDataService.lifeCycle = Constants.document.lifeCycle.loadEditor; 
             this.loading = false;
             this.currentDocument = result;
@@ -339,6 +344,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     this.retrieveData(this.actions.data.retrieveContentsData, this.currentDocument);
              
                }
+               $('#'+this.documentDataService.nameTemplate).attr('contenteditable','true');
+               $('#'+this.documentDataService.nameTemplate).css('overflow-y','auto')
                this.defineComponent();
        
         }
@@ -357,7 +364,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
            
             this.documentDataService.nameTemplate = 'template-doc';
           
-            $('#'+this.documentDataService.nameTemplate).attr('contenteditable','true');
+      
             this.setTemplate(this.actions.template.setHTML)
             //console.log(CKEDITOR.instances[this.documentDataService.nameTemplate])
             CKEDITOR.inline(this.documentDataService.nameTemplate);
@@ -812,7 +819,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             let note: NoteContentModel = {
                 id: element.attr('id') + '-progressBar',
                 parentId:element.attr('id'),
-                text:null
+                text:null,
+                html:null,
+                status:'show'
             }
             this.notes.push(note);
             
@@ -2286,7 +2295,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     progress: this.findData(this.actions.data.findProgressDocumentTrack),
                     contents: this.documentDataService.documentTrack.contents
                 }
-                console.log("saveObjectTrackTemplate==>",saveobjectTemplate);
+                console.log("saveobjectTemplate==>",saveobjectTemplate);
+                console.log("saveObjectTrackTemplate==>",saveObjectTrackTemplate);
                 // this.documentService.uploadFile(this.files).subscribe((status)=>{
                   
                         this.documentService.saveDocument(nameDocument, saveobjectTemplate).subscribe((status) => {
@@ -2401,6 +2411,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         if (action === this.actions.data.retrieveBoxData) {
             this.boxes = results.contents.boxes;
         } else if (action === this.actions.data.retrieveContentsData) {
+  
             this.contentDCtrlService.poolContents =  results.contents;
             // this.subForms = results.contents.subFroms || new Array<SubFormContentModel>();
             // this.imgs = results.contents.imgs||  new Array<ImgContentModel>();
@@ -2447,6 +2458,11 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 this.rootElement.find('.content-box').find('.content-box-label').hide();
                 this.rootElement.find('.content-box').removeClass('content-box-active border border-primary');
                 this.rootElement.find('.content-box').css('border', 'hidden');
+
+                // console.log("xxxx",this.rootElement.find('.content-box').find('[content-name]'))
+                this.rootElement.find('.content-box').find('[content-name]').html(null)
+
+
                 // CKEDITOR.instances[this.documentDataService.nameTemplate].destroy()
                 
                 resolve(Constants.common.message.status.success.text)
@@ -2724,6 +2740,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.notes  = new Array<NoteContentModel>();
         }
         else if (action === this.actions.data.removeAllContentObj) {
+
+
         }
         else if (action === this.actions.data.removeBoxData) {
             let currentBoxId = this.currentBox.attr('id');
@@ -2777,9 +2795,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
 
         }
         else if(action === this.actions.data.removeDocTrackProgress){
-            this.documentTrack.contents.forEach((content)=>{
+            this.documentDataService.documentTrack.contents.forEach((content)=>{
                 content.progress = 0;
-                if(content.contentType === this.boxType.boxSubform){
+                if(content.contentType === this.contentType.subform){
                     content.conditions.subformCondition.isClickLinks.forEach((link)=>{
                         link.isClicked = false;
                         link.progress = 0;
@@ -2787,10 +2805,25 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     // content.conditions.subformCondition.haveInDoList = false;
                     content.progress = 0;
                 }
-                else if(content.contentType === this.boxType.boxVideo){
+                else if(content.contentType === this.contentType.video){
+                    content.data = 0;
                     content.conditions.videoCondition.isClickPlay = false;
+                   
                 }
             })
+            this.contentDCtrlService.poolContents.videos.forEach((video)=>{
+                video.data.progress = 0;
+            })
+            this.contentDCtrlService.poolContents.todoList.forEach((todoList,index)=>{
+                todoList.progress = 0;
+                todoList.toDoListOrder.forEach((taskList,taskIndex)=>{
+                    taskList.objectTodoList.forEach((objectTodo)=>{
+                        objectTodo.progress = 0
+                    })
+                });    
+            });
+            console.log(this.contentDCtrlService.poolContents.todoList)
+            console.log(this.documentDataService.documentTrack.contents)
         }
         else if(action === this.actions.data.removeDocumentTrackData){
             this.documentTrack.contents  = this.documentTrack.contents.filter((content)=>content.parentId !== this.currentBox.attr('id')); 

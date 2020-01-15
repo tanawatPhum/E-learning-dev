@@ -7,7 +7,7 @@ export class commentContentModel {
 
 export class commentDetailModel {
     public id:string;
-    public userId:number;
+    public userId:string;
     public message:string;
     public isQuestion:boolean;
     public imgData:any;

@@ -87,7 +87,10 @@ export class Constants {
         contents: {
             lifeCycle:{
                 loadsubForm:'loadsubForm',
-                playVideo:'playVideo'
+                playVideo:'playVideo',
+                addTaskList:'addTaskList',
+                saveDocument:'saveComment',
+                clickSubForm:'clickSubForm'
             },
             types: {
                 img:'img',

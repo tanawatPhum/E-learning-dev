@@ -17,8 +17,8 @@ import { ContentsModel } from 'src/app/models/document/content.model';
     styleUrls: ['img-content.scss'],
 })
 export class ImgContentComponent implements OnInit, ContentInterFace {
-    private targetFile;
-    private targetimg:ImgContentModel = new ImgContentModel();
+    public targetFile;
+    public targetimg:ImgContentModel = new ImgContentModel();
     @Input() parentBox: JQuery<Element>;
     @ViewChild('inputFile', { static: true }) inputFile: ElementRef<HTMLElement>;
     @HostListener('click', ['$event']) onClick(event) {
@@ -26,13 +26,13 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
         event.stopPropagation();
 
     }
-    private actionCase = {
+    public actionCase = {
         browseImg: 'browseImg',
         loadingImg: 'loadingImg',
         showImg: 'showImg'
     }
-    private currentCase = this.actionCase.browseImg;
-    private rootElement: JQuery<Element>;
+    public currentCase = this.actionCase.browseImg;
+    public rootElement: JQuery<Element>;
 
     // private parentBox:JQuery<Element>;
     constructor(
@@ -60,7 +60,7 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
         this.initialImg();
 
     }
-    private initialImg(){
+    public initialImg(){
         if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.createContent) {
             this.handleBrowseImg()
         }
@@ -70,7 +70,7 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
             }
         }
     }
-    private handleBrowseImg() {
+    public handleBrowseImg() {
         // setTimeout(() => {
         //     this.inputFile.nativeElement.click();       
         // }, 500);
@@ -125,7 +125,7 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
         })
 
     }
-    private addImg(sourceType) {
+    public addImg(sourceType) {
         this.currentCase = this.actionCase.loadingImg;
         let img: ImgContentModel = {
             parentId: this.parentBox.attr('id'),
@@ -160,7 +160,7 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
 
 
     }
-    private loadImg(imgPath) {
+    public loadImg(imgPath) {
         this.currentCase = this.actionCase.showImg;
         this.rootElement.find('img').attr('src', imgPath)
             .attr('id', this.parentBox.attr('id') + '-img')

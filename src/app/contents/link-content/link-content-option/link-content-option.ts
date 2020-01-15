@@ -9,12 +9,12 @@ import { ContentDataControlService } from 'src/app/services/content/content-data
 })
 export class LinkContentOptionComponent implements ContentOptionInterFace, OnInit {
     @Input() parentBox: JQuery<Element>;
-    private rootElement: JQuery<Element>;
-    private actionCase = {
+    public rootElement: JQuery<Element>;
+    public actionCase = {
         browseLink: 'browseLink',
         showLink: 'showLink'
     }
-    private currentCase = this.actionCase.browseLink;
+    public currentCase = this.actionCase.browseLink;
 
     constructor(
         private contentDCtrlService: ContentDataControlService,
@@ -55,7 +55,7 @@ export class LinkContentOptionComponent implements ContentOptionInterFace, OnIni
             }
         })
     }
-    private removeLink() {
+    public removeLink() {
         this.contentDCtrlService.poolContents.links = this.contentDCtrlService.poolContents.links.filter((link) => link.parentId !== this.parentBox.attr('id'));
         this.parentBox.remove();
     }

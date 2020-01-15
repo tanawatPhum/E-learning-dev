@@ -23,6 +23,13 @@ export class DocumentDataControlService {
     private _previousPage: string;
     private _documentTrack: DocumentTrackModel = new DocumentTrackModel();
     private _documentTracks: DocumentTrackModel[] = new Array<DocumentTrackModel>();
+    private _currentResult: DocumentModel = new DocumentModel();
+    public get currentResult(): DocumentModel {
+        return this._currentResult;
+    }
+    public set currentResult(value: DocumentModel) {
+        this._currentResult = value;
+    }
 
     private _lifeCycle: string;
     public get documentTracks(): DocumentTrackModel[] {

@@ -15,7 +15,7 @@ export class FileContentOptionComponent implements ContentOptionInterFace {
 
     }
     @Input() parentBox: JQuery<Element>;
-    private removeFile(){
+    public removeFile(){
         this.contentDCtrlService.poolContents.files = this.contentDCtrlService.poolContents.files.filter((file)=>file.parentId !== this.parentBox.attr('id'));
         this.parentBox.remove();
     }

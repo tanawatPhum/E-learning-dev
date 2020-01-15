@@ -14,7 +14,7 @@ export class CommetContentOptionComponent implements ContentOptionInterFace{
     ){
 
     }
-    private removeComment(){
+    public removeComment(){
         this.contentDCtrlService.poolContents.comments = this.contentDCtrlService.poolContents.comments.filter((comment)=>comment.parentId !== this.parentBox.attr('id'));
         this.parentBox.remove();
     }

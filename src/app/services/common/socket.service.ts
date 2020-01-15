@@ -12,8 +12,9 @@ export class SocketIoService {
     }
 
     public connectSocketIo(){
-        this.socket = io.connect('http://localhost:3000');
-        // this.socket = io.connect('https://smartdoc.alworks.io');
+        // this.socket = io.connect('http://localhost:3000');
+        
+        this.socket = io.connect('https://smartdoc.alworks.io');
         // this.socket = io.connect();
     }
     public sendData(nameSocket,data?):Observable<any>{

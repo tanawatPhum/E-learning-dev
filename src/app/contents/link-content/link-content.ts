@@ -24,14 +24,14 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
         event.stopPropagation();
 
     }
-    private rootElement: JQuery<Element>;
-    private targetLinkInsert;
-    private targetLink:LinkContentModel  = new LinkContentModel();
-    private actionCase = {
+    public rootElement: JQuery<Element>;
+    public targetLinkInsert;
+    public targetLink:LinkContentModel  = new LinkContentModel();
+    public actionCase = {
         browseLink: 'browseLink',
         showLink:'showLink'
     }
-    private currentCase = this.actionCase.browseLink;
+    public currentCase = this.actionCase.browseLink;
     constructor(
         private commonService: CommonService,
         private documentService: DocumentService,
@@ -56,7 +56,7 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
         this.initialLink();
         
     }
-    private initialLink(){
+    public initialLink(){
         if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.createContent) {
             this.handleBrowseLink()
         }
@@ -69,7 +69,7 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
             }
         }
     }
-    private handleBrowseLink(){
+    public handleBrowseLink(){
         this.rootElement.find('.toolbar-browse-link').find('#link-input-url').click(() => {
             this.rootElement.find('.toolbar-browse-link').find('#link-input-url').focus();
             this.rootElement.find('.toolbar-browse-link').find('#link-input-url').on('input', this.commonService.debounce((event) => {
@@ -87,7 +87,7 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
             this.addLink();
         });
     }
-    private addLink(){
+    public addLink(){
         let hostname = (new URL(this.targetLinkInsert)).hostname;
         let links:LinkContentModel = {
             parentId:this.parentBox.attr('id'),
@@ -106,13 +106,13 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
         this.contentDCtrlService.updateContent = updateAction
         this.contentDCtrlService.setLastContent(this.parentBox);
     }
-    private loadLink(){
+    public loadLink(){
         this.currentCase  = this.actionCase.showLink;
         this.rootElement.find('.content-link').attr('data-name',this.targetLink.name)
         .attr('id', this.parentBox.attr('id') + '-link')
         .text(this.targetLink.name)
     }
-    private handleLink(){
+    public handleLink(){
         this.rootElement.find('.content-link').unbind().bind('click',(element)=>{
             window.open(this.targetLink.path)
         });

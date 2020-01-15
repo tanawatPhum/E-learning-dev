@@ -22,16 +22,16 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
         event.stopPropagation();
 
     }
-    private rootElement: JQuery<Element>;
-    private targetFileUpload;
-    private targetFile:FileContentModel  = new FileContentModel();
-    private actionCase = {
+    public rootElement: JQuery<Element>;
+    public targetFileUpload;
+    public targetFile:FileContentModel  = new FileContentModel();
+    public actionCase = {
         browseFile: 'browseFile',
         loadingFile:'loadingFile',
         showFile:'showFile'
     }    
 
-    private currentCase = this.actionCase.browseFile;
+    public currentCase = this.actionCase.browseFile;
     constructor(
         private documentService: DocumentService,
         private commonService:CommonService,
@@ -56,7 +56,7 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
         this.targetFile = this.contentDCtrlService.poolContents.files.find((file) => file.parentId === this.parentBox.attr('id'))
         this.initialFile();
     }
-    private initialFile(){
+    public initialFile(){
         if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.createContent){
             this.handleBrowseFile(); 
         }
@@ -99,7 +99,7 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
             this.addFile();
         });
     }
-    private addFile(){
+    public addFile(){
         this.currentCase = this.actionCase.loadingFile;
         let  awsFileName =  this.commonService.getPatternAWSName(this.targetFileUpload[0].name)|| 'fileName';
         let fileName = this.commonService.fileNameAndExt(this.targetFileUpload[0].name)[0] || 'fileName';
@@ -124,14 +124,14 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
         
     }
 
-    private showFile(targetFile:FileContentModel) {
+    public showFile(targetFile:FileContentModel) {
         this.currentCase = this.actionCase.showFile;
         this.rootElement.find('.content-file').attr('download',targetFile.fileName)
         .attr('data-awsname',targetFile.awsFileName)
         .attr('id',this.parentBox.attr('id') + '-file')
         .text(targetFile.fileName)
     }
-    private handleLoadFile(){
+    public handleLoadFile(){
         this.rootElement.find('.content-file').bind('click',(element)=>{
             let targetFile = this.contentDCtrlService.poolContents.files.find((file)=>file.awsFileName === $(element.currentTarget).attr('data-awsname'))
             this.documentService.downloadFile(targetFile.awsFileName).subscribe((blobFile)=>{

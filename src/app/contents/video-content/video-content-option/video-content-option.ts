@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ElementRef } from '@angular/core';
+import { Component, Input, OnInit, ElementRef, AfterViewInit } from '@angular/core';
 import { ContentOptionInterFace } from '../../interface/content-option.interface';
 import { ContentDataControlService } from '../../../services/content/content-data-control.service';
 import { DocumentTrackModel } from '../../../models/document/document.model';
@@ -10,10 +10,10 @@ import { filter } from 'rxjs/operators';
     templateUrl: 'video-content-option.html',
     styleUrls: ['video-content-option.scss']
 })
-export class VideoContentOptionComponent implements ContentOptionInterFace,OnInit{
+export class VideoContentOptionComponent implements ContentOptionInterFace,OnInit,AfterViewInit{
     @Input() parentBox: JQuery<Element>;
-    private rootElement: JQuery<Element>;
-    private sourceType:string;
+    public rootElement: JQuery<Element>;
+    public sourceType:string;
 
     constructor(
         private contentDCtrlService:ContentDataControlService,
@@ -22,19 +22,22 @@ export class VideoContentOptionComponent implements ContentOptionInterFace,OnIni
     ){
 
     }
-    private actionCase = {
+    public actionCase = {
         browseVideo: 'browseVideo',
         showVideo: 'showVideo',
     }
-    private currentCase  = this.actionCase.browseVideo
+    public currentCase  = this.actionCase.browseVideo
     ngOnInit(){
         this.rootElement = $(this.element.nativeElement);
-        this.handleSection();
-        this.handleOptionToolVideo();
+  
         this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
             this.handleSection();
             this.handleOptionToolVideo();        
         })
+    }
+    ngAfterViewInit(){
+        this.handleSection();
+        this.handleOptionToolVideo();
     }
     handleSection(){
         setTimeout(() => {
@@ -70,12 +73,19 @@ export class VideoContentOptionComponent implements ContentOptionInterFace,OnIni
         });
     }
 
-    private removeVideo(){
+    public removeVideo(){
         this.contentDCtrlService.poolContents.videos = this.contentDCtrlService.poolContents.videos.filter((video)=>video.parentId !== this.parentBox.attr('id'));
         this.documentDCtrlService.documentTrack.contents =  this.documentDCtrlService.documentTrack.contents.filter((video)=>video.parentId !==this.parentBox.attr('id'));
         this.contentDCtrlService.poolContents.progressBar.forEach((progressBar,index)=>{
             this.contentDCtrlService.poolContents.progressBar[index].contentList =  progressBar.contentList.filter((content)=>content.parentId != this.parentBox.attr('id'));
         })
+        this.contentDCtrlService.poolContents.todoList.forEach((todoList,index)=>{
+            todoList.toDoListOrder.forEach((taskList,taskIndex)=>{
+                this.contentDCtrlService.poolContents.todoList[index].toDoListOrder[taskIndex].objectTodoList =  taskList.objectTodoList.filter((component)=>  component.id !== this.parentBox.attr('id'))
+            });    
+        });
+        console.log(this.contentDCtrlService.poolContents.todoList)
+        console.log( this.documentDCtrlService.documentTrack.contents)
         this.parentBox.remove();
     }
 

@@ -14,7 +14,7 @@ export class NoteContentOptionComponent implements ContentOptionInterFace {
     ){
 
     }
-    private removeNote(){
+    public removeNote(){
         this.contentDCtrlService.poolContents.notes = this.contentDCtrlService.poolContents.notes.filter((note)=>note.parentId !== this.parentBox.attr('id'));
         this.parentBox.remove();
     }

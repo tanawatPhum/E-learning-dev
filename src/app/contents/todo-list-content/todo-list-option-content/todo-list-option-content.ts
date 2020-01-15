@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ElementRef, AfterViewInit, ChangeDetectionStrategy, ViewChildren, QueryList } from '@angular/core';
+import { Component, Input, OnInit, ElementRef, AfterViewInit, ChangeDetectionStrategy, ViewChildren, QueryList, ChangeDetectorRef, AfterViewChecked } from '@angular/core';
 import { ContentOptionInterFace } from '../../interface/content-option.interface';
 import { ContentDataControlService } from 'src/app/services/content/content-data-control.service';
 import { ToDoListContentModel, ToDoListContentOrderModel, ObjectToDoList, ToDoListCurrentModel, ToDoListBoxListModel } from '../../../models/document/elements/todoList-content.model';
@@ -12,31 +12,47 @@ import { async } from 'q';
     templateUrl: 'todo-list-option-content.html',
     styleUrls: ['todo-list-option-content.scss']
 })
-export class TodoListOptionContentComponent implements ContentOptionInterFace,OnInit,AfterViewInit{
+export class TodoListOptionContentComponent implements ContentOptionInterFace,OnInit,AfterViewInit,AfterViewChecked{
     @Input() parentBox: JQuery<Element>;
     @ViewChildren('componentList') componentList:QueryList<any>;
-    private rootElement:JQuery<Element>;
-    private toDoListOrder:ToDoListContentOrderModel[] = new Array<ToDoListContentOrderModel>();
-    private toDoListComponentList:ToDoListBoxListModel[]  = new Array<ToDoListBoxListModel>();
+    public rootElement:JQuery<Element>;
+    public toDoListOrder:ToDoListContentOrderModel[] = new Array<ToDoListContentOrderModel>();
+    public toDoListComponentList:ToDoListBoxListModel[]  = new Array<ToDoListBoxListModel>();
     public boxType = Constants.document.boxes.types;
  
     constructor(
         private documentDControlService:DocumentDataControlService,
         private contentDCtrlService:ContentDataControlService,
-        private element: ElementRef
+        private element: ElementRef,
+        private cdr: ChangeDetectorRef
     
     ){}
     ngOnInit(){
+        
         this.rootElement = $(this.element.nativeElement); 
-        this.loadTaskList() 
+      
     }
     ngAfterViewInit(){
+        let targetTodoList = this.contentDCtrlService.poolContents.todoList.find((todoList)=>todoList.parentId=== this.parentBox.attr('id') )
+        if (!this.contentDCtrlService.currentSelectTaskList.find(box => box.boxId === this.parentBox.attr('id'))) {
+            if(targetTodoList){
+                this.contentDCtrlService.currentSelectTaskList.push({
+                    boxId: this.parentBox.attr('id'),
+                    taskId: targetTodoList.toDoListOrder[0].id
+                })
+            }
+        }
+        this.loadTaskList() 
         
-              
-     
+  
+   
         
     }
-    private addTaskList(){
+    ngAfterViewChecked(){
+        //your code to update the model
+        this.cdr.detectChanges();
+     }
+     public addTaskList(){
         let taskName = this.rootElement.find('.option-toDoList').find('#toDoList-inputTask').val().toString();
         if (taskName) {
             let taskLength = (this.rootElement.find('.option-toDoList').find('.toDoList-taskList').find('.list-group-item').length + 1)
@@ -64,20 +80,24 @@ export class TodoListOptionContentComponent implements ContentOptionInterFace,On
             }
       
             this.toDoListOrder =   this.contentDCtrlService.poolContents.todoList[targetTodoListIndex].toDoListOrder;
-            this.updateContent('addTaskList',this.toDoListOrder);
+            this.contentDCtrlService.setLastContent(this.parentBox);
+            this.updateContent(Constants.document.contents.lifeCycle.addTaskList,this.toDoListOrder);
             // console.log("this.toDoListOrder",this.toDoListOrder)
             // this.handles(this.actions.event.handleOptionToolToDoList)
             // this.addElements(this.actions.event.addElToDoList, this.currentBox)
         }
 
     }  
-    private loadTaskList(){
+    public loadTaskList(){
         let targetTodoListIndex = this.contentDCtrlService.poolContents.todoList.findIndex(parentBox => parentBox.parentId === this.parentBox.attr('id'))
         if(targetTodoListIndex >= 0 ){
+     
         this.toDoListOrder =   this.contentDCtrlService.poolContents.todoList[targetTodoListIndex].toDoListOrder;
-        let targetBox = this.contentDCtrlService.currentSelectTaskList.find((box) => box.boxId === this.parentBox.attr('id'))
+        let targetBox = this.contentDCtrlService.currentSelectTaskList.find((box) => box.boxId === this.parentBox.attr('id')) 
+
         if (targetBox) {
             this.createToDoListComponentList().then(()=>{
+
                 this.rootElement.find('.option-toDoList').find('.toDoList-taskList').find('#' + targetBox.taskId).addClass('task-active');
                 this.componentList.changes.subscribe((componentList)=>{
                     componentList.forEach(component => {
@@ -114,8 +134,7 @@ export class TodoListOptionContentComponent implements ContentOptionInterFace,On
         
        }
     }  
-    private handleTaskList(event,action){
-        console.log('xcxcxcxcxxxx');
+    public handleTaskList(event,action){
         if(action==='click'){
             this.rootElement.find('.option-toDoList').find('.toDoList-taskList').find('.list-group-item').removeClass('task-active')
             $(event.currentTarget).addClass('task-active')
@@ -175,41 +194,49 @@ export class TodoListOptionContentComponent implements ContentOptionInterFace,On
 
     }
  
-    private updateContent(actionCase,data?){
+    public updateContent(actionCase,data?){
         let updateData:UpdateContentModel  = new UpdateContentModel();
         updateData.actionCase =  actionCase;
         updateData.data =  data
         this.contentDCtrlService.updateContent = updateData;
     }
-    private async createToDoListComponentList(){
-        this.toDoListComponentList = new Array<ToDoListBoxListModel>();
-        for await(let content of this.contentDCtrlService.poolContents.subFroms){
-            this.toDoListComponentList.push({
-                id: content.parentBoxId,
-                name: content.parentBoxId,
-                boxType:'subform',
-                boxTypeName:'Subform',
-                isChecked: false
-            });
-        }
-        for await(let content of this.contentDCtrlService.poolContents.videos){
-            this.toDoListComponentList.push({
-                 id: content.parentId,
-                name: content.parentId,
-                boxType:'video',
-                boxTypeName:'Video',
-                isChecked: false
-            });
-        }
-        for await(let content of this.contentDCtrlService.poolContents.exams){
-             this.toDoListComponentList.push({
-                id: content.parentId,
-                name: content.parentId,
-                boxType:'exam',
-                boxTypeName:'Exam',
-                isChecked: false
-            });
-        }
+    public async createToDoListComponentList() :Promise<any>{
+        return new Promise(async (resovle,reject)=>{
+            this.toDoListComponentList = new Array<ToDoListBoxListModel>();
+            for await(let content of this.contentDCtrlService.poolContents.subFroms){
+                this.toDoListComponentList.push({
+                    id: content.parentBoxId,
+                    name: content.parentBoxId,
+                    boxType:'subform',
+                    boxTypeName:'Subform',
+                    isChecked: false
+                });
+            }
+            for await(let content of this.contentDCtrlService.poolContents.videos){
+                this.toDoListComponentList.push({
+                     id: content.parentId,
+                    name: content.parentId,
+                    boxType:'video',
+                    boxTypeName:'Video',
+                    isChecked: false
+                });
+            }
+            for await(let content of this.contentDCtrlService.poolContents.exams){
+                 this.toDoListComponentList.push({
+                    id: content.parentId,
+                    name: content.parentId,
+                    boxType:'exam',
+                    boxTypeName:'Exam',
+                    isChecked: false
+                });
+            }
+        
+            resovle(Constants.common.message.status.success)     
+            
+           
+        })
+   
+     
         // await this.contentDCtrlService.poolContents.subFroms.forEach((content)=>{
         //     this.toDoListComponentList.push({
         //         id: content.parentBoxId,
@@ -240,7 +267,7 @@ export class TodoListOptionContentComponent implements ContentOptionInterFace,On
 
       
     }
-    private removeToDoList(){
+    public removeToDoList(){
         this.contentDCtrlService.poolContents.todoList = this.contentDCtrlService.poolContents.todoList.filter((todoList)=>todoList.parentId !== this.parentBox.attr('id'));
         this.parentBox.remove();
     

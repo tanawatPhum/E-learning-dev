@@ -12,9 +12,9 @@ declare var CKEDITOR: any;
 })
 export class TextareaContentOptionComponent  implements ContentOptionInterFace,OnInit,AfterViewInit{
     @Input() parentBox: JQuery<Element>;
-    private rootElement: JQuery<Element>;
-    private fontSizeList:Number[] =  new Array<Number>();
-    private currentColorCode:string;
+    public rootElement: JQuery<Element>;
+    public fontSizeList:Number[] =  new Array<Number>();
+    public currentColorCode:string;
 
     constructor(
         private contentDCtrlService:ContentDataControlService,
@@ -37,7 +37,7 @@ export class TextareaContentOptionComponent  implements ContentOptionInterFace,O
     ngAfterViewInit(){
         this.handleOptionTextArea();
     }
-    private handleOptionTextArea(){
+    public handleOptionTextArea(){
         this.rootElement.find('#option-font-family').fontselect(
             {
                 searchable: false,
@@ -115,10 +115,10 @@ export class TextareaContentOptionComponent  implements ContentOptionInterFace,O
         }
 
     }
-    private addStyles(styles,element?){
+    public addStyles(styles,element?){
         this.documentService.compileStyles(styles, element);
     }
-    private removeTextarea(){
+    public removeTextarea(){
         this.contentDCtrlService.poolContents.textAreas = this.contentDCtrlService.poolContents.textAreas.filter((textarea)=>textarea.parentId !== this.parentBox.attr('id'));
         this.parentBox.remove();
     }

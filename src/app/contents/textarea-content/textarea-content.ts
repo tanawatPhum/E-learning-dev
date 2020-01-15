@@ -15,8 +15,8 @@ import { ContentsModel } from 'src/app/models/document/content.model';
     styleUrls: ['textarea-content.scss']
 })
 export class TextareaContentComponent implements OnInit, ContentInterFace, AfterViewInit {
-    private rootElement: JQuery<Element>;
-    private targetTextArea:TextAreaContentModel = new TextAreaContentModel();
+    public rootElement: JQuery<Element>;
+    public targetTextArea:TextAreaContentModel = new TextAreaContentModel();
     @Input() lifeCycle:string;
     @Input() parentBox: JQuery<Element>;
     @HostListener('click', ['$event']) onClick(event) {
@@ -68,7 +68,7 @@ export class TextareaContentComponent implements OnInit, ContentInterFace, After
         this.targetTextArea = this.contentDCtrlService.poolContents.textAreas.find((textarea) => textarea.parentId === this.parentBox.attr('id'));
         this.initialTextarea();
     }
-    private initialTextarea(){
+    public initialTextarea(){
         if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.createContent){
             this.addTextarea() 
         }
@@ -80,7 +80,7 @@ export class TextareaContentComponent implements OnInit, ContentInterFace, After
         }
     }
 
-    private addTextarea() {
+    public addTextarea() {
         let textArea: TextAreaContentModel = { 
             parentId: this.parentBox.attr('id'), 
             id: this.parentBox.attr('id') + '-img', 
@@ -108,7 +108,7 @@ export class TextareaContentComponent implements OnInit, ContentInterFace, After
     //     //     }
     //     // }
     // }
-    private loadTextarea(){
+    public loadTextarea(){
         this.parentBox.draggable({
             handle: this.parentBox.find('.content-box-label')
         })
@@ -118,7 +118,7 @@ export class TextareaContentComponent implements OnInit, ContentInterFace, After
         }
         
     }
-    private setPreview() {
+    public setPreview() {
         if(this.targetTextArea){
             this.rootElement.html(this.targetTextArea.html)
             this.rootElement.find('.content-textarea').attr('contenteditable', 'false')

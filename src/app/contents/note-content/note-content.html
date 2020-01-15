@@ -1,11 +1,47 @@
 <!--component html goes here -->
 <div [attr.id]="parentBox.attr('id')+'-note'" class="content-note">
-    <img [attr.data-parentId]="parentBox.attr('id')" src="assets/imgs/contentPage/note-writing.svg" class="rounded-circle note-icon writing hideCK">
 
-    <div [attr.data-parentId]="parentBox.attr('id')" class="note-icon writing showCK">
-        <img src="assets/imgs/contentPage/others/arrow-button-left.svg" class="rounded-circle note-icon arrow pointer-events">
-        <img src="assets/imgs/contentPage/note-writing.svg" class="rounded-circle note-icon writing pointer-events">
+    <div class="row note-container note-bar bg-light m-0">
+        <div class="col-11">
+            <div class="row m-0 align-items-center">
+
+                <div class="col-2 pl-2 d-flex">
+                    <input disabled style="font-size: 12px;padding-left: 0.3rem;" value="Arial" id="note-font-family" class="note-form-input">
+                </div>
+                <div class="col-2 pl-2">
+                    <select disabled class="note-form-input" id="note-font-size">
+                        <option *ngFor="let number of fontSizeList">{{number}}</option>
+                    </select>
+                </div>
+                <div class="col-2 pl-2">
+                    <input disabled type="text" id="note-font-color" class="note-form-input">
+                </div>
+                <div class="col-1 pl-2">
+                    <img data-font-style="bold" class="note-font-style" src="assets/imgs/contentPage/optionTool/bold.svg">
+                </div>
+                <div class="col-1 pl-2">
+                    <img data-font-style="italic" class="note-font-style" src="assets/imgs/contentPage/optionTool/italic.svg">
+                </div>
+                <div class="col-1 pl-2">
+                    <img data-font-style="underline" class="note-font-style" src="assets/imgs/contentPage/optionTool/underlined.svg">
+                </div>
+            </div>
+
+        </div>
+        <div class="col-1">
+            <img [attr.data-parentId]="parentBox.attr('id')" src="assets/imgs/contentPage/note-writing.svg" class="rounded-circle note-icon writing">
+            <!-- <div [attr.data-parentId]="parentBox.attr('id')" class="note-icon writing">
+                <img src="assets/imgs/contentPage/others/arrow-button-left.svg" class="rounded-circle note-icon arrow pointer-events">
+                <img src="assets/imgs/contentPage/note-writing.svg" class="rounded-circle note-icon writing pointer-events">
+            </div> -->
+        </div>
     </div>
-    <div contenteditable [attr.id]="parentBox.attr('id')+'-note-area'" class="note-area border">
+    <div class="row m-0 note-container note-area p-0">
+        <div class="col-12">
+            <div contenteditable [attr.id]="parentBox.attr('id')+'-note-area'" class="note-editable border">
+            </div>
+        </div>
     </div>
+
+
 </div>

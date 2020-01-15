@@ -1,4 +1,4 @@
-import { Component, Input, ElementRef, OnInit, AfterViewInit, HostListener } from '@angular/core';
+import { Component, Input, ElementRef, OnInit, AfterViewInit, HostListener, OnDestroy } from '@angular/core';
 import { DocumentService } from 'src/app/services/document/document.service';
 import { ContentDataControlService } from '../../services/content/content-data-control.service';
 import { ContentInterFace } from '../interface/content.interface';
@@ -18,7 +18,7 @@ declare var Wistia: any;
     templateUrl: 'video-content.html',
     styleUrls: ['video-content.scss']
 })
-export class VideoContentComponent implements OnInit, ContentInterFace, AfterViewInit {
+export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace, AfterViewInit {
     @Input() lifeCycle: string;
     @Input() parentBox: JQuery<Element>;
     @Input() data: any;
@@ -28,13 +28,13 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
 
     }
 
-    private rootElement: JQuery<Element>;
-    private targetFile;
-    private contentTypes = Constants.document.contents.types;
-    private targetVideo: VideoContentModel = new VideoContentModel();
-    private updateAction: UpdateContentModel = new UpdateContentModel();
-    private documentTrackInterval: any;
-    private actionCase = {
+    public rootElement: JQuery<Element>;
+    public targetFile;
+    public contentTypes = Constants.document.contents.types;
+    public targetVideo: VideoContentModel = new VideoContentModel();
+    public updateAction: UpdateContentModel = new UpdateContentModel();
+    public documentTrackInterval: any;
+    public actionCase = {
         browseVideo: 'browseVideo',
         loadingVideo: 'loadingVideo',
         showVideo: 'showVideo',
@@ -42,7 +42,7 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
         videoYoutube: 'videoYoutube',
         videoWistia: 'videoWistia'
     }
-    private currentCase = this.actionCase.browseVideo;
+    public currentCase = this.actionCase.browseVideo;
     constructor(
         private commonService: CommonService,
         private documentService: DocumentService,
@@ -62,11 +62,14 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
             }
         })
     }
+    ngOnDestroy(){
+        clearInterval(this.documentTrackInterval)
+    }
     ngAfterViewInit() {
         this.targetVideo = this.contentDCtrlService.poolContents.videos.find((video) => video.parentId === this.parentBox.attr('id'))
         this.intialVideo();
     }
-    private intialVideo() {
+    public intialVideo() {
         if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.createContent) {
             this.handleBrowseVideo();
         }
@@ -85,7 +88,7 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
             }
         }
     }
-    private handleBrowseVideo() {
+    public handleBrowseVideo() {
         this.rootElement.find('#btn-video').unbind('click').bind('click', () => {
             this.rootElement.find('.content-browse-video').click((event) => {
                 event.stopPropagation();
@@ -174,7 +177,7 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
 
 
     }
-    private addVideo(dataStreaming, sourceType) {
+    public addVideo(dataStreaming, sourceType) {
         let streamData: VideoConetentDataModel = dataStreaming;
         let condition: VideoConetentConditionModel = new VideoConetentConditionModel();
         condition.isMustWatchingEnd = false;
@@ -240,18 +243,26 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
             // .attr('id', this.parentBox.attr('id') + '-video')
         }
     }
-    private handleVideo() {
+    public handleVideo() {
         let targetDocumentTrackIndex = this.documentDCtrlService.currentDocumentTrack.contents.findIndex((content) => content.parentId === this.parentBox.attr('id'))
         let targetDocumentTrack = this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex]
         if (targetDocumentTrack) {
             let targetVideo = this.contentDCtrlService.poolContents.videos.find((video) => video.parentId === targetDocumentTrack.parentId)
             if (targetVideo) {
+                let isHasToDoList= $('.content-toDoList')
                 let isHasProgressBar = $('.content-progress-bar')
                 let targetWistiaVideo = Wistia.api(targetVideo.data.streamId);
                 targetWistiaVideo.time(targetDocumentTrack.data);
-                // this.rootElement.find('.content-video').click((event) => {
-                targetWistiaVideo.bind("play", (e) => {
+                this.rootElement.find('.content-video').click((event) => {
                     this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex].conditions.videoCondition.isClickPlay = true;
+                
+                })
+                targetWistiaVideo.bind("play", (e) => {
+                  
+                    if(isHasToDoList.length >0){
+                        this.updateAction.actionCase = Constants.document.contents.lifeCycle.playVideo;
+                        this.contentDCtrlService.updateContent = this.updateAction
+                    }
                     return targetWistiaVideo.unblind;
                 });
                 targetWistiaVideo.bind("secondchange", () => {
@@ -259,27 +270,38 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
                         this.updateAction.actionCase = Constants.document.contents.lifeCycle.playVideo;
                         this.contentDCtrlService.updateContent = this.updateAction
                     }
+               
                     this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex].data = targetWistiaVideo.time()
                     this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex].progress = (targetWistiaVideo.time() / targetWistiaVideo.duration()) * 100;
-                    this.documentTrackInterval = setInterval(() => {
-                        this.handleDocumentTrack();
-                    }, 4000)
+                    if(!this.documentTrackInterval){
+                        this.documentTrackInterval = setInterval(() => {
+                            console.log('save');
+                            this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName);
+                            clearInterval(this.documentTrackInterval)
+                            this.documentTrackInterval = null;
+                        }, 4000)
+                    }
+         
                 })
                 targetWistiaVideo.bind("end", (e) => {
                     this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex].progress = 100;
                     this.updateAction.actionCase = Constants.document.contents.lifeCycle.playVideo;
                     this.contentDCtrlService.updateContent = this.updateAction
-                    this.handleDocumentTrack();
+                    if(isHasToDoList.length >0){
+                        this.updateAction.actionCase = Constants.document.contents.lifeCycle.playVideo;
+                        this.contentDCtrlService.updateContent = this.updateAction
+                    }
+                    this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName);
                     clearInterval(this.documentTrackInterval)
                 })
                 targetWistiaVideo.bind("pause",  (e)=> {
-                    this.handleDocumentTrack();
+                    this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName);
                     clearInterval(this.documentTrackInterval)
                 });
             }
         }
     }
-    private addDocumentTrackVideo() {
+    public addDocumentTrackVideo() {
         let documentTrackContent = new DocumentTrackContent;
         documentTrackContent.contentType = this.contentTypes.video;
         documentTrackContent.parentId = this.parentBox.attr('id');
@@ -290,34 +312,34 @@ export class VideoContentComponent implements OnInit, ContentInterFace, AfterVie
         documentTrackContent.conditions.videoCondition.isClickPlay = false;
         this.documentDCtrlService.documentTrack.contents.push(documentTrackContent)
     }
-    private handleDocumentTrack() {
-        let numberOfCondition = this.documentDCtrlService.currentDocumentTrack.contents.length;
-        let numberOfProgress = 0;
-        let currentDocumentTrack = this.documentDCtrlService.currentDocumentTrack.contents.filter((content) => content.contentType === this.contentTypes.video)
-        currentDocumentTrack.forEach((content) => {
-            if (content.conditions.videoCondition.isMustWatchingEnd) {
-                numberOfProgress += content.progress
-            } else if (content.conditions.videoCondition.isClickPlay) {
-                numberOfProgress += 100
-            }
-        })
-        this.documentDCtrlService.currentDocumentTrack.progress = numberOfProgress / numberOfCondition;
-        this.saveDocumentTrack(this.documentDCtrlService.currentDocumentName).subscribe((status) => {
-            // console.log(" this.currentDocumentTrack", this.currentDocumentTrack)          
-        });
-    }
-    private saveDocumentTrack(nameDocument) {
-        let saveObjectTrackTemplate: DocumentTrackModel = {
-            id: this.commonService.getPatternId(nameDocument),
-            nameDocument: nameDocument,
-            userId: Constants.common.user.id,
-            status: Constants.common.message.status.created.text,
-            isTrackProgress: this.documentDCtrlService.currentDocumentTrack.contents.length > 0 ? true : false,
-            progress: this.documentDCtrlService.currentDocumentTrack.contents.length === 0 ? 100 : this.documentDCtrlService.currentDocumentTrack.progress,
-            contents: this.documentDCtrlService.currentDocumentTrack.contents
-        }
+    // private handleDocumentTrack() {
+    //     let numberOfCondition = this.documentDCtrlService.currentDocumentTrack.contents.length;
+    //     let numberOfProgress = 0;
+    //     let currentDocumentTrack = this.documentDCtrlService.currentDocumentTrack.contents.filter((content) => content.contentType === this.contentTypes.video)
+    //     currentDocumentTrack.forEach((content) => {
+    //         if (content.conditions.videoCondition.isMustWatchingEnd) {
+    //             numberOfProgress += content.progress
+    //         } else if (content.conditions.videoCondition.isClickPlay) {
+    //             numberOfProgress += 100
+    //         }
+    //     })
+    //     this.documentDCtrlService.currentDocumentTrack.progress = numberOfProgress / numberOfCondition;
+    //     this.saveDocumentTrack(this.documentDCtrlService.currentDocumentName).subscribe((status) => {
+    //         // console.log(" this.currentDocumentTrack", this.currentDocumentTrack)          
+    //     });
+    // }
+    // private saveDocumentTrack(nameDocument) {
+    //     let saveObjectTrackTemplate: DocumentTrackModel = {
+    //         id: this.commonService.getPatternId(nameDocument),
+    //         nameDocument: nameDocument,
+    //         userId: Constants.common.user.id,
+    //         status: Constants.common.message.status.created.text,
+    //         isTrackProgress: this.documentDCtrlService.currentDocumentTrack.contents.length > 0 ? true : false,
+    //         progress: this.documentDCtrlService.currentDocumentTrack.contents.length === 0 ? 100 : this.documentDCtrlService.currentDocumentTrack.progress,
+    //         contents: this.documentDCtrlService.currentDocumentTrack.contents
+    //     }
 
-        return this.documentService.saveDocumentTrack(nameDocument, saveObjectTrackTemplate)
-    }
+    //     return this.documentService.saveDocumentTrack(nameDocument, saveObjectTrackTemplate)
+    // }
 
 }

@@ -5,6 +5,11 @@ import { DocumentService } from 'src/app/services/document/document.service';
 import { ContentDataControlService } from 'src/app/services/content/content-data-control.service';
 import { DocumentDataControlService } from 'src/app/services/document/document-data-control.service';
 import { NoteContentModel } from 'src/app/models/document/elements/note-content.model';
+import { Constants } from '../../global/constants';
+import { UpdateContentModel } from '../../models/common/common.model';
+import { DocumentModel } from 'src/app/models/document/content.model';
+import { CommonDataControlService } from '../../services/common/common-data-control.service';
+declare var CKEDITOR;
 
 @Component({
     moduleId: module.id,
@@ -15,9 +20,16 @@ import { NoteContentModel } from 'src/app/models/document/elements/note-content.
 export class NoteContentComponent implements OnInit, ContentInterFace, AfterViewInit {
     @Input() parentBox: JQuery<Element>;
     @Input() lifeCycle:string;
-    private rootElement: JQuery<Element>;
+    public targetNote:NoteContentModel = new NoteContentModel();
+    public targetIndexNote:number;
+    public rootElement: JQuery<Element>;
+    public updateAction:UpdateContentModel = new UpdateContentModel();
+    public currentColorCode:string;
+    public fontSizeList:Number[] =  Constants.common.style.fontSizeList;4
+    public targetTimeout;
     constructor(
         private commonService: CommonService,
+        private commonDCtrlService:CommonDataControlService,
         private documentService: DocumentService,
         private contentDCtrlService: ContentDataControlService,
         private documentDCtrlService:DocumentDataControlService,
@@ -27,19 +39,238 @@ export class NoteContentComponent implements OnInit, ContentInterFace, AfterView
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
+        if(this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadPreview){
+
+        }
     }
     ngAfterViewInit() {
-        this.addNote();
+        this.initialNote();
     }
-    addNote(){
+    private initialNote(){
+        this.targetIndexNote =  this.contentDCtrlService.poolContents.notes.findIndex((note) => note.parentId === this.parentBox.attr('id'));
+        this.targetNote =  this.contentDCtrlService.poolContents.notes[this.targetIndexNote]
+        if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.createContent) {
+            this.addNote();
+        }else if(this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor || this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadPreview){
+            this.loadNote();
+            if(this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadPreview){
+                this.handleNote();
+            }
+
+          
+        }
+    }
+    private addNote(){
         let note: NoteContentModel = {
-            id: this.parentBox.attr('id') + '-progressBar',
+            id: this.parentBox.attr('id') + '-note',
             parentId:this.parentBox.attr('id'),
-            text:null
+            text:null,
+            html:null,
+            status:'show'
         }
         this.contentDCtrlService.poolContents.notes.push(note);
-        this.rootElement.find('.note-icon.writing.showCK').hide();
-        this.rootElement.find('.note-icon.writing.hideCK').show();
         this.rootElement.find('.note-area').show();
+        this.contentDCtrlService.setLastContent(this.parentBox);
+        this.rootElement.find("#note-font-color").spectrum({
+            showPalette: true,
+            palette: [ ],
+            showSelectionPalette: true, // true by default
+            selectionPalette: ["red", "green", "blue"],
+            change:(color)=> {
+                let style = 'color:' + color.toHexString();
+                this.currentColorCode =  color.toHexString();
+                this.addStyles(style)
+            }
+        });
+        this.customStyleInput();
+    }
+    private loadNote(){
+        this.rootElement.find('.note-content').attr('id',this.targetNote.id)
+        this.rootElement.find('.note-area').show();
+
+    }
+    private handleNote(){
+        this.rootElement.find('input, select').removeAttr('disabled')
+        if(this.targetNote.status === "show"){
+            this.parentBox.addClass('show')
+            this.parentBox.removeClass('hide')
+        }else{
+            this.parentBox.addClass('hide')
+            this.parentBox.removeClass('show')
+            this.cloneIconNote(this.parentBox.find('.note-icon'))
+        }
+
+        this.rootElement.find('#note-font-family').fontselect(
+            {
+                searchable: false,
+            }
+        ).on('change', (ev) => {
+            let font: any = $(ev.currentTarget).val().toString();
+            font = font.replace(/\+/g, ' ');
+            font = font.split(':');
+            let fontFamily = font[0];
+            let fontWeight = font[1] || 400;
+            let style = 'font-family:"' + fontFamily + '";font-weight:' + fontWeight;
+            this.addStyles(style)
+        });
+        this.rootElement.find("#note-font-color").spectrum({
+            showPalette: true,
+            palette: [ ],
+            showSelectionPalette: true, // true by default
+            selectionPalette: ["red", "green", "blue"],
+            change:(color)=> {
+                let style = 'color:' + color.toHexString();
+                this.currentColorCode =  color.toHexString();
+                this.addStyles(style)
+            }
+        });
+        this.rootElement.find('#note-font-size').change((element) => {
+            let style = 'font-size:' + $(element.currentTarget).val() + 'px';
+            this.addStyles(style)
+        });
+        this.rootElement.find('.note-font-style').click((element) => {
+            let style;
+            let dataStyle = $(element.currentTarget).attr('data-font-style');
+            let editor = CKEDITOR.instances[this.targetNote.parentId+'-note-area'];
+            let selectedElement = $(editor.getSelection().getStartElement().$);
+            let allwrapElement = $('span:contains("' + selectedElement.text() + '")');
+            if (dataStyle === 'bold') {
+                if (allwrapElement.css('font-weight') === '700') {
+                    style = 'font-weight:400';
+                } else {
+                    style = 'font-weight:' + $(element.currentTarget).attr('data-font-style');
+                }
+            }
+            else if (dataStyle === 'italic') {
+                if (allwrapElement.css('font-style') === 'italic') {
+                    style = 'font-style:normal';
+                } else {
+                    style = 'font-style:' + $(element.currentTarget).attr('data-font-style');
+                }
+            }
+            else if (dataStyle === 'underline') {
+                if (/none/.test(allwrapElement.css('text-decoration'))) {
+                    style = 'text-decoration:' + $(element.currentTarget).attr('data-font-style');
+                } else {
+                    style = 'text-decoration:none'
+                }
+            }
+            this.addStyles(style);
+        });
+      
+        this.rootElement.find('.note-icon').click('click',(element) => {
+            console.log('xxxxxxxx')
+            let targetIcon  = $(element.currentTarget);
+            if(this.parentBox.hasClass('show')){
+                this.parentBox.removeClass('show')
+                this.parentBox.addClass('hide')
+                this.contentDCtrlService.poolContents.notes[this.targetIndexNote].status = 'hide';
+                this.saveDocument();
+                this.cloneIconNote(targetIcon)
+
+            }else{
+                this.parentBox.addClass('show')
+                this.parentBox.removeClass('hide')
+                $('.template-doc').find('note-icon').remove().ready(()=>{
+                    this.parentBox.show();
+                    this.contentDCtrlService.poolContents.notes[this.targetIndexNote].status = 'show';
+                    this.saveDocument();
+                })
+            }
+
+
+        })
+
+        CKEDITOR.inline(this.targetNote.parentId+'-note-area');
+        CKEDITOR.disableAutoInline = true;
+        CKEDITOR.on('instanceReady', (ev) => {
+            $('.cke_top').css('display','none')
+            $('#'+this.parentBox.attr('id')+'-note-area').html(this.targetNote.html)
+    
+
+            this.rootElement.find('#'+this.parentBox.attr('id')+'-note-area').bind('input',this.commonService.debounce((element) => {
+                if(this.targetIndexNote >=0){
+                    this.contentDCtrlService.poolContents.notes[this.targetIndexNote].text  = $(element.currentTarget).text();
+                    this.contentDCtrlService.poolContents.notes[this.targetIndexNote].html = $(element.currentTarget).html();
+                    this.saveDocument();
+                }
+            },2000))
+        })
+        this.parentBox.draggable({
+            handle: this.parentBox.find('.note-icon')
+        })
+        this.customStyleInput();
+
+    }
+    private addStyles(styles,element?){
+        this.documentService.compileStyles(styles, element,this.targetNote.parentId+'-note-area');
+        let targetIndexNote =  this.contentDCtrlService.poolContents.notes.findIndex((note) => note.parentId === this.parentBox.attr('id'));
+        if(!this.targetTimeout){
+            this.targetTimeout = setTimeout(() => {
+                if(targetIndexNote >=0){
+                    this.contentDCtrlService.poolContents.notes[targetIndexNote].html =  $('#'+this.parentBox.attr('id')+'-note-area').html();
+                    this.saveDocument();
+                    this.targetTimeout = null
+                }          
+            }, 2000);
+        }  
+      
+    }
+    private cloneIconNote(targetIcon){
+        let targetTempIcon = this.parentBox.attr('id')+'-note-icon';
+        $('.template-doc').append(
+            targetIcon.clone().attr('id',targetTempIcon) 
+            .addClass('note-icon-only')
+            .css('top',targetIcon.offset().top)
+            .css('left',targetIcon.offset().left)
+        ).ready((element)=>{
+            this.parentBox.hide();
+            $('#'+targetTempIcon).draggable()
+            $('#'+targetTempIcon).unbind('click').bind('click',(element) => {
+                this.parentBox.show();
+                this.parentBox.addClass('show')
+                this.parentBox.removeClass('hide')
+                this.parentBox.css('top', $(element.currentTarget).offset().top-8)
+                this.parentBox.css('left', $(element.currentTarget).offset().left - this.parentBox.width()+38)
+                $(element.currentTarget).remove();
+                this.contentDCtrlService.poolContents.notes[this.targetIndexNote].status = 'show';
+                this.saveDocument();
+            })
+        })
+    }
+
+    private customStyleInput(){
+        this.rootElement.find('.sp-replacer').removeClass('mt-2')
+        .css('height','26px')
+        .css('padding','0.3rem 0 0 0.3rem')
+        this.rootElement.find('.sp-preview')
+        .css('width','20px')
+        .css('height','15px')
+        this.rootElement.find('.sp-dd')
+        .css('padding','0')
+        this.rootElement.find('.font-select > span')
+        .css('height','26px')
+        .css('padding','0.4rem 0 0 0.3rem')
+        .css('font-size','12px')
+        .css('line-height','1')
+        this.rootElement.find('.font-select .fs-results li')
+        .css('font-size','12px')
+        this.rootElement.find('.font-select')
+        .css('width','100%')
+    }
+    private saveDocument() {
+        this.updateAction.actionCase = Constants.document.contents.lifeCycle.saveDocument;
+        let saveobjectTemplate: DocumentModel = {
+            nameDocument: this.documentDCtrlService.currentDocumentName,
+            previewImg: this.documentDCtrlService.currentResult.previewImg,
+            userId:this.commonDCtrlService.userId,
+            id: this.documentDCtrlService.currentResult.id, 
+            html: $('#contentTemplate').html(),
+            status: this.documentDCtrlService.currentResult.status,
+            otherDetail: this.documentDCtrlService.currentResult.otherDetail,
+            contents:this.contentDCtrlService.poolContents
+        }
+        this.updateAction.data = saveobjectTemplate;
+        this.contentDCtrlService.updateContent = this.updateAction
     }
 }

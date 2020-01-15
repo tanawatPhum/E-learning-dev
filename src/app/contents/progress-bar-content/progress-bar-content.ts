@@ -16,15 +16,15 @@ import { DocumentDataControlService } from '../../services/document/document-dat
 export class ProgressBarContentComponent implements OnInit,ContentInterFace  {
     @Input() parentBox: JQuery<Element>;
     @Input() lifeCycle:string;
-    private targetProgressBar:ProgressBarContentModel = new ProgressBarContentModel();
-    private actionCase = {
+    public targetProgressBar:ProgressBarContentModel = new ProgressBarContentModel();
+    public actionCase = {
         browseImg:'browseImg',
         loadingImg:'loadingImg',
         showImg:'showImg'
     }
-    private currentCase = this.actionCase.browseImg;
-    private contentTypes = Constants.document.contents.types;
-    private rootElement:JQuery<Element>;
+    public currentCase = this.actionCase.browseImg;
+    public contentTypes = Constants.document.contents.types;
+    public rootElement:JQuery<Element>;
     constructor(
         private commonService :CommonService,
         private documentService:DocumentService,
@@ -50,7 +50,7 @@ export class ProgressBarContentComponent implements OnInit,ContentInterFace  {
         this.targetProgressBar  = this.contentDCtrlService.poolContents.progressBar.find((progressBar)=>progressBar.parentId === this.parentBox.attr('id'));      
         this.initialFile();
     }
-    private initialFile(){
+    public initialFile(){
         if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.createContent){
             this.addProgressBar();
         }
@@ -75,7 +75,7 @@ export class ProgressBarContentComponent implements OnInit,ContentInterFace  {
     loadProgressBar(){
         this.rootElement.find('.content-progress-bar').attr('id',this.parentBox.attr('id') + '-progressBar');
     }
-    private async handleProgressBar(){
+    public async handleProgressBar(){
         let summaryOfPercent = 0;
         let numberOfContentProgress =0;
         for await (let parentBox of this.contentDCtrlService.poolContents.progressBar){

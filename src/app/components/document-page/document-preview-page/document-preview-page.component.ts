@@ -28,6 +28,7 @@ import { Constants } from 'src/app/global/constants';
 import { ContentDataControlService } from '../../../services/content/content-data-control.service';
 import { ContentRouting } from '../../../app-content-routing';
 import { createCustomElement, NgElement, WithProperties } from '@angular/elements';
+import { AttachSession } from 'protractor/built/driverProviders';
 
 declare var CKEDITOR: any;
 
@@ -44,6 +45,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
     private currentResult: DocumentModel = new DocumentModel();
     private contentTemplateSize: ScreenDetailModel = new ScreenDetailModel();
     // private currentScreenSize: ScreenDetailModel = new ScreenDetailModel();
+   
     private documentTracks: DocumentTrackModel[] = new Array<DocumentTrackModel>();
     private currentDocumentTrack: DocumentTrackModel = new DocumentTrackModel();
     public boxType = Constants.document.boxes.types;
@@ -64,7 +66,6 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         },
         handle: {
             handleSubForm: 'handleSubForm',
-            handleVideo: 'handleVideo',
             handleProgressBar: 'handleProgressBar',
             handleComment: 'handleComment',
             handleToDoList: 'handleToDoList',
@@ -102,6 +103,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
     private documentTrackInterval:any;
     private currentUrlParam:any;
     private systemDocument:DocumentModel = new DocumentModel();
+    private timeoutSaveDoc:any;
     constructor(
         private documentDataService: DocumentDataControlService,
         private documentDCtrlService:DocumentDataControlService,
@@ -120,10 +122,22 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
     //     // this.handles(this.actions.handle.handleDocumentTrack);
     // }
     ngOnInit() {
+        this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
+            if(detail.actionCase === Constants.document.contents.lifeCycle.saveDocument){
+                if(!this.timeoutSaveDoc){
+                    this.timeoutSaveDoc  = setTimeout(() => {
+                        this.customSaveDocument(detail.data); 
+                        clearTimeout(this.timeoutSaveDoc)
+                        this.timeoutSaveDoc = null;   
+                    }, 3000);
+                }
+     
+                
+            } 
+        })
         
     }
     ngOnDestroy() {
-        clearInterval(this.documentTrackInterval)
         $(document).find('body').css('overflow-x','auto');
         $(document).find('body').css('overflow-y','hidden');
         this.documentDataService.previousPage =  DocumentPreviewPageComponent.name
@@ -154,12 +168,19 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                 this.CommonDataService.userId =  this.currentUrlParam['userId'];
             }
            // console.log(this.documentDataService.currentDocumentName);
-            this.loadHtml(this.documentDataService.currentDocumentName);
-      
+          
+            this.loadDocFromDB();
         })
         
 
     }
+    public loadDocFromDB(){
+        this.documentService.loadDocFromDB().subscribe((documentList:any)=>{
+            this.documentDCtrlService.documentList = documentList;
+            this.loadHtml(this.documentDataService.currentDocumentName);
+        })
+    }
+    
 
     public loadHtml(documentName?) {
         if (electron) {
@@ -170,7 +191,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
                     this.setElements(this.actions.element.setResultElement, null, result);
                     this.setTemplate(this.actions.template.setDocumentTrack);
                 }
-                this.currentResult = result;
+                this.currentResult = this.documentDataService.currentResult  = result;
             });
         } else {
             this.documentService.loadDocFromDB(this.commonService.getPatternId(documentName)).subscribe((result) => {
@@ -202,7 +223,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
            // this.contentTemplateSize = JSON.parse(localStorage.getItem('contentTemplateSize'))|| new ScreenDetailModel();
             this.rootElement = $(this.documentPreviewContent.nativeElement);
             // - Constants.general.element.css.navBar.height
-            this.rootElement.css('height', $(window).height())
+          //  this.rootElement.css('height', $(window).height())
 
             
             // this.currentScreenSize.height = $(this.rootElement).outerHeight();
@@ -217,9 +238,11 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         else if (action === this.actions.template.setDocumentTrack) {
             this.documentService.loadDocTrackFromDB().subscribe((documentTrack) => {
                 this.documentTracks = this.documentDCtrlService.documentTracks = documentTrack;
-                console.log('documentTrack',documentTrack)
+                console.log('documentTrack',this.documentTracks)
                 if (this.documentTracks.length > 0) {
-                    this.currentDocumentTrack = this.documentDataService.currentDocumentTrack = documentTrack.find((documentTrack) => documentTrack.id === this.commonService.getPatternId(this.documentDataService.currentDocumentName));
+                    this.currentDocumentTrack = this.documentDCtrlService.documentTrack =this.documentDataService.currentDocumentTrack = documentTrack.find((documentTrack) => documentTrack.id === this.commonService.getPatternId(this.documentDataService.currentDocumentName));
+                    
+                    console.log(this.documentDCtrlService.documentTrack)
                     this.setElements(this.actions.element.setResultElement, null, this.currentResult);
                     // this.handles(this.actions.handle.handleDocumentTrack);
                     // this.handles(this.actions.handle.handleToDoList);
@@ -257,11 +280,33 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             if(rulerDetail&&rulerDetail.paddingLeft<0){
                 rulerDetail.paddingLeft = 0;
             }
-        let html = '<div class="template-scroll" id="contentTemplate" style="overflow:hidden;position:relative;padding-left:'+rulerDetail.paddingLeft+'%;padding-right:' +(100-rulerDetail.paddingRight)+  '%;width:' +  this.contentTemplateSize.width + 'px;height:' + this.contentTemplateSize.height + 'px" >' + data.html + '</div>'
-       // let html = data.html; 
-            this.rootElement.html(html);
-            this.retrieveData(this.actions.data.retrieveResultData, data);
-            this.defineComponent()
+       // let html = '<div class="template-scroll" id="contentTemplate" style="overflow:hidden;position:relative;padding-left:'+rulerDetail.paddingLeft+'%;padding-right:' +(100-rulerDetail.paddingRight)+  '%;width:' +  this.contentTemplateSize.width + 'px;height:' + this.contentTemplateSize.height + 'px" >' + data.html + '</div>'
+            let html = `<div id="contentTemplate"
+            style="
+            padding-left:${rulerDetail.paddingLeft}%;padding-right:${(100-rulerDetail.paddingRight)}%
+            "
+
+            >${data.html}</div>`
+
+                      // style="
+                //     height:${this.contentTemplateSize.height}px;
+                //     width:${this.contentTemplateSize.width}px;
+                // "
+                this.retrieveData(this.actions.data.retrieveResultData, data);
+                this.rootElement.html(html);   
+                this.defineComponent()                 
+         
+    
+            // this.rootElement.find('.template-doc').css('height',this.contentTemplateSize.height +'px');
+            // this.rootElement.find('.template-doc').css('width',this.contentTemplateSize.width +'px');
+
+        
+            // setTimeout(() => {
+            //     this.defineComponent()             
+            // }, 3000);
+                 
+
+  
             this.setElements(this.actions.element.previewElement);
             // this.handles(this.actions.handle.handleSubForm);
             // this.handles(this.actions.handle.handleVideo);
@@ -298,6 +343,9 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             // this.rootElement.find('.content-box').find('.content-box-label').remove();
             this.rootElement.find('.template-doc').attr('contenteditable', 'false');
             this.rootElement.find('.template-doc').removeAttr("title");
+            this.rootElement.find('.template-doc').css('overflow','unset')
+
+            this.rootElement.find('.template-doc').css('cursor','default')
             // // this.rootElement.find('.template-doc').css('width', this.documentDataService.currentScreenSize.width +'px');
             // this.rootElement.find('.content-box').find('.content-progress-bar').find('.progress-bar').css('width', 0)
             // this.rootElement.find('.content-comment').css('height', 'auto');
@@ -328,18 +376,22 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             // let ratioW = this.documentDataService.currentScreenSize.width / this.contentTemplateSize.width;
             // //let ratioH = this.documentDataService.currentScreenSize.height / (this.contentTemplateSize.height)
             // //console.log("ratioH",ratioH)
-            let ratioH = this.documentDataService.currentScreenSize.height / this.contentTemplateSize.height;
-            let ratioW = this.documentDataService.currentScreenSize.width / this.contentTemplateSize.width;
-            console.log(ratioW)
-
+            //let ratioH = this.documentDataService.currentScreenSize.height / this.contentTemplateSize.height;
+            let ratioW = this.documentDataService.currentScreenSize.width / (this.contentTemplateSize.width );
+            this.rootElement.find('#contentTemplate').css({
+                zoom:ratioW
+            })
             // let scale = Math.min(
             //     this.documentDataService.currentScreenSize.width/ this.contentTemplateSize.width,    
             //     this.documentDataService.currentScreenSize.height /this.contentTemplateSize.height
             //   );
-            this.rootElement.find('#contentTemplate').css({
-                transform:  'scale( '+ ratioW + ','+ratioW +')',
-                transformOrigin: 'left top'
-            });
+            // this.rootElement.find('#contentTemplate').css({
+            //     transform:  'scale( '+ ratioW + ','+ratioW +') translateZ(0)',
+            //     transformOrigin: 'left top',
+            //     'backface-visibility': 'hidden',
+            //     filter: 'blur(0px)',
+            //     '-webkit-font-smoothing': 'subpixel-antialiased'
+            // });
             // this.rootElement.find('.content-')
             // this.rootElement.find('.content-box').each((index,element)=>{
             //     console.log( $(element).position().top )
@@ -546,7 +598,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             let targetCommentIndex;
             let replyComment: commentDetailModel = {
                 id: 'comment-reply-' + $('.comment-reply').length,
-                userId: 0,
+                userId: '',
                 message: this.currentCommentDetail.message,
                 isQuestion: false,
                 imgData: null,
@@ -636,95 +688,6 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             this.rootElement.find('.carousel-control-prev').click((event) => {
                 $('#' + $(event.currentTarget).attr('data-subformId')).carousel('prev');
             })
-        }
-        else if (action === this.actions.handle.handleVideo) {
-            setTimeout(() => {
-                this.currentDocumentTrack.contents.forEach((content)=>{
-                    if(content.contentType === this.boxType.boxVideo){
-                    let targetVideo = this.videos.find((video)=>video.id === content.id)
-                    let targetWistiaVideo =  Wistia.api(targetVideo.data.wistiaId);
-                    targetWistiaVideo.time(content.data);
-                    }
-
-                })
-                // this.currentResult.contents.videos.forEach(async video => {
-                //     let targetvideo =  Wistia.api(video.data.wistiaId);
-                //     targetvideo.time(video.data.currentWatchingTime);
-                // });
-            }, 300);
-            this.rootElement.find('.content-video').click((event) => {
-                let targetVideoIndex = this.currentResult.contents.videos.findIndex((video) => video.id === $(event.currentTarget).attr('id'))
-                let targetVideo = this.currentResult.contents.videos[targetVideoIndex];
-                if (targetVideo.data.channelStream === 'wistia') {
-                    let video = Wistia.api(targetVideo.data.wistiaId);
-                    let isHasProgressBar = this.rootElement.find('.content-progress-bar')
-                    let isHasToDoList= this.rootElement.find('.content-toDoList')
-                    let targetVideoTrackIndex = this.currentDocumentTrack.contents.findIndex(content => content.parentId === this.currentResult.contents.videos[targetVideoIndex].parentId)
-                    video.bind("play", ()=> {
-                        this.currentDocumentTrack.contents[targetVideoTrackIndex].conditions.videoCondition.isClickPlay =  true;
-                      //  console.log(this.currentDocumentTrack.contents[targetVideoTrackIndex]);
-                        if (isHasToDoList.length > 0) {
-                            this.handles(this.actions.handle.handleToDoList);
-                        }
-                        // if(targetVideo.condition.isMustWatchingEnd){
-                            video.bind("secondchange", () => {
-                                // this.videos[targetVideoIndex].data.currentWatchingTime = video.time();
-                                // console.log(this.videos[targetVideoIndex].data.currentWatchingTime);
-                                // this.currentResult.contents.videos[targetVideoIndex].data.currentWatchingTime = video.time();
-                                // console.log(this.currentResult.contents.videos[targetVideoIndex].data.currentWatchingTime)
-                                this.currentDocumentTrack.contents[targetVideoTrackIndex].data= video.time()
-                                this.currentDocumentTrack.contents[targetVideoTrackIndex].progress = (video.time()/video.duration()) * 100;
-                                if (targetVideoTrackIndex >= 0) {
-        
-                                    if (isHasProgressBar.length > 0) {
-                                        this.handles(this.actions.handle.handleProgressBar);
-                                    }
-                                    if(Math.ceil(video.time()) === Math.ceil(video.duration())){
-                                        this.currentDocumentTrack.contents[targetVideoTrackIndex].progress = 100;
-                                        this.handles(this.actions.handle.handleDocumentTrack)
-                                        if (isHasToDoList.length > 0) {
-                                            this.handles(this.actions.handle.handleToDoList);
-                                        }
-                                        clearInterval(this.documentTrackInterval)
-                                    }else{
-                                        this.documentTrackInterval = setInterval(()=>{
-                                            this.handles(this.actions.handle.handleDocumentTrack);
-                                        },2000)
-                                    }
-                                }
-                            })
-                        // }
-                        // else{
-                        //     this.handles(this.actions.handle.handleDocumentTrack);
-                        //     this.currentDocumentTrack.contents[targetVideoTrackIndex].progress = 100;
-                        //     this.handles(this.actions.handle.handleToDoList);
-                        // }
-                    });
-
-                    video.bind("pause", function() {
-                        clearInterval(this.documentTrackInterval)
-                    });
-                    video.bind("end", function() {
-                        clearInterval(this.documentTrackInterval)
-                    });
-     
-                    // console.log(targetVideo);
-                   // let targetVideoTrackIndex = this.currentDocumentTrack.contents.findIndex(content => content.parentId === this.currentResult.contents.videos[targetVideoIndex].parentId)
-                    // video.bind("secondchange", () => {
-                    //     this.currentResult.contents.videos[targetVideoIndex].data.currentWatchingTime = video.time();
-                    //     if (isHasProgressBar.length > 0) {
-                    //         this.handles(this.actions.handle.handleProgressBar)
-                    //     }
-                    //     if (Math.ceil(video.time()) === Math.ceil(video.duration()) && targetVideoTrackIndex >= 0) {
-                    //         this.currentDocumentTrack.contents[targetVideoTrackIndex].progress = 100;
-                    //         this.handles(this.actions.handle.handleToDoList, null,'saveDocTrack');
-                    //         // let targetParentBox =  $('#'+this.currentResult.contents.videos[targetVideoIndex].parentId);
-                    //         // this.handles(this.actions.handle.handleToDoList,targetParentBox)
-                    //     }
-                    // })
-                }
-            })
-
         }
         else if (action === this.actions.handle.handleProgressBar) {
             let summaryOfPercent = 0;
@@ -897,7 +860,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
 
                      task.objectTodoList.forEach((content) => {
                       let targetContent =  this.currentDocumentTrack.contents.find(contentTrack=>contentTrack.parentId === content.id);
-
+            
                       if(targetContent){
                           if( targetContent.contentType === this.boxType.boxVideo && !targetContent.conditions.videoCondition.isMustWatchingEnd&&targetContent.conditions.videoCondition.isClickPlay ){
                                 summaryOfProgress += 100;
@@ -1131,20 +1094,6 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
             status: this.currentResult.status,
             otherDetail: this.currentResult.otherDetail,
             contents:this.contentDCtrlService.poolContents
-            // contents: {
-            //     boxes: this.boxes,
-            //     files:this.files,
-            //     links:this.links,
-            //     textAreas: this.textAreas,
-            //     imgs: this.imgs,
-            //     videos: this.videos,
-            //     subFroms: this.subForms,
-            //     comments: this.comments,
-            //     todoList: this.toDoLists,
-            //     exams:this.exams,
-            //     notes:this.notes,
-            //     progressBar: this.progressBars
-            // }
         }
         console.log('saveobjectTemplate',saveobjectTemplate)
         this.documentService.saveDocument(this.currentResult.nameDocument, saveobjectTemplate).subscribe((status) => {
@@ -1164,6 +1113,10 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         }
 
         return this.documentService.saveDocumentTrack(nameDocument, saveObjectTrackTemplate)
+    }
+    private customSaveDocument(saveobjectTemplate:DocumentModel) {
+        this.documentService.saveDocument(saveobjectTemplate.nameDocument, saveobjectTemplate).subscribe((status) => {
+        })
     }
 
     public async goToSubForm(element:JQuery<Element>) {
@@ -1212,6 +1165,7 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
     private retrieveData(action: string, results: DocumentModel, element?: JQuery<Element>) {
         if (action === this.actions.data.retrieveResultData) {
             this.contentDCtrlService.poolContents =  results.contents;
+            console.log('xxxxx', this.contentDCtrlService.poolContents)
             // this.boxes = results.contents.boxes || new Array<BoxContentModel>();
             // this.subForms = results.contents.subFroms || new Array<SubFormContentModel>();
             // this.imgs = results.contents.imgs||  new Array<ImgContentModel>();

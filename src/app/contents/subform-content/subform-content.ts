@@ -4,11 +4,13 @@ import { CommonService } from 'src/app/services/common/common.service';
 import { DocumentService } from 'src/app/services/document/document.service';
 import { ContentDataControlService } from 'src/app/services/content/content-data-control.service';
 import { DocumentDataControlService } from '../../services/document/document-data-control.service';
-import { SubFormContentDetailModel } from 'src/app/models/document/elements/subForm-content.model';
+import { SubFormContentDetailModel, SubFormContentLinkModel } from 'src/app/models/document/elements/subForm-content.model';
 import { SubFormContentConditionModel, SubFormContentModel } from '../../models/document/elements/subForm-content.model';
 import { ScreenDetailModel } from 'src/app/models/common/common.model';
 import { UpdateContentModel } from '../../models/common/common.model';
 import { Constants } from '../../global/constants';
+import { ActivatedRoute, Router } from '@angular/router';
+import { DocumentTrackModel, DocumentTrackContent } from 'src/app/models/document/document.model';
 
 @Component({
     moduleId: module.id,
@@ -16,56 +18,59 @@ import { Constants } from '../../global/constants';
     templateUrl: 'subform-content.html',
     styleUrls: ['subform-content.scss']
 })
-export class SubformContentComponent  implements OnInit,ContentInterFace,AfterViewInit  {
+export class SubformContentComponent implements OnInit, ContentInterFace, AfterViewInit {
     @Input() parentBox: JQuery<Element>;
-    @Input() lifeCycle:string;
+    @Input() lifeCycle: string;
     @HostListener('click', ['$event']) onClick(event) {
         event.stopPropagation();
         event.stopImmediatePropagation();
     }
-    private rootElement:JQuery<Element>;
-    private childDocuments: SubFormContentDetailModel[] = new Array<SubFormContentDetailModel>();
-    private currentSubFormType ={
-        id:null,
-        name:null
+    public rootElement: JQuery<Element>;
+    public childDocuments: SubFormContentDetailModel[] = new Array<SubFormContentDetailModel>();
+    public currentSubFormType = {
+        id: null,
+        name: null
     };
-    private contentTemplateSize: ScreenDetailModel = new ScreenDetailModel();
-    private targetSubform:SubFormContentModel = new SubFormContentModel();
-    private actionCase = {
-        addSubform:'addSubform',
+    public contentTemplateSize: ScreenDetailModel = new ScreenDetailModel();
+    public targetSubform: SubFormContentModel = new SubFormContentModel();
+    public actionCase = {
+        addSubform: 'addSubform',
     }
-    private currentCase = this.actionCase.addSubform;
+    public contentTypes = Constants.document.contents.types;
+    public currentCase = this.actionCase.addSubform;
     constructor(
-        private commonService :CommonService,
-        private documentDCtrlService:DocumentDataControlService,
-        private documentService:DocumentService,
-        private contentDCtrlService:ContentDataControlService,
-        private element: ElementRef
-        
-    ){}
+        private commonService: CommonService,
+        private documentDCtrlService: DocumentDataControlService,
+        private documentService: DocumentService,
+        private contentDCtrlService: ContentDataControlService,
+        private element: ElementRef,
+        private route: ActivatedRoute,
+        private router: Router,
+
+    ) { }
     ngOnInit() {
-        this.rootElement = $(this.element.nativeElement); 
+        this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
-        this.contentTemplateSize =    JSON.parse(localStorage.getItem('contentTemplateSize'))
+        this.contentTemplateSize = JSON.parse(localStorage.getItem('contentTemplateSize'))
     }
-    ngAfterViewInit(){
+    ngAfterViewInit() {
         this.initialSubform();
-     
+
     }
-    private initialSubform(){
-        this.targetSubform =  this.contentDCtrlService.poolContents.subFroms.find((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
+    public initialSubform() {
+        this.targetSubform = this.contentDCtrlService.poolContents.subFroms.find((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
         if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.createContent) {
             this.handleAddSubform();
-        }else if(this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor || this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadPreview){
-            if(this.targetSubform){
-                this.currentSubFormType.id =  this.targetSubform.subformType;
+        } else if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor || this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadPreview) {
+            if (this.targetSubform) {
+                this.currentSubFormType.id = this.targetSubform.subformType;
                 this.addSubform();
             }
-          
+
         }
 
     }
-    handleAddSubform(){
+    handleAddSubform() {
         this.currentSubFormType = { id: 'subform-link', name: 'link' };
         let htmlDocumentList = '<div class="list-group text-left">';
         this.createDocumentChild();
@@ -84,104 +89,105 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
         htmlDocumentList += '</div>'
         this.rootElement.find('.subform-col').html(htmlDocumentList)
         this.handleSubform();
+  
     }
-    handleSubform(){
-            let targetSubform = this.contentDCtrlService.poolContents.subFroms.find(parentBox => parentBox.parentBoxId === this.parentBox.attr('id'))
-            if (targetSubform) {
-                targetSubform.subformList.forEach((detail) => {
-                    this.rootElement.find('.toolbar-subform').find('#subform-name-' + detail.id).prop('checked', true);
-                })
-                if (targetSubform.subformList.length > 0) {
-                    if (targetSubform.subformList[0].type === "subform-silde") {
-                        this.rootElement.find('.toolbar-subform').find('[id="' + targetSubform.subformList[0].type + '"]').text('Silde (' + targetSubform.subformList.length + ')');
-                    } else if (targetSubform.subformList[0].type === "subform-link") {
-                        this.rootElement.find('.toolbar-subform').find('[id="' + targetSubform.subformList[0].type + '"]').text('Link (' + targetSubform.subformList.length + ')');
-                    }
-
-                    this.removeStyleSubformActive();
-                    this.addStyleSubformActive( this.rootElement.find('.toolbar-subform').find('#' + targetSubform.subformList[0].type));
+    handleSubform() {
+        let targetSubform = this.contentDCtrlService.poolContents.subFroms.find(parentBox => parentBox.parentBoxId === this.parentBox.attr('id'))
+        if (targetSubform) {
+            targetSubform.subformList.forEach((detail) => {
+                this.rootElement.find('.toolbar-subform').find('#subform-name-' + detail.id).prop('checked', true);
+            })
+            if (targetSubform.subformList.length > 0) {
+                if (targetSubform.subformList[0].type === "subform-silde") {
+                    this.rootElement.find('.toolbar-subform').find('[id="' + targetSubform.subformList[0].type + '"]').text('Silde (' + targetSubform.subformList.length + ')');
+                } else if (targetSubform.subformList[0].type === "subform-link") {
+                    this.rootElement.find('.toolbar-subform').find('[id="' + targetSubform.subformList[0].type + '"]').text('Link (' + targetSubform.subformList.length + ')');
                 }
-            }
-            this.rootElement.find('.toolbar-subform').find('.nav-item').click((itemElement) => {
+
                 this.removeStyleSubformActive();
-                this.addStyleSubformActive($(itemElement.currentTarget));
-                this.currentSubFormType = {
-                    id: $(itemElement.currentTarget).attr('id'),
-                    name: $(itemElement.currentTarget).data('subformtype')
-                }
-                this.rootElement.find('.toolbar-subform').find('#subform-silde').text('Silde (0)');
-                this.rootElement.find('.toolbar-subform').find('#subform-link').text('Link (0)');
-                let targetSubformIndex = this.contentDCtrlService.poolContents.subFroms.findIndex((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
-                
-                if(targetSubformIndex >= 0){
-                    if (this.currentSubFormType.id === "subform-silde") {
-                        this.rootElement.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Silde (' + this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.length + ')');
-                    }
-                    else if (this.currentSubFormType.id === "subform-link") {
-                        this.rootElement.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Link (' + this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.length + ')');
-                    }
-                    this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.forEach((detail) => {
-                        detail.type = this.currentSubFormType.id;
-                    });
-                }
-      
-            });
+                this.addStyleSubformActive(this.rootElement.find('.toolbar-subform').find('#' + targetSubform.subformList[0].type));
+            }
+        }
+        this.rootElement.find('.toolbar-subform').find('.nav-item').click((itemElement) => {
+            this.removeStyleSubformActive();
+            this.addStyleSubformActive($(itemElement.currentTarget));
+            this.currentSubFormType = {
+                id: $(itemElement.currentTarget).attr('id'),
+                name: $(itemElement.currentTarget).data('subformtype')
+            }
+            this.rootElement.find('.toolbar-subform').find('#subform-silde').text('Silde (0)');
+            this.rootElement.find('.toolbar-subform').find('#subform-link').text('Link (0)');
+            let targetSubformIndex = this.contentDCtrlService.poolContents.subFroms.findIndex((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
 
-            this.rootElement.find('.toolbar-subform').find('input[type="checkbox"]').click((itemElement) => {
-                let targetDocument = this.documentDCtrlService.documentNavList.find((document) => document.nameDocument === $(itemElement.currentTarget).val())
-                let condition:SubFormContentConditionModel =  new SubFormContentConditionModel();
-                let newSubform: SubFormContentDetailModel = {
-                    id: targetDocument.id,
-                    documentName: targetDocument.nameDocument,
-                    isLinked: true,
-                    linkName: targetDocument.nameDocument,
-                    type: this.currentSubFormType.id,
-                    isConfirm: false,
-                    condition:condition
-                }
-                if (this.contentDCtrlService.poolContents.subFroms.length === 0 || !this.contentDCtrlService.poolContents.subFroms.find((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'))) {
-                    this.contentDCtrlService.poolContents.subFroms.push(
-                        {
-                            parentBoxId: this.parentBox.attr('id'),
-                            subformType:this.currentSubFormType.id,
-                            subformList: [newSubform]
-                        }
-                    )
-                } else {
-                    let targetSubformIndex = this.contentDCtrlService.poolContents.subFroms.findIndex((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
-                    let targetDocument = this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.find((document)=>document.id === newSubform.id)
-                    if ($(itemElement.currentTarget).is(':checked') && !targetDocument) {
-                        this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.push(newSubform)
-                    } else {
-                        this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList = this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.filter((detail) => detail.documentName != $(itemElement.currentTarget).val())
-                    }
-                }
-                let targetSubform = this.contentDCtrlService.poolContents.subFroms.find((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
-                // if(targetSubform.subformList.length>0){
+            if (targetSubformIndex >= 0) {
                 if (this.currentSubFormType.id === "subform-silde") {
-                    this.rootElement.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Silde (' + targetSubform.subformList.length + ')');
+                    this.rootElement.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Silde (' + this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.length + ')');
                 }
                 else if (this.currentSubFormType.id === "subform-link") {
-                    this.rootElement.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Link (' + targetSubform.subformList.length + ')');
+                    this.rootElement.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Link (' + this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.length + ')');
                 }
-                this.removeStyleSubformActive();
-                this.addStyleSubformActive(this.rootElement.find('.toolbar-subform').find('#' + this.currentSubFormType.id));
-            });
-            this.rootElement.find('.carousel-control-next').click((event) => {
-                $('#' + $(event.currentTarget).attr('data-subformId')).carousel('next');
-            })
-            this.rootElement.find('.carousel-control-prev').click((event) => {
-                $('#' + $(event.currentTarget).attr('data-subformId')).carousel('prev');
-            })
-            this.rootElement.find('.toolbar-subform').find('#subform-btn-submit').click((btnElement) => {
-                btnElement.stopPropagation();
+                this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.forEach((detail) => {
+                    detail.type = this.currentSubFormType.id;
+                });
+            }
+
+        });
+
+        this.rootElement.find('.toolbar-subform').find('input[type="checkbox"]').click((itemElement) => {
+            let targetDocument = this.documentDCtrlService.documentNavList.find((document) => document.nameDocument === $(itemElement.currentTarget).val())
+            let condition: SubFormContentConditionModel = new SubFormContentConditionModel();
+            let newSubform: SubFormContentDetailModel = {
+                id: targetDocument.id,
+                documentName: targetDocument.nameDocument,
+                isLinked: true,
+                linkName: targetDocument.nameDocument,
+                type: this.currentSubFormType.id,
+                isConfirm: false,
+                condition: condition
+            }
+            if (this.contentDCtrlService.poolContents.subFroms.length === 0 || !this.contentDCtrlService.poolContents.subFroms.find((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'))) {
+                this.contentDCtrlService.poolContents.subFroms.push(
+                    {
+                        parentBoxId: this.parentBox.attr('id'),
+                        subformType: this.currentSubFormType.id,
+                        subformList: [newSubform]
+                    }
+                )
+            } else {
                 let targetSubformIndex = this.contentDCtrlService.poolContents.subFroms.findIndex((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
-                this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.forEach((subform) => {
-                    subform.isConfirm = true;
-                })
-                this.targetSubform =  this.contentDCtrlService.poolContents.subFroms.find((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
-                this.addSubform();
+                let targetDocument = this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.find((document) => document.id === newSubform.id)
+                if ($(itemElement.currentTarget).is(':checked') && !targetDocument) {
+                    this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.push(newSubform)
+                } else {
+                    this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList = this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.filter((detail) => detail.documentName != $(itemElement.currentTarget).val())
+                }
+            }
+            let targetSubform = this.contentDCtrlService.poolContents.subFroms.find((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
+            // if(targetSubform.subformList.length>0){
+            if (this.currentSubFormType.id === "subform-silde") {
+                this.rootElement.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Silde (' + targetSubform.subformList.length + ')');
+            }
+            else if (this.currentSubFormType.id === "subform-link") {
+                this.rootElement.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Link (' + targetSubform.subformList.length + ')');
+            }
+            this.removeStyleSubformActive();
+            this.addStyleSubformActive(this.rootElement.find('.toolbar-subform').find('#' + this.currentSubFormType.id));
+        });
+        this.rootElement.find('.carousel-control-next').click((event) => {
+            $('#' + $(event.currentTarget).attr('data-subformId')).carousel('next');
+        })
+        this.rootElement.find('.carousel-control-prev').click((event) => {
+            $('#' + $(event.currentTarget).attr('data-subformId')).carousel('prev');
+        })
+        this.rootElement.find('.toolbar-subform').find('#subform-btn-submit').click((btnElement) => {
+            btnElement.stopPropagation();
+            let targetSubformIndex = this.contentDCtrlService.poolContents.subFroms.findIndex((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
+            this.contentDCtrlService.poolContents.subFroms[targetSubformIndex].subformList.forEach((subform) => {
+                subform.isConfirm = true;
             })
+            this.targetSubform = this.contentDCtrlService.poolContents.subFroms.find((parentBox) => parentBox.parentBoxId === this.parentBox.attr('id'));
+            this.addSubform();
+        })
 
         this.rootElement.find('.content-box').find('.content-subform').find('.carousel-control-next').click((event) => {
             $('#' + $(event.currentTarget).attr('data-subformId')).carousel('next');
@@ -191,7 +197,7 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
         })
     }
 
-    createDocumentChild(){
+    createDocumentChild() {
         this.childDocuments = new Array<SubFormContentDetailModel>();
         this.contentDCtrlService.poolContents.subFroms.forEach((parentBox) => {
             parentBox.subformList.forEach((subform) => {
@@ -204,17 +210,17 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
             })
         });
     }
-    removeStyleSubformActive(){
+    removeStyleSubformActive() {
         this.rootElement.find('.toolbar-subform').find('.nav-item').removeClass('active');
         this.rootElement.find('.toolbar-subform').find('.nav-item').removeClass('text-primary');
     }
-    addStyleSubformActive(element:JQuery<Element>){
+    addStyleSubformActive(element: JQuery<Element>) {
         element.addClass('active');
         element.addClass('text-primary');
     }
-    addSubform(){
+    addSubform() {
         let htmlSubform = '';
-       
+
 
         if (this.currentSubFormType.id === 'subform-link') {
             htmlSubform += '<ul id="' + this.parentBox.attr('id') + '-subform" data-subformType="subform-link" class="list-group content-subform mt-3">';
@@ -234,7 +240,7 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
             htmlSubform += '<div class="carousel-inner full-screen">'
             this.targetSubform.subformList.forEach((subform, index) => {
                 let targetDocument = this.documentDCtrlService.documentList.find((document) => document.id === subform.id);
-    
+
                 if (targetDocument) {
                     if (index == 0) {
                         htmlSubform += '<div  class="carousel-item active full-screen subform-preview">'
@@ -264,13 +270,13 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
             htmlSubform += '</div>'
             htmlSubform += '</div>'
         }
-        
+
         this.rootElement.html(htmlSubform)
         this.targetSubform.subformList.forEach((subform, index) => {
             let targetDocument = this.documentDCtrlService.documentList.find((document) => document.id === subform.id);
             let updateAction: UpdateContentModel = new UpdateContentModel()
             updateAction.actionCase = Constants.document.contents.lifeCycle.loadsubForm;
-            updateAction.data  = targetDocument.contents;
+            updateAction.data = targetDocument.contents;
             this.contentDCtrlService.updateContent = updateAction
         })
         if (this.currentSubFormType.id === 'subform-silde') {
@@ -278,12 +284,19 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
             setTimeout(() => {
                 this.setPreviewSubformSilde();
             });
-            this.parentBox.resize(()=>{
+            this.parentBox.resize(() => {
                 this.handleSubformSildeRatio();
             })
+        }else{
+            if(this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadPreview){
+                this.setHandlePreviewSubformLink()
+            }
         }
+
+        this.addDocumentTrackSubform();
+        
         this.contentDCtrlService.setLastContent(this.parentBox);
-   
+
 
         // element.css('display', 'initial');
         // element.css('text-align', 'initial');
@@ -304,30 +317,105 @@ export class SubformContentComponent  implements OnInit,ContentInterFace,AfterVi
 
 
     }
-    handleSubformSildeRatio(){
+    handleSubformSildeRatio() {
         let ratioW = this.rootElement.find('.subform-preview').width() / this.contentTemplateSize.width;
         let ratioH = this.rootElement.find('.subform-preview').height() / this.contentTemplateSize.height;
         this.rootElement.find('.subform-preview').find('#contentTemplate').css({
-            transform: 'scale( ' + ratioW +',' + ratioH + ')'
+            transform: 'scale( ' + ratioW + ',' + ratioH + ')'
         });
     }
-    setPreviewSubformSilde(){
-            this.rootElement.find('.subform-preview').find('.template-doc').attr('contenteditable','false')
-            .css('cursor','default')
-            .css('pointer-events','none')
-            
-            this.rootElement.find('.subform-preview').find('.content-box').removeClass('ui-resizable');
-            this.rootElement.find('.subform-preview').find('.content-box').find('.ui-resizable-handle').remove();
-            this.rootElement.find('.subform-preview').find('.content-box').removeClass('.ui-draggable ui-draggable-handle');
-            this.rootElement.find('.subform-preview').find('.content-box').find('.content-box-label').hide()
-            this.rootElement.find('.subform-preview').find('.content-box').css('border', 'none');
-            this.rootElement.find('.subform-preview').find('.content-box').css('cursor', 'default');
-            this.rootElement.find('.subform-preview').find('.content-box').find('.content-textarea').attr('contenteditable','false')
-            this.rootElement.find('.subform-preview').find('.content-box').find('.content-textarea').css('cursor','default')
-            // this.rootElement.find('.subform-preview').find('.content-box').find('.content-video').css('pointer-events', 'initial');
+    setPreviewSubformSilde() {
+        if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor) {
+            this.rootElement.find('.subform-preview').find('.template-doc').attr('contenteditable', 'false')
+                .css('cursor', 'default')
+                .css('pointer-events', 'none')
+        }
+        else if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadPreview) {
+            this.rootElement.find('.subform-preview').find('.template-doc').attr('contenteditable', 'false')
+                .css('cursor', 'default')
+                .css('pointer-events', 'auto')
+                .css('overflow', 'auto')
+        }
+
+
+        this.rootElement.find('.subform-preview').find('.content-box').removeClass('ui-resizable');
+        this.rootElement.find('.subform-preview').find('.content-box').find('.ui-resizable-handle').remove();
+        this.rootElement.find('.subform-preview').find('.content-box').removeClass('.ui-draggable ui-draggable-handle');
+        this.rootElement.find('.subform-preview').find('.content-box').find('.content-box-label').hide()
+        this.rootElement.find('.subform-preview').find('.content-box').css('border', 'none');
+        this.rootElement.find('.subform-preview').find('.content-box').css('cursor', 'default');
+        this.rootElement.find('.subform-preview').find('.content-box').find('.content-textarea').attr('contenteditable', 'false')
+        this.rootElement.find('.subform-preview').find('.content-box').find('.content-textarea').css('cursor', 'default')
+
+  
+ 
+        // this.rootElement.find('.subform-preview').find('.content-box').find('.content-video').css('pointer-events', 'initial');
+    }
+    public setHandlePreviewSubformLink(){
+        this.rootElement.find('.content-subform').find('.subform-list').click((element)=>{
+            this.goToSubForm($(element.currentTarget));
+        })
     }
 
+
+
+    public async goToSubForm(element: JQuery<Element>) {
+        let targetContentIndex = await this.documentDCtrlService.currentDocumentTrack.contents.findIndex((content) => content.id === element.parents('.content-subform').attr('id')) 
+        if (targetContentIndex >= 0) {
+            let targetLinkIndex = this.documentDCtrlService.currentDocumentTrack.contents[targetContentIndex].conditions.subformCondition.isClickLinks.findIndex(link => link.linkName === element.attr('data-subformName'))
+            this.documentDCtrlService.currentDocumentTrack.contents[targetContentIndex].conditions.subformCondition.isClickLinks[targetLinkIndex].isClicked = true;
+        }
+      
+        this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName).subscribe(()=>{
+            let updateAction: UpdateContentModel = new UpdateContentModel()
+            updateAction.actionCase = Constants.document.contents.lifeCycle.clickSubForm; 
+
+            this.router.routeReuseStrategy.shouldReuseRoute = function () { return false; };
+            let currentUrl = this.router.url + '?';
+            this.router.navigateByUrl(currentUrl)
+                .then(() => {
+                    this.router.navigated = false;
+                    this.router.navigate(['documentPreview'], { queryParams: { documentName: element.attr('data-subformName') } })
+                });
+        });
     
+    }
+
+    public addDocumentTrackSubform() {
+        if(!this.documentDCtrlService.documentTrack.contents.find((content)=>content.parentId ===this.parentBox.attr('id'))){
+            let documentTrackContent = new DocumentTrackContent;
+            documentTrackContent.contentType = this.contentTypes.subform;
+            documentTrackContent.parentId = this.parentBox.attr('id');
+            documentTrackContent.name = this.parentBox.attr('name');
+            documentTrackContent.id = this.parentBox.attr('id') + '-subform'
+            documentTrackContent.progress = 0;
+            documentTrackContent.conditions.subformCondition.haveInDoList = false;
+            // documentTrackContent.conditions.subformCondition.haveInProgressBar = false;
+            let targetSubform =  this.parentBox.find('#'+documentTrackContent.id);
+            if(targetSubform.attr('data-subformtype') ==='subform-link'){
+                targetSubform.find('.subform-list').each((index,element)=>{
+                  if(!documentTrackContent.conditions.subformCondition.isClickLinks.find(link=>link.linkId === $(element).attr('data-subformid'))) { 
+                    let link:SubFormContentLinkModel={
+                        linkId:$(element).attr('data-subformid'),
+                        linkName: $(element).attr('data-subformname'),
+                        isClicked:false,
+                        progress:0
+                      }
+                      documentTrackContent.conditions.subformCondition.isClickLinks.push(link);
+                  }
     
+                })
+            }
+            console.log(documentTrackContent)
+            this.documentDCtrlService.documentTrack.contents.push(documentTrackContent)
+        }
+
+
+    }
+
+
+
+
+
 
 }

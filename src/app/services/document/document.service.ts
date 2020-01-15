@@ -44,6 +44,7 @@ export class DocumentService {
     }
     public indexDB: any;
     public highlighter: any;
+    private contentTypes = Constants.document.contents.types;
     // public createContent(){
     //     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(Img);
     //     const viewContainerRef = this.adHost.viewContainerRef;
@@ -368,10 +369,10 @@ export class DocumentService {
         });
     }
 
-    public compileStyles(styles: string, tagElement?: string) {
-        console.log(tagElement)
-        let editor = CKEDITOR.instances[this.documentDataService.nameTemplate];
-       
+    public compileStyles(styles: string, tagElement?: string,editor?:any) {
+
+        let targetEditor = CKEDITOR.instances[editor] || CKEDITOR.instances[this.documentDataService.nameTemplate];
+ 
         let style = new CKEDITOR.style({
             element: tagElement || 'span',
             attributes: {
@@ -379,7 +380,7 @@ export class DocumentService {
             }
         });
         console.log(style)
-        editor.applyStyle(style);
+        targetEditor.applyStyle(style);
     }
     public saveDocument(nameDocument, saveobjectTemplate): Observable<string> {
         return new Observable((subscriber) => {
@@ -584,6 +585,59 @@ export class DocumentService {
             subscriber.complete();
             subscriber.next()
 
+        })
+
+    }
+
+    public handleDocumentTrack(nameDocument):Observable<any>{
+        return new Observable((subscriber)=>{
+            let numberOfCondition = this.documentDataService.currentDocumentTrack.contents.length;
+            let numberOfProgress =0;
+            // console.log(this.currentDocumentTrack.contents[targetVideoTrackIndex])
+            this.documentDataService.currentDocumentTrack.contents.forEach((content) => {
+                if(content.contentType === this.contentTypes.video){
+                    if(content.conditions.videoCondition.isMustWatchingEnd){
+                        numberOfProgress +=content.progress
+                    }else if(content.conditions.videoCondition.isClickPlay){
+                        numberOfProgress +=100
+                    }
+                }
+                else if(content.contentType === this.contentTypes.subform){
+                    let numberOfLinks = content.conditions.subformCondition.isClickLinks.length;
+                    let numberOfProgressLink =0;
+                    content.conditions.subformCondition.isClickLinks.forEach((link)=>{
+                        if(link.isClicked){
+                            let documentTrackTarget  = this.documentDataService.documentTracks.find((documentTrack)=>documentTrack.id ===link.linkId);
+                            link.progress =  documentTrackTarget.progress;
+                            numberOfProgressLink +=link.progress;
+                        }
+                        else if(!content.conditions.subformCondition.haveInDoList){
+                            numberOfProgressLink +=100;
+                        }
+                    });
+                    content.progress = numberOfProgressLink/numberOfLinks;
+                    numberOfProgress += numberOfProgressLink/numberOfLinks;
+                }
+            });
+            // this.currentDocumentTrack.contents.forEach((content) => {
+            //     if()
+            // })
+    
+            this.documentDataService.currentDocumentTrack.progress =   numberOfProgress/numberOfCondition;
+            let saveObjectTrackTemplate: DocumentTrackModel = {
+                id: this.commonService.getPatternId(nameDocument),
+                nameDocument: nameDocument,
+                userId: Constants.common.user.id,
+                status: Constants.common.message.status.created.text,
+                isTrackProgress: this.documentDataService.currentDocumentTrack.contents.length > 0 ? true : false,
+                progress: this.documentDataService.currentDocumentTrack.contents.length === 0 ? 100 : this.documentDataService.currentDocumentTrack.progress,
+                contents: this.documentDataService.currentDocumentTrack.contents
+            }
+            this.saveDocumentTrack(nameDocument,saveObjectTrackTemplate).subscribe((status)=>{
+                subscriber.next(status)
+                subscriber.complete();
+               // console.log(" this.currentDocumentTrack", this.currentDocumentTrack)          
+            });
         })
 
     }

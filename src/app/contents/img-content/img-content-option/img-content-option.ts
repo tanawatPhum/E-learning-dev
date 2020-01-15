@@ -15,7 +15,7 @@ export class ImgContentOptionComponent implements ContentOptionInterFace {
     ){
 
     }
-    private removeImg(){
+    public removeImg(){
         this.contentDCtrlService.poolContents.imgs = this.contentDCtrlService.poolContents.imgs.filter((img)=>img.parentId !== this.parentBox.attr('id'));
         this.parentBox.remove();
     }

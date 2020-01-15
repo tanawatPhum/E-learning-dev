@@ -11,8 +11,8 @@ import { DocumentDataControlService } from '../../../services/document/document-
 })
 export class ProgressBarContentOptionComponent implements OnInit, ContentOptionInterFace {
     @Input() parentBox: JQuery<Element>;
-    private progressBoxList:ProgressBoxListModel[] = new Array<ProgressBoxListModel>();
-    private rootElement:JQuery<Element>;
+    public progressBoxList:ProgressBoxListModel[] = new Array<ProgressBoxListModel>();
+    public rootElement:JQuery<Element>;
     constructor(
         private documentDCtrlService:DocumentDataControlService,
         private contentDCtrlService:ContentDataControlService,
