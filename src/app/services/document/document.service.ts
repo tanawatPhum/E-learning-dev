@@ -606,14 +606,16 @@ export class DocumentService {
                     let numberOfLinks = content.conditions.subformCondition.isClickLinks.length;
                     let numberOfProgressLink =0;
                     content.conditions.subformCondition.isClickLinks.forEach((link)=>{
-                        if(link.isClicked){
-                            let documentTrackTarget  = this.documentDataService.documentTracks.find((documentTrack)=>documentTrack.id ===link.linkId);
-                            link.progress =  documentTrackTarget.progress;
-                            numberOfProgressLink +=link.progress;
-                        }
-                        else if(!content.conditions.subformCondition.haveInDoList){
-                            numberOfProgressLink +=100;
-                        }
+                        let documentTrackTarget  = this.documentDataService.documentTracks.find((documentTrack)=>documentTrack.id ===link.linkId);
+                        // if(link.isClicked){
+                        //     link.progress =  documentTrackTarget.progress;
+                        // }
+                        link.progress =  documentTrackTarget.progress;
+                        numberOfProgressLink +=link.progress;
+                        // else if(!content.conditions.subformCondition.haveInDoList){
+                        //     numberOfProgressLink +=100;
+                        // }
+
                     });
                     content.progress = numberOfProgressLink/numberOfLinks;
                     numberOfProgress += numberOfProgressLink/numberOfLinks;
@@ -633,6 +635,7 @@ export class DocumentService {
                 progress: this.documentDataService.currentDocumentTrack.contents.length === 0 ? 100 : this.documentDataService.currentDocumentTrack.progress,
                 contents: this.documentDataService.currentDocumentTrack.contents
             }
+            console.log('saveObjectTrackTemplate',saveObjectTrackTemplate)
             this.saveDocumentTrack(nameDocument,saveObjectTrackTemplate).subscribe((status)=>{
                 subscriber.next(status)
                 subscriber.complete();

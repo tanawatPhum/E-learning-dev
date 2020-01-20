@@ -36,7 +36,9 @@ export class ProgressBarContentComponent implements OnInit,ContentInterFace  {
         this.rootElement = $(this.element.nativeElement); 
         this.parentBox = this.rootElement.parents('.content-box');
         this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
-            if(detail.actionCase === Constants.document.contents.lifeCycle.playVideo){
+            if(detail.actionCase === Constants.document.contents.lifeCycle.playVideo 
+            && detail.for === Constants.document.contents.types.progressBar
+                ){
                 this.handleProgressBar();
                 // let targetDocumentContent:ContentsModel = detail.data;
                 // this.targetimg = targetDocumentContent.imgs.find((img) => img.parentId === this.parentBox.attr('id'))

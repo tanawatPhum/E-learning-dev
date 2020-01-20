@@ -275,10 +275,10 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
                     this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex].progress = (targetWistiaVideo.time() / targetWistiaVideo.duration()) * 100;
                     if(!this.documentTrackInterval){
                         this.documentTrackInterval = setInterval(() => {
-                            console.log('save');
-                            this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName);
-                            clearInterval(this.documentTrackInterval)
-                            this.documentTrackInterval = null;
+                            this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName).subscribe(()=>{
+                                clearInterval(this.documentTrackInterval)
+                                this.documentTrackInterval = null;
+                            });
                         }, 4000)
                     }
          
@@ -286,17 +286,26 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
                 targetWistiaVideo.bind("end", (e) => {
                     this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex].progress = 100;
                     this.updateAction.actionCase = Constants.document.contents.lifeCycle.playVideo;
-                    this.contentDCtrlService.updateContent = this.updateAction
+                    // this.contentDCtrlService.updateContent = this.updateAction
                     if(isHasToDoList.length >0){
-                        this.updateAction.actionCase = Constants.document.contents.lifeCycle.playVideo;
+                        this.updateAction.for  = this.contentTypes.todoList;
                         this.contentDCtrlService.updateContent = this.updateAction
                     }
-                    this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName);
-                    clearInterval(this.documentTrackInterval)
+                    if (isHasProgressBar.length > 0) {
+                        this.updateAction.for  = this.contentTypes.progressBar;
+                        this.contentDCtrlService.updateContent = this.updateAction
+                    }
+                    this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName).subscribe(()=>{
+                        clearInterval(this.documentTrackInterval)
+                        this.documentTrackInterval = null;
+                    });
+              
                 })
                 targetWistiaVideo.bind("pause",  (e)=> {
-                    this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName);
-                    clearInterval(this.documentTrackInterval)
+                    this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName).subscribe(()=>{
+                        clearInterval(this.documentTrackInterval)
+                        this.documentTrackInterval = null;
+                    });
                 });
             }
         }

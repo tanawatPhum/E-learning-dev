@@ -32,6 +32,7 @@ export class UploadFileModel {
 
 export class UpdateContentModel {
     public data: any;
+    public for:string;
     public actionCase: string;
 }
 

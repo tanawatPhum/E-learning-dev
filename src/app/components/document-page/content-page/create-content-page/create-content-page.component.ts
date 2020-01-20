@@ -53,7 +53,7 @@ declare var Wistia: any;
 export class CreateContentPageComponent implements OnInit, AfterViewInit {
     @ViewChild('contentTemplate', { static: true }) contentTemplate: ElementRef;
     @ViewChild('contentOptionTool', { static: true }) contentOptionTool: ElementRef;
-    @ViewChild(AdHost, {static: true}) adHost: AdHost;
+    @ViewChild(AdHost, { static: true }) adHost: AdHost;
     @Input() triggerElement: Subject<TriggerEventModel>;
     @Input() contentElement: Subject<DocumentModel>;
     @Input() contentTypeSelected: Subject<any>;
@@ -65,10 +65,10 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     public currentElement: any;
     public currentContentType: any
     public currentBrowseFile: any;
-    public currentBrowseLink:string;
-    public currentinput:string;
+    public currentBrowseLink: string;
+    public currentinput: string;
     public currentElementTool: any;
-    public currentColorCode:string;
+    public currentColorCode: string;
     public currentDocument: DocumentModel = new DocumentModel();
     public currentSelectTaskList: ToDoListSelectCurrentModel[] = new Array<ToDoListSelectCurrentModel>();
     public currentSubFormType = { id: 'subform-link', name: 'link' };
@@ -82,45 +82,34 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     public toDoListBoxList: ToDoListBoxListModel[] = new Array<ToDoListBoxListModel>();
     public progressBoxList: ProgressBoxListModel[] = new Array<ProgressBoxListModel>();
     public documentTrack: DocumentTrackModel = new DocumentTrackModel();
-    public rulerDetail:RulerDetailModel = new RulerDetailModel();
+    public rulerDetail: RulerDetailModel = new RulerDetailModel();
 
     public rulerDetailSubject: Subject<RulerDetailModel> = new Subject<RulerDetailModel>();
 
     public boxType = Constants.document.boxes.types;
     public contentType = Constants.document.contents.types;
 
+ 
+
     private cmpRef: ComponentRef<any>;
 
     public actions = {
         event: {
             addElBox: 'addElBox',
-            addElVideo: 'addElVideo',
-            addElExam:'addElExam',
-            addElNote:'addElNote',
-            addElProgressBar: 'addElProgressBar',
-            addElToDoList: 'addElToDoList',
-            addElComment: 'addElComment',
+            addElExam: 'addElExam',
             addElSubForm: 'addElSubForm',
             addEventBox: 'addEventBox',
             addSubForm: 'addSubForm',
             dropTool: 'dropTool',
             handleCurrentBox: 'handleCurrentBox',
-            handleAttachImgModal: 'handleAttachImgModal',
             handleDragBoxes: 'handleDragBoxes',
-            handleToolbars: 'handleToolbars',
-            handleNote:'handleNote',
-            handleSubForm: 'handleSubForm',
-            handleBrowseExam: 'handleBrowseExam',
-            handleTemplateDoc: 'handleTemplateDoc',
-            handleWistia: 'handleWistia',
             handleOptionToolTextArea: 'handleOptionToolTextArea',
-            handleOptionToolToDoList: 'handleOptionToolToDoList',
-            handleOptionToolVideo: 'handleOptionToolVideo',
+            handleBrowseExam: 'handleBrowseExam',
+            handleNote: 'handleNote',
+            handleSubForm: 'handleSubForm',
+            handleTemplateDoc: 'handleTemplateDoc',
             handleOptionToolExam: 'handleOptionToolExam',
-            handleOptionToolLink: 'handleOptionToolLink',
-            handleOptionToolProgressBar:'handleOptionToolProgressBar',
             handleOptionToolSubform: 'handleOptionToolSubform',
-            handleOptionTools: 'handleOptionTool',
             handleCarousel: 'handleCarousel',
             handleElRatio: 'handleElRatio',
             removeElBox: 'removeElBox',
@@ -133,39 +122,24 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             updateNavigatorData: 'createNavigatorData',
             createChildDocument: 'createChildDocument',
             createToDoListBoxList: 'createToDoListBoxList',
-            createProgressBoxList:'createProgressBoxList',
-            createDocumentTrack:'createDocumentTrack',
+            createProgressBoxList: 'createProgressBoxList',
+            createDocumentTrack: 'createDocumentTrack',
             retrieveBoxData: 'retrieveBoxData',
             retrieveContentsData: 'retrieveContentsData',
-            removeAllContentObj: 'removeAllContentObj',
-            removeBoxData: 'removeBoxData',
-            removeDocumentTrackData:'removeDocumentTrackData',
             removeNavigatorData: 'removeNavigatorData',
-            removeImgData: 'removeImgData',
-            removeObjInTodoList:'removeObjInTodoList',
-            removeObjInProgressBar:'removeObjInProgressBar',
-            removeDocTrackProgress:'removeDocTrackProgress',
+            removeDocTrackProgress: 'removeDocTrackProgress',
             findIndexBoxData: 'findIndexBoxData',
-            findContentId:'findBoxType',
+            findContentId: 'findBoxType',
             findEmptyData: 'findEmptyData',
-            findProgressDocumentTrack:'findProgressDocumentTrack',
+            findProgressDocumentTrack: 'findProgressDocumentTrack',
             findTrackProgressData: 'findTrackProgressData'
         },
         toolbar: {
             templateDocTool: 'templateDocTool',
-            addInitalTool: 'addInitalTool',
-            addTextareaTool: 'addTextareaTool',
-            addBrowseLinkTool:'addBrowseLinkTool',
-            addExamTool:'addExamTool',
-            addBrowseExamTool:'addBrowseExamTool',
-            addProgressBarTool: 'addProgressBarTool',
-            addNote:'addNote',
-            addToDoListTool: 'addToDoListTool',
-            addCommentTool: 'addCommentTool',
+            addBrowseExamTool: 'addBrowseExamTool',
             addCreateSubformTool: 'addCreateSubformTool',
             addSubformTool: 'addSubformTool',
-            addVideoTool: 'addVideoTool',
-            addLinkTool: 'addLinkTool',
+            addExamTool: 'addExamTool',
             removeTool: 'removeTool',
             cancelTool: 'cancelTool'
         },
@@ -173,25 +147,18 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             addOptionStyle: 'addOptionStyle',
             removeAllStyleBoxCurrent: 'removeAllStyleBoxCurrent',
             addStyleBoxCurrent: 'addStyleBoxCurrent',
-            addStyleBoxBrowseImgSize: 'addStyleBoxBrowseImgSize',
-            addStyleBoxBrowseFileSize: 'addStyleBoxBrowseFileSize',
-            addStyleBoxBrowseVideoSize: 'addStyleBoxBrowseVideoSize',
-            addStyleBoxProgressBarSize: 'addStyleBoxProgressBarSize',
-            addStyleBoxCommentSize: 'addStyleBoxCommentSize',
+
+
             addStyleBoxSubformSize: 'addStyleBoxSubformSize',
             addStyleSubformActive: 'addStyleSubformActive',
             addStyleBoxActive: 'addStyleBoxActive',
             addStyleBorderBox: 'addStyleBorderBox',
-            addStyleBoxContentNote:'addStyleBoxContentNote',
-            
+
+
             removeStyleBorderBox: 'removeStyleBorderBox',
             removeStyleBoxCurrent: 'removeStyleBoxCurrent',
             removeStyleBoxActive: 'removeStyleBoxActive',
-            removeStyleBoxBrowseImgSize: 'removeStyleBoxBrowseImgSize',
             removeStyleBoxSubformSize: 'removeStyleBoxSubformSize',
-            removeStyleBoxBrowseVideoSize: 'removeStyleBoxBrowseVideoSize',
-            removeStyleBoxProgressBarSize: 'removeStyleBoxProgressBar',
-            removeStyleBoxCommentSize: 'removeStyleBoxCommentSize',
             removeStyleBoxType: 'removeStyleBoxType',
             removeStyleSubformActive: 'removeStyleActiveSubform'
         },
@@ -200,32 +167,24 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         },
         template: {
             setDocument: 'setDocument',
-            setHTML:'setHTML',
+            setHTML: 'setHTML',
             setDocumentTrack: 'setDocumentTrack',
-            setContentEditable:'setContentEditable',
-            
+            setContentEditable: 'setContentEditable',
+
 
         },
-        editor:{
-            setEditor:'setEditor',
-            setEditorContentNote:'setEditorContentNote',
-            openEditorContentNote:'openEditorContentNote',
-            closeEditorContentNote:'closeEditorContentNote',
+        editor: {
+            setEditor: 'setEditor',
+            setEditorContentNote: 'setEditorContentNote',
+            openEditorContentNote: 'openEditorContentNote',
+            closeEditorContentNote: 'closeEditorContentNote',
         }
     };
-    public boxes: BoxContentModel[] = new Array<BoxContentModel>();
-    public textAreas: TextAreaContentModel[] = new Array<TextAreaContentModel>();
-    public imgs: ImgContentModel[] = new Array<ImgContentModel>();
-    public files:FileContentModel[] = new Array<FileContentModel>();
-    public videos: VideoContentModel[] = new Array<VideoContentModel>();
+
     public subForms: SubFormContentModel[] = new Array<SubFormContentModel>();
-    public comments: commentContentModel[] = new Array<commentContentModel>();
-    public progressBars: ProgressBarContentModel[] = new Array<ProgressBarContentModel>();
-    public toDoLists: ToDoListContentModel[] = new Array<ToDoListContentModel>();
-    public links:LinkContentModel[] =new Array<LinkContentModel>();
-    public exams:ExamContentModel[]  = new Array<ExamContentModel>();
-    public notes: NoteContentModel[] = new Array<NoteContentModel>();
-    public loading:boolean =true;
+    public exams: ExamContentModel[] = new Array<ExamContentModel>();
+    public boxes: BoxContentModel[] = new Array<BoxContentModel>();
+    public loading: boolean = true;
 
 
 
@@ -233,48 +192,47 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         private commonService: CommonService,
         private documentService: DocumentService,
         private documentDataService: DocumentDataControlService,
-        private contentDCtrlService:ContentDataControlService,
+        private contentDCtrlService: ContentDataControlService,
         private componentFactoryResolver: ComponentFactoryResolver,
-        private injector:Injector,
-        private render:Renderer2,
+        private injector: Injector,
+        private render: Renderer2,
         private applicationRef: ApplicationRef,
-        
+
     ) { }
     ngOnInit() {
         this.loading = true;
-        this.documentDataService.lifeCycle = Constants.document.lifeCycle.loadEditor; 
+        this.documentDataService.lifeCycle = Constants.document.lifeCycle.loadEditor;
         this.contentDCtrlService.poolContents = new ContentsModel();
         this.documentDataService.documentTrack = new DocumentTrackModel();
         // this.http.httpPost().subscribe((result)=>{
         //     console.log(result)
         // });
         this.contentElement.subscribe((result) => {
-            this.contentDCtrlService.poolContents = new ContentsModel();
             this.documentDataService.documentTrack = new DocumentTrackModel();
-            this.documentDataService.lifeCycle = Constants.document.lifeCycle.loadEditor; 
-            this.loading = false;
+            this.documentDataService.lifeCycle = Constants.document.lifeCycle.loadEditor;
             this.currentDocument = result;
+            this.contentDCtrlService.poolContents = result.contents || new ContentsModel();
+            let updateContent = new UpdateContentModel();
+            updateContent.actionCase = Constants.document.lifeCycle.initialEditor;
+            updateContent.data = result.contents;
+            this.contentDCtrlService.updateContent = updateContent;
             this.rulerDetailSubject.next(result.otherDetail.rulerDevDetail)
-            this.setTemplate(this.actions.template.setDocument);
-            this.setTemplate(this.actions.template.setDocumentTrack);
-           
-        
-          
-          
-
-       
-
+        });
+        this.contentDCtrlService.getUpdateContent().subscribe((res) => {
+            if(res.actionCase === Constants.document.lifeCycle.initialEditor){
+                this.setTemplate(this.actions.template.setDocument);
+                this.setTemplate(this.actions.template.setDocumentTrack);
+            }
         });
         this.contentTypeSelected.subscribe((contentType) => {
             this.currentContentType = contentType;
             this.addElements(this.actions.event.addElBox);
         });
         this.dropElement.subscribe((tool) => {
-
-            if (tool.action === this.actions.event.dropTool) {
+            if (tool.action === this.actions.event.dropTool && tool.data.contentName) {
                 this.currentContentType = this.layoutTypes.freedomLayout;
                 this.currentElementTool = tool.data.element;
-                this.addElements(this.actions.event.addElBox, null, this.actions.event.dropTool,null,tool.data.contentName)
+                this.addElements(this.actions.event.addElBox, null, this.actions.event.dropTool, null, tool.data.contentName)
                 //remove tranfer img icon to ckeditor
                 //if(this.rootElement.find('p').find('img'))
                 //this.rootElement.find('p').find('img').remove();
@@ -299,55 +257,45 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
 
     }
     ngAfterViewInit() {
-   
-            this.rootElement = $(this.contentTemplate.nativeElement);
-            this.rootOptionTool = $(this.contentOptionTool.nativeElement);
-            this.setCurrentToolbar(this.actions.toolbar.templateDocTool);
-            this.addOptionToolBar();
-            this.getContentTemplateSize();  
-    
 
-
+        this.rootElement = $(this.contentTemplate.nativeElement);
+        this.rootOptionTool = $(this.contentOptionTool.nativeElement);
+        this.setCurrentToolbar(this.actions.toolbar.templateDocTool);
+        this.addOptionToolBar();
+        this.getContentTemplateSize();
     }
     private async setTemplate(action) {
         if (action === this.actions.template.setDocument) {
             if ($('.template-doc').length == 0) {
-                this.rootElement.append('<div id="template-doc" class="template-doc"></div>')
-                
+                this.rootElement.append('<div id="template-doc"  class="template-doc"></div>')
             }
             this.handleEditor(this.actions.editor.setEditor);
             // this.handleEditor(this.actions.editor.closeEditorContentNote,this.rootElement);
-            this.handles(this.actions.event.handleNote);
+            //this.handles(this.actions.event.handleNote);
             // this.handles(this.actions.event.handleTextArea);
-    
-            this.handles(this.actions.event.handleTemplateDoc, $('.template-doc'));                
-          
-       
+
+            this.handles(this.actions.event.handleTemplateDoc, $('.template-doc'));
+
+
         }
         else if (action === this.actions.template.setDocumentTrack) {
             this.documentService.loadDocTrackFromDB().subscribe((documentTrack) => {
-               if(documentTrack&&documentTrack.length>0){
-                this.documentTrack = this.documentDataService.documentTrack =  documentTrack.find((documentTrack)=>documentTrack.id === this.commonService.getPatternId(this.documentDataService.currentDocumentName)) || new DocumentTrackModel();
-                //remove progress preview
-                this.removeData(this.actions.data.removeDocTrackProgress);
+                if (documentTrack && documentTrack.length > 0) {
+                    this.documentTrack = this.documentDataService.documentTrack = documentTrack.find((documentTrack) => documentTrack.id === this.commonService.getPatternId(this.documentDataService.currentDocumentName)) || new DocumentTrackModel();
+                    //remove progress preview
+                    this.removeData(this.actions.data.removeDocTrackProgress);
                 }
-               
+
             })
         }
-        else if(action === this.actions.template.setHTML){
-            //this.createComponentFromRaw(this.currentDocument.html)
-           
-         
-                await this.rootElement.html(this.currentDocument.html); 
-                if (this.currentDocument.status!== Constants.common.message.status.notFound.text) {
-                    this.retrieveData(this.actions.data.retrieveBoxData, this.currentDocument);
-                    this.retrieveData(this.actions.data.retrieveContentsData, this.currentDocument);
-             
-               }
-               $('#'+this.documentDataService.nameTemplate).attr('contenteditable','true');
-               $('#'+this.documentDataService.nameTemplate).css('overflow-y','auto')
-               this.defineComponent();
-       
+        else if (action === this.actions.template.setHTML) {
+            if (this.currentDocument.status !== Constants.common.message.status.notFound.text) {
+                this.retrieveData(this.actions.data.retrieveBoxData, this.currentDocument);
+                this.retrieveData(this.actions.data.retrieveContentsData, this.currentDocument);
+
+            }
+            $('#' + this.documentDataService.nameTemplate).attr('contenteditable', 'true');
+            $('#' + this.documentDataService.nameTemplate).css('overflow-y', 'auto')
         }
     }
     private getContentTemplateSize() {
@@ -359,55 +307,57 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         this.contentTemplateSize = contentTemplateSize;
         localStorage.setItem('contentTemplateSize', JSON.stringify(contentTemplateSize))
     }
-    private handleEditor(action:string,element?:JQuery<Element>){
-        if(action===this.actions.editor.setEditor){
-           
+    private handleEditor(action: string, element?: JQuery<Element>) {
+        if (action === this.actions.editor.setEditor) {
+
             this.documentDataService.nameTemplate = 'template-doc';
-          
-      
-            this.setTemplate(this.actions.template.setHTML)
-            //console.log(CKEDITOR.instances[this.documentDataService.nameTemplate])
-            CKEDITOR.inline(this.documentDataService.nameTemplate);
-            CKEDITOR.disableAutoInline = true;
-            CKEDITOR.on('instanceReady', (ev) => {
-               
-                     $('.cke_top').css('display','none')
-                    
-                     $('#'+this.documentDataService.nameTemplate).click(()=>{
+            this.rootElement.html(this.currentDocument.html).ready(() => {
+                this.defineComponent();
+                this.rootElement.find('#'+this.documentDataService.nameTemplate).attr('contenteditable','true')
+                CKEDITOR.disableAutoInline = true;
+                CKEDITOR.inline(this.documentDataService.nameTemplate);
+                CKEDITOR.on('instanceReady', (ev) => {
+                    $('.cke_top').css('display', 'none')
+                    $('#' + this.documentDataService.nameTemplate).click(() => {
                         this.removeStyleElements(this.actions.style.removeAllStyleBoxCurrent)
                         this.currentToolbar = this.actions.toolbar.templateDocTool;
                         this.addOptionToolBar();
-                     })
-                   
-                     this.addElements(this.actions.event.addEventBox).then(() => {
-                        this.removeData(this.actions.data.removeAllContentObj);
+                    })
+                    this.addElements(this.actions.event.addEventBox).then(() => {
+                        //this.removeData(this.actions.data.removeAllContentObj);
                     });
-              
-           
-                     $(ev.editor.element.$).removeAttr("title");
-                  
-                    
-         
+                    $(ev.editor.element.$).removeAttr("title");
+                });
+
+
+
             });
+
+            // this.setTemplate(this.actions.template.setHTML)
+            //console.log(CKEDITOR.instances[this.documentDataService.nameTemplate])
+
+
+
+
             // console.log($('#'+this.documentDataService.nameTemplate))  
             // $('#'+this.documentDataService.nameTemplate).click(()=>{
             //     console.log('xxxxxxx')
             // })         
-                  // ev.editor.on('focus',  (e)=> {  
-                    //     $('.cke').css('display','none')
-                    
-                    // }); 
-  
-            
-    
+            // ev.editor.on('focus',  (e)=> {  
+            //     $('.cke').css('display','none')
+
+            // }); 
+
+
+
             // $('#template-doc').on('drop',(event)=>{
             //     setTimeout(() => {
             //         console.log($('#box-'+ this.commonService.getBoxCurrentId()));
             //    $('#box-'+ this.commonService.getBoxCurrentId()).detach().appendTo($('#template-doc'))
             //     },500)
             // })
-         
- 
+
+
         }
         // if(action===this.actions.editor.setEditorContentNote){
         //     CKEDITOR.disableAutoInline = true;
@@ -424,23 +374,23 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         //         element.find('#cke_note-area').show()
         //         this.addStyleElements(this.actions.style.addStyleBoxContentNote,element);
         //        }
-      
+
         //      });   
         //     });
         // }
-       else if(action===this.actions.editor.openEditorContentNote){
-            
+        else if (action === this.actions.editor.openEditorContentNote) {
+
             element.find('.note-icon.writing.hideCK').hide();
             element.find('.note-icon.writing.showCK').show();
-            element.find('.note-icon.writing.showCK').css('width',$('.note-icon.writing.hideCK').width()-($('.note-icon.writing.hideCK').width()*70/100))
+            element.find('.note-icon.writing.showCK').css('width', $('.note-icon.writing.hideCK').width() - ($('.note-icon.writing.hideCK').width() * 70 / 100))
         }
-        else if(action===this.actions.editor.closeEditorContentNote){
-         
-                element.find('.note-icon.writing.showCK').hide();
-                element.find('.note-icon.writing.hideCK').show();
-                element.find('.note-area').show();
-               // element.find('#cke_'+ element.attr('id')+'-note-area').hide();
-          
+        else if (action === this.actions.editor.closeEditorContentNote) {
+
+            element.find('.note-icon.writing.showCK').hide();
+            element.find('.note-icon.writing.hideCK').show();
+            element.find('.note-area').show();
+            // element.find('#cke_'+ element.attr('id')+'-note-area').hide();
+
         }
     }
     private async addElements(action: string, element?: any, subaction?: string, subElement?: any, data?: any) {
@@ -471,22 +421,22 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     }
                     $('[id="box-' + numberOfBox + '"]').css('width', Constants.common.element.css.box.width);
                     $('[id="box-' + numberOfBox + '"]').css('height', Constants.common.element.css.box.height);
-                } 
-                
+                }
+
                 this.removeStyleElements(this.actions.toolbar.removeTool);
                 this.setCurrentBox($('#box-' + numberOfBox));
                 this.addData(this.actions.data.retrieveBoxData, 'box-' + numberOfBox, $('[id="box-' + numberOfBox + '"]'));
                 if (subaction === this.actions.event.dropTool) {
-                    let targetContent  = ContentRouting.routes.find((content)=>content.contentName === data)
+                    let targetContent = ContentRouting.routes.find((content) => content.contentName === data)
                     await this.createContent(targetContent.component, targetContent.contentName);
-                    this.documentDataService.lifeCycle  = Constants.document.lifeCycle.loadEditor;
+
                     // this.currentBox.append(targetContentHtml);
                     this.currentBox.find('[content-name]').show();
                     $('.content-box').find('[content-name][content-last!="true"]').hide();
                     this.rootOptionTool.html(this.createContentOption(targetContent.option))
-              
 
-                   $(this.currentBox).detach().appendTo($('#template-doc'))
+
+                    $(this.currentBox).detach().appendTo($('#template-doc'))
                 } else {
                     this.setCurrentToolbar();
                 }
@@ -499,14 +449,14 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'startDrag');
                 }),
                 stop: ((event) => {
-                //     let l = (100 * parseFloat(($(event.target).position().left  / this.rootElement.width()).toString())) + "%";
-                //     let t = (100 * parseFloat((($(event.target).position().top+$('#template-doc').scrollTop()) / this.rootElement.height()).toString())) + "%";
-                   
-                // //    console.log($(event.target).position().top)
-                // //     console.log($('#template-doc').scrollTop())
+                    //     let l = (100 * parseFloat(($(event.target).position().left  / this.rootElement.width()).toString())) + "%";
+                    //     let t = (100 * parseFloat((($(event.target).position().top+$('#template-doc').scrollTop()) / this.rootElement.height()).toString())) + "%";
 
-                //     $(event.target).css("left", l);
-                //     $(event.target).css("top", t);
+                    // //    console.log($(event.target).position().top)
+                    // //     console.log($('#template-doc').scrollTop())
+
+                    //     $(event.target).css("left", l);
+                    //     $(event.target).css("top", t);
                     // this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'endDrag');
                     this.removeStyleElements(this.actions.style.removeStyleBoxActive);
                     // console.log($('#template-doc').scrollTop())
@@ -522,10 +472,10 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                         this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'startResize');
                     }),
                     stop: ((event) => {
-                    //     let w = (100 * parseFloat(($(event.target).width() / this.rootElement.width()).toString())) + "%";
-                    //     let h = (100 * parseFloat(($(event.target).height() / this.rootElement.height()).toString())) + "%";
-                    //     $(event.target).css("width", w);
-                    //   $(event.target).css("height", h);
+                        //     let w = (100 * parseFloat(($(event.target).width() / this.rootElement.width()).toString())) + "%";
+                        //     let h = (100 * parseFloat(($(event.target).height() / this.rootElement.height()).toString())) + "%";
+                        //     $(event.target).css("width", w);
+                        //   $(event.target).css("height", h);
                         //this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'endResize');
                         this.removeStyleElements(this.actions.style.removeStyleBoxActive);
                         if ($(event.target).hasClass(this.boxType.boxSubform)) {
@@ -533,16 +483,15 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                         }
                     }),
                 })
-                // .find('.ui-resizable-handle').removeClass('ui-icon ui-icon-gripsmall-diagonal-se'); 
-                this.rootElement.find('.content-box').css("border", "");
-                this.rootElement.find('.content-box').find('.content-box-label').show();
-                // this.rootElement.find('.content-box').css('cursor','move')
+            // .find('.ui-resizable-handle').removeClass('ui-icon ui-icon-gripsmall-diagonal-se'); 
+            this.rootElement.find('.content-box').css("border", "");
+            this.rootElement.find('.content-box').find('.content-box-label').show();
+            // this.rootElement.find('.content-box').css('cursor','move')
 
 
             this.handles(this.actions.event.handleCurrentBox);
-            this.handles(this.actions.event.handleToolbars);
             this.handles(this.actions.event.handleSubForm);
-            
+
             if (this.currentBox) {
                 // this.handles(this.actions.event.handleBrowseImg, this.currentBox);
                 this.addElements(this.actions.style.addStyleBoxCurrent, this.currentBox);
@@ -572,80 +521,31 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             //this.addOptionToolBar();
         }
         else if (action === this.actions.event.addElExam) {
-            
+
             let hostname = (new URL(this.currentBrowseLink)).hostname;
-            if(!this.currentinput){
+            if (!this.currentinput) {
                 this.currentinput = 'Title'
             }
             this.exams.push({
-                parentId:element.attr('id'),
-                id:element.attr('id') + '-exam',
-                path:this.currentBrowseLink,
-                title:this.currentinput,
-                name:hostname,
-                score:'0'
+                parentId: element.attr('id'),
+                id: element.attr('id') + '-exam',
+                path: this.currentBrowseLink,
+                title: this.currentinput,
+                name: hostname,
+                score: '0'
             });
-            let htmlExam  = '<div class="row content-exam"  id="' + element.attr('id') + '-exam">' 
-            +'<div class="col-12 mb-3">' 
-            +'<input class="mb-3 exam-input-title" id="exam-input-title" type="text" value="'+this.currentinput+'" > '     
-            +'<a id="exam-input-url" data-name="'+hostname+'" class="content-link cursor-pointer ">'+hostname+'</a>'
-            + '<h5 id="text-exam-score" class="mt-3">Score:0</h5>'
-            +'</div>'
-            +'</div>'
+            let htmlExam = '<div class="row content-exam"  id="' + element.attr('id') + '-exam">'
+                + '<div class="col-12 mb-3">'
+                + '<input class="mb-3 exam-input-title" id="exam-input-title" type="text" value="' + this.currentinput + '" > '
+                + '<a id="exam-input-url" data-name="' + hostname + '" class="content-link cursor-pointer ">' + hostname + '</a>'
+                + '<h5 id="text-exam-score" class="mt-3">Score:0</h5>'
+                + '</div>'
+                + '</div>'
             element.html(htmlExam);
             // element.css('display','initial')
 
 
             //element.append('<a  data-name="'+hostname+'" id="' + element.attr('id') + '-link" class="content-link cursor-pointer ">'+hostname+'</a>');
-        }
-
-        else if (action === this.actions.event.addElVideo) {
-            let streamData: VideoConetentDataModel = data;
-            let condition:VideoConetentConditionModel = new VideoConetentConditionModel();
-            condition.isMustWatchingEnd  = false;
-            let video = {
-                id: element.attr('id') + '-video',
-                data: streamData,
-                path: null,
-                parentId: element.attr('id'),
-                condition:condition
-            }
-            if (subaction === 'videoSource') {
-                const reader = new FileReader();
-                reader.onload = ((event: any) => {
-                    video.path = event.target.result;
-                    element.append('<video src="' + event.target.result + '" id="' + element.attr('id') + '-video" class="content-video" controls ></video>');
-                    this.videos.push(video);
-                });
-                reader.readAsDataURL(this.currentBrowseFile[0]);
-            } else if (subaction === 'youtube') {
-                video.path = this.currentBrowseFile;
-                element.append('<iframe src="' + this.currentBrowseFile + '" id="' + element.attr('id') + '-video" class="content-video" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>');
-                this.videos.push(video);
-            }
-            else if (subaction === 'wistia') {
-                element.append('<div id="' + element.attr('id') + '-video" class="content-video"><div class="wistia_responsive wistia_embed wistia_async_' + this.currentBrowseFile + ' full-screen">&nbsp;</div></div>')
-                setTimeout(() => {
-                    // let videoWist = Wistia.api(streamData.streamId);
-                    // streamData.duration = video.duration();
-                    video.path = this.currentBrowseFile;
-                    video.data.wistiaId =  $(element.find('#'+element.attr('id') + '-video').find('.wistia_responsive')).attr('id');
-                    this.videos.push(video);
-                    this.handles(this.actions.event.handleWistia, element)
-                }, 500)
-            }
-            // console.log($(element.find('#'+element.attr('id') + '-video').find('.wistia_responsive'))[0])
- 
-     
-      
-         
-            // let documentTrackContent = new DocumentTrackContent;
-            // documentTrackContent.boxType = this.
-            // this.
-
-            // this.addOptionToolBar();
-            // let wistiaObj = Wistia.api("bm82offozy")
-            // console.log('wistiaObj',wistiaObj)
         }
         else if (action === this.actions.event.addElSubForm) {
             let htmlSubform = '';
@@ -736,115 +636,10 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             //     })
             // });
         }
-        else if (action === this.actions.event.addElProgressBar) {
-            element.append(
-                '<div id="' + element.attr('id') + '-progressBar" class="content-progress-bar progress full-screen">'
-                + '<div class="progress-bar bg-success"  style="width:40%">'
-                + '</div>'
-                + '</div>'
-            )
-            let progressBar: ProgressBarContentModel = {
-                id: element.attr('id') + '-progressBar',
-                parentId:element.attr('id'),
-                progress: 0,
-                contentList:new Array<ProgressBarContentObjectModel>()
-            }
-            this.progressBars.push(progressBar);
-            this.addStyleElements(this.actions.style.addStyleBoxProgressBarSize, element);
-        }
-        else if (action === this.actions.event.addElComment) {
-            let htmlToolComment = '<div id="' + element.attr('id') + '-comment" class="content-comment">';
-            htmlToolComment += '<div class="row comment-form submit m-0 w-100">';
-            htmlToolComment += '<div class="col-12">';
-            htmlToolComment += '<div class="row m-0 max-height">';
-            htmlToolComment += '<div   class="col-1 half-height pl-3">';
-            htmlToolComment += '<div class="comment-profile icon">';
-            htmlToolComment += '<img src="assets/imgs/documentPage/profileIcon.svg">';
-            htmlToolComment += '</div>';
-            htmlToolComment += '</div>';
-            htmlToolComment += '<div class="col-10 pt-4 pl-5 half-height">';
-            htmlToolComment += '<textarea placeholder="Leave your comment here..." class="comment-textarea"></textarea>';
-            htmlToolComment += '<div  class="comment-massege-img"></div>'
-            htmlToolComment += '</div>';
-            htmlToolComment += '<div class="col-12 pr-3 pt-2">';
-            htmlToolComment += '<div class="row m-0">';
-            htmlToolComment += '<div class="col-1  half-height">';
-            htmlToolComment += '</div>';
-            htmlToolComment += '<div class="col-6 pl-5">';
-            htmlToolComment += '<div data-commentBoxId="' + element.attr('id') + '-comment" id="comment-attach" class="comment-tool attach">';
-            htmlToolComment += '<input type="file" class="comment-browse-file" id="comment-input-file">'
-            htmlToolComment += '<img src="assets/imgs/contentPage/attachment.svg">';
-            htmlToolComment += '</div>';
-            htmlToolComment += '<div id="comment-question" class="comment-tool question">';
-            // htmlToolComment += '<img  src="assets/imgs/contentPage/question.svg">';
-            htmlToolComment += '</div>';
-            htmlToolComment += '</div>';
-            htmlToolComment += '<div class="col pt-3 ">';
-            htmlToolComment += '<button data-commentId="' + element.attr('id') + '-comment"  type="button" class="btn btn-primary float-right comment-btn-post">Post Comment</button>';
-            htmlToolComment += '</div>';
-            htmlToolComment += '</div>';
-            htmlToolComment += '</div>';
-            htmlToolComment += '</div>';
-            htmlToolComment += '</div>';
-            htmlToolComment += '</div>';
-            htmlToolComment += '</div>';
-            element.append(htmlToolComment);
-            this.comments.push({
-                parentId:element.attr('id'),
-                id: element.attr('id') + '-comment',
-                listComment: []
-            })
-            this.addStyleElements(this.actions.style.addStyleBoxCommentSize, element)
-        }
-        else if (action === this.actions.event.addElToDoList) {
-            let targetTodoList = this.toDoLists.find((parentBox) => parentBox.parentId === this.currentBox.attr('id'));
-            let orderList = "";
-            if (targetTodoList) {
-                targetTodoList.toDoListOrder.forEach((order) => {
-                    orderList += '<div id="' + order.id + '"  class="toDoList-list list-group-item text-left"><p>' + order.displayName + '</p></div>'
-                })
-            }
-            element.css('display', 'initial')
-            let htmlToolToDoList = '<div class="list-group text-left content-toDoList"></div>'
-            if(element.find('.content-toDoList').length==0){
-                element.append(htmlToolToDoList)
-            }
-            let htmlToolToDoListTask = '<div class="list-group text-left">';
-            htmlToolToDoListTask += orderList
-            htmlToolToDoListTask += '</div>'
-            // element.find('.content-toDoList').find('.toDoList-list').attr('data-before','&#9675;');
-            element.find('.content-toDoList').html(htmlToolToDoListTask);
-        }
-        else if(action === this.actions.event.addElNote){
-            let note: NoteContentModel = {
-                id: element.attr('id') + '-progressBar',
-                parentId:element.attr('id'),
-                text:null,
-                html:null,
-                status:'show'
-            }
-            this.notes.push(note);
-            
-            element.append(
-                `
-                    <div id="${element.attr('id')}-note" class="content-note">
-                        <img data-parentId="${element.attr('id')}" src="assets/imgs/contentPage/note-writing.svg" class="rounded-circle note-icon writing hideCK">
-                
-                        <div data-parentId="${element.attr('id')}" class="note-icon writing showCK">
-                            <img  src="assets/imgs/contentPage/others/arrow-button-left.svg" class="rounded-circle note-icon arrow pointer-events">
-                            <img src="assets/imgs/contentPage/note-writing.svg" class="rounded-circle note-icon writing pointer-events">
-                        </div>
-                        <div contenteditable id="${element.attr('id')}-note-area" class="note-area border">
-                        </div>
-                    </div>
-                `
-                )
-                this.handles(this.actions.event.handleNote,element)
-                this.handleEditor(this.actions.editor.closeEditorContentNote,element)
-        }
+
 
         this.setCurrentToolbar();
-       // this.addOptionToolBar();
+        // this.addOptionToolBar();
         this.createData(this.actions.data.addBoxType, element)
         this.createData(this.actions.data.createDocumentTrack);
     }
@@ -852,7 +647,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         if (action === this.actions.event.handleCurrentBox) {
             this.rootElement.find('.content-box').find('.content-textarea').click((event) => {
                 this.currentElement = $(event.target);
-                if(!this.currentElement.parents('.content-box').hasClass('content-box-current')){
+                if (!this.currentElement.parents('.content-box').hasClass('content-box-current')) {
                     this.setCurrentBox(this.currentElement.parents('.content-box'));
                 }
             })
@@ -861,14 +656,14 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 this.currentElement = $(event.target);
                 if ($(event.target).hasClass('content-box')) {
                     this.setCurrentBox(this.currentElement);
-                }else{
+                } else {
                     this.setCurrentBox(this.currentElement.parents('.content-box'));
                 }
 
-          
+
                 // this.addStyleElements(this.actions.style.addStyleBoxCurrent,this.currentBox)
                 // this.addElements(this.actions.style.addStyleBoxCurrent, this.currentBox, 'click');
-                
+
                 // if ($(event.currentTarget).attr('id') !== (this.currentBox && this.currentBox.attr('id'))) {
                 //     console.log(event.currentTarget)
                 // //    console.log('afiokdjffdjdsfopfjdslkdfs');
@@ -896,11 +691,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 // }
 
             });
-        
+
         }
-        else if (action === this.actions.event.handleAttachImgModal) {
-            element.modal('show');
-        } else if (action === this.actions.event.handleDragBoxes) {
+        else if (action === this.actions.event.handleDragBoxes) {
             // if (this.commonService.isPlatform === Constants.platform.device) {
             //     this.rootElement.find('.freedom-layout').on('touchmove', (event) => {
             //         this.rootElement.find('.freedom-layout').draggable({ disabled: false, cancel: '' });
@@ -910,51 +703,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             //         this.rootElement.find('.freedom-layout').draggable({ disabled: false, cancel: '' });
             //     });
             // }
-        } else if (action === this.actions.event.handleToolbars) {
-            // this.rootElement.find('.content-toolbar').click((event) => {
-            //     event.stopPropagation();
-            //     if (event.target.id === 'file-browse') {
-            //         this.setCurrentToolbar(this.actions.toolbar.addBrowseImgTool);
-            //         this.removeStyleElements(this.actions.style.removeStyleBoxType);
-            //         this.currentBox.addClass(this.boxType.boxBrowseImg);
-            //         this.addToolBarBox(this.currentToolbar, this.currentBox);
-            //         // this.triggerElements(this.constants.event.triggerAttachFileModal, $('#attach-file-modal'));
-            //     } else if (event.target.id === 'trash') {
-            //         this.removeStyleElements(this.actions.event.removeElBox);
-            //     } else if (event.target.id === 'text-area') {
-            //         this.removeStyleElements(this.actions.style.removeStyleBoxType);
-            //         this.currentBox.addClass(this.boxType.boxTextarea);
-            //         this.setCurrentToolbar(this.actions.toolbar.addTextareaTool);
-            //         this.addToolBarBox(this.currentToolbar, element);
-            //         this.addElements(this.actions.event.addElTextArea, this.currentBox);
-            //     } else if (event.target.id === 'video-browse') {
-            //         this.setCurrentToolbar(this.actions.toolbar.addBrowseVideoTool);
-            //         this.removeStyleElements(this.actions.style.removeStyleBoxType);
-            //         this.currentBox.addClass(this.boxType.boxBrowseVideo);
-            //         this.addToolBarBox(this.currentToolbar, this.currentBox);
-            //     }
-            //     else if (event.target.id === 'subform') {
-            //         this.setCurrentToolbar(this.actions.toolbar.addCreateSubformTool);
-            //         this.addToolBarBox(this.currentToolbar, this.currentBox);
-            //         this.currentBox.addClass(this.boxType.boxAddSubform);
-            //         // this.removeElements(this.contents.event.removeStyleBoxType);
-            //         // this.currentBox.addClass(this.boxType.boxBrowseVideo);
-            //         // this.addToolBarBox(this.currentToolbar, this.currentBox); this.addToolBarBox(this.currentToolbar, this.currentBox);
-            //     }
-            //     else if (event.target.id === 'cancel') {
-            //         this.removeStyleElements(this.actions.event.removeElBox);
-            //         // if (element.hasClass(this.boxType.boxSubform)) {
-
-            //         // }
-            //         // this.removeElements(this.actions.style.removeStyleBoxType);
-            //         // this.removeElements(this.actions.event.removeContent);
-            //         // this.setCurrentToolbar(this.actions.toolbar.addInitalTool);
-            //         // this.addToolBarBox(this.actions.toolbar.addInitalTool, element);
-            //     }
-            // });
-            // this.rootElement.find('.content-toolbar').find('.form-group').attr('contenteditable','false')
         }
-         else if (action === this.actions.event.handleSubForm) {
+        else if (action === this.actions.event.handleSubForm) {
             if (element) {
                 let targetSubform = this.subForms.find(parentBox => parentBox.parentBoxId === element.attr('id'))
                 if (targetSubform) {
@@ -982,7 +732,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     element.find('.toolbar-subform').find('#subform-silde').text('Silde (0)');
                     element.find('.toolbar-subform').find('#subform-link').text('Link (0)');
                     let targetSubformIndex = this.subForms.findIndex((parentBox) => parentBox.parentBoxId === element.attr('id'));
-                    console.log('this.subForms',this.subForms)
+                    console.log('this.subForms', this.subForms)
                     if (this.currentSubFormType.id === "subform-silde") {
                         element.find('.toolbar-subform').find('[id="' + this.currentSubFormType.id + '"]').text('Silde (' + this.subForms[targetSubformIndex].subformList.length + ')');
                     }
@@ -1012,7 +762,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 })
                 element.find('.toolbar-subform').find('input[type="checkbox"]').click((itemElement) => {
                     let targetDocument = this.documentDataService.documentNavList.find((document) => document.nameDocument === $(itemElement.currentTarget).val())
-                    let condition:SubFormContentConditionModel =  new SubFormContentConditionModel();
+                    let condition: SubFormContentConditionModel = new SubFormContentConditionModel();
                     let newSubform: SubFormContentDetailModel = {
                         id: targetDocument.id,
                         documentName: targetDocument.nameDocument,
@@ -1020,13 +770,13 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                         linkName: targetDocument.nameDocument,
                         type: this.currentSubFormType.id,
                         isConfirm: false,
-                        condition:condition
+                        condition: condition
                     }
                     if (this.subForms.length === 0 || !this.subForms.find((parentBox) => parentBox.parentBoxId === element.attr('id'))) {
                         this.subForms.push(
                             {
                                 parentBoxId: element.attr('id'),
-                                subformType:null,
+                                subformType: null,
                                 subformList: [newSubform]
                             }
                         )
@@ -1104,13 +854,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             //     }
             // })
         }
-        else if (action === this.actions.event.handleOptionTools) {
-            $('.option-action-trash').click(() => {
-                this.removeData(this.actions.data.removeBoxData);
-                this.removeStyleElements(this.actions.option.removeOptionTool);
-                this.removeStyleElements(this.actions.event.removeElBox);
-            });
-        }
         else if (action === this.actions.event.handleOptionToolTextArea) {
             $('#option-font-family').fontselect(
                 {
@@ -1172,236 +915,49 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             // if(this.currentColorCode){
             //     $("#option-font-color").spectrum("set", this.currentColorCode.toHexString())
             // }
-         
+
             $("#option-font-color").spectrum({
                 showPalette: true,
-                palette: [ ],
+                palette: [],
                 showSelectionPalette: true, // true by default
                 selectionPalette: ["red", "green", "blue"],
-                change:(color)=> {
+                change: (color) => {
                     let style = 'color:' + color.toHexString();
-                    this.currentColorCode =  color.toHexString();
+                    this.currentColorCode = color.toHexString();
                     this.addStyleElements(this.actions.style.addOptionStyle, null, style)
                 }
             });
-            if(this.currentColorCode){
+            if (this.currentColorCode) {
                 $("#option-font-color").spectrum("set", this.currentColorCode)
             }
-    
+
 
             $('.option-action-trash').click(() => {
-                this.removeData(this.actions.data.removeBoxData);
                 this.removeStyleElements(this.actions.option.removeOptionTool);
                 this.removeStyleElements(this.actions.event.removeElBox);
             });
 
         }
-        else if (action === this.actions.event.handleWistia) {
-            element.click((event) => {
-                let videoIndex = this.videos.findIndex((video) => video.id === $(event.currentTarget).attr('id') + '-video');
-                let video = Wistia.api(this.videos[videoIndex].data.streamId);
-                // video.pause();
-                // console.log('cxcxcx');
-                this.videos[videoIndex].data.currentWatchingTime = video.time();
-            });
-        }
-        else if (action === this.actions.event.handleOptionToolToDoList) {
-            $('.option-toDoList').find('.toDoList-btnPlus').unbind().bind('click', () => {
-                let taskName = $('.option-toDoList').find('#toDoList-inputTask').val().toString();
-                let taskLength = ($('.option-toDoList').find('.toDoList-taskList').find('.list-group-item').length + 1)
-                let displayName = 'Step' + taskLength + ' : ' + taskName;
-                let task = '<div data-boxId="' + this.currentBox.attr('id') + '"  id="taskList-' + taskLength + '" data-taskName="' + taskName + '" class="rounded-0 list-group-item border-0 pl-4 cursor-pointer">' + displayName +  '</div>';
-
-                if (taskName) {
-                    $('.option-toDoList').find('.toDoList-taskList').append(task);
-                    if (!this.toDoLists.find(parentBox => parentBox.parentId === this.currentBox.attr('id') + '-todoList')) {
-                        let todoList: ToDoListContentModel = {
-                            parentId: this.currentBox.attr('id'),
-                            id: this.currentBox.attr('id') + '-todoList',
-                            progress: 0,
-                            toDoListOrder: new Array<ToDoListContentOrderModel>()
-                        }
-                        this.toDoLists.push(todoList)
-                    }
-                    let toDoListOrder: ToDoListContentOrderModel = {
-                        id: 'taskList-' + taskLength,
-                        name: taskName,
-                        displayName: displayName,
-                        progress: 0,
-                        step: taskLength,
-                        objectTodoList: new Array<ObjectToDoList>()
-                    }
-                    let targetTodoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentId === this.currentBox.attr('id'))
-                    if (targetTodoListIndex >= 0 && !this.toDoLists[targetTodoListIndex].toDoListOrder.find(order => order.id === 'taskList-' + taskLength)) {
-                        this.toDoLists[targetTodoListIndex].toDoListOrder.push(toDoListOrder)
-                    }
-                    this.handles(this.actions.event.handleOptionToolToDoList)
-                    this.addElements(this.actions.event.addElToDoList, this.currentBox)
-                }
-
-            });
-            $('.option-toDoList').find('.toDoList-taskList').find('.list-group-item').unbind().bind('click', (element) => {
-                $('.option-toDoList').find('.toDoList-taskList').find('.list-group-item').removeClass('task-active')
-                $(element.currentTarget).addClass('task-active')
-                
-                if (!this.currentSelectTaskList.find(box => box.boxId === this.currentBox.attr('id'))) {
-                    this.currentSelectTaskList.push({
-                        boxId: this.currentBox.attr('id'),
-                        taskId: $(element.currentTarget).attr('id')
-                    })
-                } else {
-                    let targetBoxIndex = this.currentSelectTaskList.findIndex(box => box.boxId === this.currentBox.attr('id'))
-                    this.currentSelectTaskList[targetBoxIndex].taskId = $(element.currentTarget).attr('id');
-                }
-                this.createData(this.actions.data.createToDoListBoxList)
-                let listBox = '';
-                this.toDoListBoxList.forEach((box, index) => {
-                    listBox += '<input data-taskId="' + $(element.currentTarget).attr('id') + '" type="checkbox" value="' + box.id + '" id="compontentList-box-' + box.id + '" />';
-                    listBox += '<label class="list-group-item border-0" for="compontentList-box-' + box.id + '">' + box.name + '(' + box.boxTypeName + ')' + '</label>';
-                });
-
-                if (listBox) {
-                    $('.option-toDoList').find('.toDoList-componentList').html(listBox);
-                }
-
-                let targetTodoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentId === this.currentBox.attr('id'))
-                let targetIndexTodoOrder = this.toDoLists[targetTodoListIndex].toDoListOrder.findIndex((order) => order.id === $(element.currentTarget).attr('id'));
-                this.toDoLists[targetTodoListIndex].toDoListOrder[targetIndexTodoOrder].objectTodoList.forEach((object) => {
-                    $('.option-toDoList').find('.toDoList-componentList').find('input[type="checkbox"]').each((index, element) => {
-                        if (object.id === $(element).val()) {
-                            $(element).prop('checked', true);
-                        }
-                    });
-                })
-
-                this.handles(this.actions.event.handleOptionToolToDoList)
-            });
-            $('.option-toDoList').find('.toDoList-componentList').find('input[type="checkbox"]').unbind().bind('click', (element) => {
-                let targetToDoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentId === this.currentBox.attr('id'))
-                let targetToDoOrderIndex = this.toDoLists[targetToDoListIndex].toDoListOrder.findIndex((order) => order.id === $(element.currentTarget).attr('data-taskId'));
-                 let targetDocumentTrackContentIndex =  this.documentTrack.contents.findIndex(content=>content.parentId ===$(element.currentTarget).val().toString());
-                if ($(element.currentTarget).prop('checked')) {
-                    let objectTodoList: ObjectToDoList = {
-                        id: $(element.currentTarget).val().toString(),
-                        progress: 0
-                    }
-        
-                    this.toDoLists[targetToDoListIndex].toDoListOrder[targetToDoOrderIndex].objectTodoList.push(objectTodoList)
-                    if( this.documentTrack.contents[targetDocumentTrackContentIndex].contentType === this.boxType.boxSubform){
-                        this.documentTrack.contents[targetDocumentTrackContentIndex].conditions.subformCondition.haveInDoList = true;
-                    }
-                } else {
-                    this.toDoLists[targetToDoListIndex].toDoListOrder[targetToDoOrderIndex].objectTodoList =
-                    this.toDoLists[targetToDoListIndex].toDoListOrder[targetToDoOrderIndex].objectTodoList.filter((object) => object.id != $(element.currentTarget).val().toString())
-                    if( this.documentTrack.contents[targetDocumentTrackContentIndex].contentType === this.boxType.boxSubform){
-                        this.documentTrack.contents[targetDocumentTrackContentIndex].conditions.subformCondition.haveInDoList = false;
-                    }
-                }
-
-            })
-            $('.option-toDoList').find('.toDoList-taskList').find('.taskList-text').unbind().bind('input', (element) => {
-                let taskId   =  $(element.currentTarget).attr('data-taskId');
-                let targetToDoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentId === this.currentBox.attr('id'))
-                let targetToDoListTaskIndex  =   this.toDoLists[targetToDoListIndex].toDoListOrder.findIndex(task=>task.id===taskId);
-                this.toDoLists[targetToDoListIndex].toDoListOrder[targetToDoListTaskIndex].displayName  =  $(element.currentTarget).text();
-                this.currentBox.find('.content-toDoList').find('#'+taskId).find('p').text($(element.currentTarget).text())
-
-
-                // let targetToDoOrderIndex = this.toDoLists[targetToDoListIndex].toDoListOrder.findIndex((order) => order.id === $(element.currentTarget).attr('data-taskId'));
-                // if()
-                // $(element.currentTarget).val()
-                // $(element.currentTarget
-
-            })
-            $('.option-toDoList').find('.toDoList-taskList').find('.taskList-trash').unbind().bind('click', (element) => {
-                element.stopPropagation()
-                let taskId =  $(element.currentTarget).attr('data-taskid');
-                this.currentBox.find('.content-toDoList').find('#'+taskId).remove();
-                 $('.option-toDoList').find('.toDoList-taskList').find('#'+taskId).remove();
-                let  targetParentBoxIndex =    this.toDoLists.findIndex((parentBox)=>parentBox.parentId === this.currentBox.attr('id'));
-                if(targetParentBoxIndex>=0){
-                    this.toDoLists[targetParentBoxIndex].toDoListOrder =  this.toDoLists[targetParentBoxIndex].toDoListOrder.filter((task)=>task.id !== taskId);
-                }
-                
-                this.toDoLists[targetParentBoxIndex].toDoListOrder.forEach((task,index)=>{
-                    this.toDoLists[targetParentBoxIndex].toDoListOrder[index].id =  'taskList-'+index+1;                    
-                })
-                this.currentBox.find('.content-toDoList').find('.toDoList-list').each((index,element)=>{
-                        $(element).attr('id','taskList-'+(index+1));
-                });
-                $('.option-toDoList').find('.toDoList-taskList').find('.list-group-item').each((index,element)=>{
-                        $(element).attr('id','taskList-'+(index+1));
-                });
-            });
-
-            $('.option-toDoList').find('.toDoList-trash').find('.option-action-trash').unbind().bind('click', () => {
-                this.removeData(this.actions.data.removeBoxData);
-                this.removeStyleElements(this.actions.option.removeOptionTool);
-                this.removeStyleElements(this.actions.event.removeElBox);
-            });
-
-        }
-        else if (action === this.actions.event.handleOptionToolVideo) {
-            $('.option-video').find('.video-tracker').unbind().bind('click', (element) => {
-                let targetVideoIndex = this.videos.findIndex((video) => video.parentId === this.currentBox.attr('id'))
-                let targetVideoTrackIndex =  this.documentTrack.contents.findIndex((video)=>video.id === this.videos[targetVideoIndex].id);
-                if (targetVideoIndex >= 0) {
-                    if($('.option-video').find('.video-tracker').prop('checked')){
-                        this.videos[targetVideoIndex].condition.isMustWatchingEnd = true;
-                        this.documentTrack.contents[targetVideoTrackIndex].conditions.videoCondition.isMustWatchingEnd = true
-                    }else{
-                        this.videos[targetVideoIndex].condition.isMustWatchingEnd = false;
-                        this.documentTrack.contents[targetVideoTrackIndex].conditions.videoCondition.isMustWatchingEnd = false;
-                    }
-                }
-            });
-
-            $('.option-video').find('.option-action-trash').unbind().bind('click', () => {
-                this.removeData(this.actions.data.removeBoxData);
-                this.removeStyleElements(this.actions.option.removeOptionTool);
-                this.removeStyleElements(this.actions.event.removeElBox);
-            });
-        }
-
-        else if (action === this.actions.event.handleOptionToolLink) {
-            $('.option-link').find('#link-input-url').unbind().bind('input', (element) => {
-                console.log(element)
-                let targetLinkIndex = this.links.findIndex(link=>link.parentId === this.currentBox.attr('id'))
-                if(targetLinkIndex>=0){
-                    this.links[targetLinkIndex].name =  $(element.currentTarget).val().toString();
-                    this.currentBox.find('.content-link').text($(element.currentTarget).val().toString());
-                    this.currentBox.find('.content-link').attr('data-name',$(element.currentTarget).val().toString());
-                }
-
-            })
-            $('.option-link').find('.option-action-trash').unbind().bind('click', () => {
-                this.removeData(this.actions.data.removeBoxData);
-                this.removeStyleElements(this.actions.option.removeOptionTool);
-                this.removeStyleElements(this.actions.event.removeElBox);
-            });
-
-        }
-
         else if (action === this.actions.event.handleOptionToolExam) {
             $('.option-exam').find('#exam-input-url').unbind().bind('input', (element) => {
-                let targetExamIndex = this.exams.findIndex(exam=>exam.parentId === this.currentBox.attr('id'));
+                let targetExamIndex = this.exams.findIndex(exam => exam.parentId === this.currentBox.attr('id'));
                 console.log(targetExamIndex)
-                if(targetExamIndex>=0){
-                    this.exams[targetExamIndex].name =  $(element.currentTarget).val().toString();
+                if (targetExamIndex >= 0) {
+                    this.exams[targetExamIndex].name = $(element.currentTarget).val().toString();
                     console.log(this.currentBox.find('.content-exam').find('#exam-input-url'))
                     this.currentBox.find('.content-exam').find('#exam-input-url').text($(element.currentTarget).val().toString());
                 }
             })
             $('.option-exam').find('#exam-input-title').unbind().bind('input', (element) => {
-                let targetExamIndex = this.exams.findIndex(exam=>exam.parentId === this.currentBox.attr('id'));
+                let targetExamIndex = this.exams.findIndex(exam => exam.parentId === this.currentBox.attr('id'));
                 console.log(targetExamIndex)
-                if(targetExamIndex>=0){
-                    this.exams[targetExamIndex].name =  $(element.currentTarget).val().toString();
+                if (targetExamIndex >= 0) {
+                    this.exams[targetExamIndex].name = $(element.currentTarget).val().toString();
                     this.currentBox.find('.content-exam').find('#exam-input-title').val($(element.currentTarget).val().toString());
                 }
             })
             $('.option-exam').find('.option-action-trash').unbind().bind('click', () => {
-                this.removeData(this.actions.data.removeBoxData);
+
                 this.removeStyleElements(this.actions.option.removeOptionTool);
                 this.removeStyleElements(this.actions.event.removeElBox);
             });
@@ -1470,70 +1026,27 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
 
             // });
             $('.option-subform').find('.subform-input').unbind().bind('input', (element) => {
-               let targetElementSubform =  this.currentBox.find('.content-subform').find('li'+"[data-subformid='" + $(element.currentTarget).attr('data-subformid') + "']")
-                let targetParentBoxIndex =  this.subForms.findIndex((parentBox)=>parentBox.parentBoxId === this.currentBox.attr('id'));
-                let targetSubformIndex =  this.subForms[targetParentBoxIndex].subformList.findIndex(subform=>subform.id === $(element.currentTarget).attr('data-subformid'))
-                this.subForms[targetParentBoxIndex].subformList[targetSubformIndex].linkName =  $(element.currentTarget).val().toString();
-                targetElementSubform.text($(element.currentTarget).val().toString()) 
+                let targetElementSubform = this.currentBox.find('.content-subform').find('li' + "[data-subformid='" + $(element.currentTarget).attr('data-subformid') + "']")
+                let targetParentBoxIndex = this.subForms.findIndex((parentBox) => parentBox.parentBoxId === this.currentBox.attr('id'));
+                let targetSubformIndex = this.subForms[targetParentBoxIndex].subformList.findIndex(subform => subform.id === $(element.currentTarget).attr('data-subformid'))
+                this.subForms[targetParentBoxIndex].subformList[targetSubformIndex].linkName = $(element.currentTarget).val().toString();
+                targetElementSubform.text($(element.currentTarget).val().toString())
 
             });
             $('.option-subform').find('.option-action-trash').unbind().bind('click', () => {
-                this.removeData(this.actions.data.removeBoxData);
                 this.removeStyleElements(this.actions.option.removeOptionTool);
                 this.removeStyleElements(this.actions.event.removeElBox);
             });
         }
-        else if (action === this.actions.event.handleOptionToolProgressBar) {
-            $('.option-progressBar').find('.progressBar-componentList').find('input[type="checkbox"]').unbind().bind('click', (element) => {
-                let targetProgressBarIndex  =  this.progressBars.findIndex(progressBar=>progressBar.parentId  === this.currentBox.attr('id'));
-                let targetdocumentTrack= this.documentTrack.contents.find(content => content.parentId  === $(element.currentTarget).val().toString())
-                console.log(targetdocumentTrack)
-                // console.log(targetdocumentTrack)
-                if(targetProgressBarIndex>=0){
-                    if($(element.currentTarget).prop('checked')){
-                        if(!this.progressBars[targetProgressBarIndex].contentList.find(content=>content.parentId === $(element.currentTarget).val().toString())){
-                            // this.documentTrack.contents[targetParentBoxSubformIndex].conditions.subformCondition.haveInProgressBar  =true;
-                            // this.subForms[targetParentBoxSubformIndex].subformList.forEach((subform)=>{
-                                // this.documentTrack.contents.forEach((content)=>{
-                                //     if(content.boxType ===this.boxType.boxSubform){
-                                //         content.conditions.subformCondition.haveInProgressBar = true;
-                                //     }
-                                // });
-                            // })
-                          let targetDocTrack =  this.documentTrack.contents.find((content)=>content.parentId === $(element.currentTarget).val().toString())
-                         console.log("targetDocTrack", $(element.currentTarget).val().toString())
-                          let progressBarContentObj:ProgressBarContentObjectModel = {
-                                id:targetDocTrack.id,
-                                parentId:targetDocTrack.parentId,
-                                boxType:targetdocumentTrack.contentType
-                            }
-                            this.progressBars[targetProgressBarIndex].contentList.push(progressBarContentObj)
-                           }
-                    }else{
-                        this.progressBars[targetProgressBarIndex].contentList =  this.progressBars[targetProgressBarIndex].contentList.filter((content)=>content.parentId !== $(element.currentTarget).val().toString())
-                        // this.documentTrack.contents[targetParentBoxSubformIndex].conditions.subformCondition.haveInProgressBar  =false;
-                    }
-                    console.log(this.progressBars)
-                }
-            });
-            $('.option-progressBar').find('.option-action-trash').unbind().bind('click', () => {
-                this.removeData(this.actions.data.removeBoxData);
-                this.removeStyleElements(this.actions.option.removeOptionTool);
-                this.removeStyleElements(this.actions.event.removeElBox);
-            });
+        else if (action === this.actions.event.handleBrowseExam) {
 
-        }
- 
-
-        else if(action === this.actions.event.handleBrowseExam){
-
-            element.find('.toolbar-browse-exam').find('#exam-input-title').unbind().bind('click',(event)=>{
+            element.find('.toolbar-browse-exam').find('#exam-input-title').unbind().bind('click', (event) => {
                 element.find('.toolbar-browse-exam').find('#exam-input-title').focus();
-                element.find('.toolbar-browse-exam').find('#exam-input-title').unbind().bind('input',(event)=>{
+                element.find('.toolbar-browse-exam').find('#exam-input-title').unbind().bind('input', (event) => {
                     this.currentinput = event.target.value;
                 })
             });
-            element.find('.toolbar-browse-exam').find('#exam-input-url').unbind().bind('click',()=> {
+            element.find('.toolbar-browse-exam').find('#exam-input-url').unbind().bind('click', () => {
                 element.find('.toolbar-browse-exam').find('#exam-input-url').focus();
                 element.find('.toolbar-browse-exam').find('#exam-input-url').on('input', this.commonService.debounce((event) => {
                     if (event.target.value) {
@@ -1547,35 +1060,12 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 }, 500));
             });
         }
-        else if(action === this.actions.event.handleNote){
-           
-                    if(element&&element.find('.content-note').length ===0){
-                        this.addElements(this.actions.event.addElNote, element);
-                    }else{
-                        this.rootElement.find('.note-icon.writing.hideCK').click((event)=>{
-                            let parentId =  $(event.target).attr('data-parentid')
-                            
-                            // if(!CKEDITOR.instances[element.attr('id')+'-note-area']){
-                            //     this.handleEditor(this.actions.editor.setEditorContentNote,element);
-                            // }
-                            this.handleEditor(this.actions.editor.openEditorContentNote,$('#'+parentId));
-                        })
-                        this.rootElement.find('.note-icon.writing.showCK').click((event)=>{
-                            let parentId =  $(event.target).attr('data-parentid')
-                            this.handleEditor(this.actions.editor.closeEditorContentNote,$('#'+parentId));
-                        })
-                    }
-                
-          
-            
-
-        }
     }
     private removeStyleElements(action: string, element?: any) {
         if (action === this.actions.event.removeElBox) {
             this.currentBox.remove();
             this.currentBox = null;
-        } 
+        }
         else if (action === this.actions.style.removeStyleBoxCurrent) {
             this.rootElement.find('.content-box').find('[content-name][content-last!="true"]').hide();
             this.rootElement.find('.content-box').removeClass('content-box-current');
@@ -1595,20 +1085,10 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.rootElement.find('.content-box').removeClass('content-box-active');
             this.rootElement.find('.content-box').removeClass('border border-primary');
         }
-        else if (action === this.actions.style.removeStyleBoxBrowseImgSize) {
-            this.rootElement.find('.content-box').removeClass('box-browse-img-size');
-        } else if (action === this.actions.style.removeStyleBoxBrowseVideoSize) {
-            this.rootElement.find('.content-box').removeClass('box-browse-video-size');
-        }
-        else if (action === this.actions.style.removeStyleBoxProgressBarSize) {
-            this.rootElement.find('.content-box').removeClass('box-progress-bar-size');
-        }
         else if (action === this.actions.style.removeStyleBoxSubformSize) {
             this.rootElement.find('.content-box').removeClass('box-subform-size');
         }
-        else if (action === this.actions.style.removeStyleBoxCommentSize) {
-            this.rootElement.find('.content-box').removeClass('box-comment-size');
-        }
+
         else if (action === this.actions.event.removeForPreviewSubForm) {
             console.log(this.rootElement.find(element).find('.subform-preview'))
             this.rootElement.find(element).find('.subform-preview').find('.content-box').removeClass('content-box-active border border-primary');
@@ -1662,29 +1142,11 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 element.find('[content-name]').show();
                 element.addClass('border border-primary');
                 element.addClass('content-box-active');
-                element.addClass('content-box-current');            
+                element.addClass('content-box-current');
             });
-                    
-          
 
-        }
-        else if (action === this.actions.style.addStyleBoxBrowseImgSize) {
-            element.addClass('box-browse-img-size');
-        }
-        else if (action === this.actions.style.addStyleBoxBrowseVideoSize) {
-            element.addClass('box-browse-video-size');
-        }
-        else if (action === this.actions.style.addStyleBoxBrowseFileSize) {
-            element.addClass('box-browse-file-size');
-        }
-        else if (action === this.actions.style.addStyleBoxProgressBarSize) {
-            element.addClass('box-progress-bar-size');
-        }
-        else if (action === this.actions.style.addStyleBoxSubformSize) {
-            element.addClass('box-subform-size');
-        }
-        else if (action === this.actions.style.addStyleBoxCommentSize) {
-            element.addClass('box-comment-size');
+
+
         }
         else if (action === this.actions.style.addStyleBoxActive) {
             this.removeStyleElements(this.actions.style.removeStyleBoxActive);
@@ -1701,10 +1163,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             element.addClass('active');
             element.addClass('text-primary');
         }
-        else if (action === this.actions.style.addStyleBoxContentNote) {
-            // element.find('#cke_note-area').css('z-index',10)
-            // element.find('#cke_note-area').css('width',$('.note-area').outerWidth())
-        }
     }
     // private addStylesElement(action:string,styles:string,subaction?:string) {
     //     if(action === this.actions.style.addOptionStyle){
@@ -1714,26 +1172,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     private async addToolBarBox(action: string, element: any) {
         let htmlTootBar;
         this.removeStyleElements(this.actions.toolbar.removeTool);
-        this.removeStyleElements(this.actions.style.removeStyleBoxBrowseImgSize);
-        this.removeStyleElements(this.actions.style.removeStyleBoxBrowseVideoSize);
-        if (action === this.actions.toolbar.addInitalTool) {
-            this.removeStyleElements(this.actions.toolbar.removeTool);
-            htmlTootBar = '<div class="row content-toolbar toolbar-inital">'
-                + '<div class="col-12">'
-                + '<div class="row toolbar-picker">'
-                + '<div class="col-3"><img id="text-area" src="assets/imgs/contentPage/text-area.svg"></div>'
-                + '<div class="col-3"><img id="file-browse" src="assets/imgs/contentPage/image-picker.svg"> </div>'
-                + '<div class="col-3"><img id="video-browse" src="assets/imgs/contentPage/video-camera.svg"> </div>'
-                + '<div class="col-3"><img id="subform" src="assets/imgs/contentPage/subform.svg"> </div>'
-                + '</div>'
-                + '<div class="row toolbar-function">'
-                + '<div class="col-12"><img id="trash" src="assets/imgs/contentPage/trash.svg"></div>'
-                + '</div>'
-                + '</div>'
-                + '</div>';
-            this.rootElement.find(element).append(htmlTootBar);
-        }
-        else if (action === this.actions.toolbar.addBrowseExamTool) {
+        if (action === this.actions.toolbar.addBrowseExamTool) {
             htmlTootBar = '<div class="row content-toolbar toolbar-browse-exam">'
                 + '<div class="col-12 toolbar-drag">'
                 + '<div class="w-70 form-group m-auto">'
@@ -1746,13 +1185,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.rootElement.find(element).append(htmlTootBar);
             this.handles(this.actions.event.handleBrowseExam, element);
 
-        }
-
-        else if (action === this.actions.toolbar.addTextareaTool) {
-            htmlTootBar = '<div class="row content-toolbar toolbar-textarea">'
-                + '<div class="col-12">'
-                + '</div>'
-                + '</div>';
         }
         else if (action === this.actions.toolbar.addCreateSubformTool) {
             // this.currentSubFormType = { id: 'subform-link', name: 'link' };
@@ -1802,18 +1234,14 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             //     + '</div>'
             //     + '</div>';
             //this.rootElement.find(element).append(htmlTootBar);
-        
+
         }
-        else if (this.currentToolbar === this.actions.toolbar.addNote) {
-            // htmlTootBar = '<img src="assets/imgs/contentPage/note-writing.svg"  class="rounded-circle">'
-            // this.rootElement.find(element).html(htmlTootBar);
-            this.handles(this.actions.event.handleNote, element);
-        }
-        this.handles(this.actions.event.handleToolbars, element);
+
+
     }
     private async addOptionToolBar() {
         let htmlOptionToolBar;
-        if (this.currentToolbar === this.actions.toolbar.addTextareaTool || this.currentToolbar === this.actions.toolbar.templateDocTool) {
+        if (this.currentToolbar === this.actions.toolbar.templateDocTool) {
             const constFontSizeList = Constants.common.style.fontSizeList
             let htmlFontSizeList = "";
             constFontSizeList.forEach((fontsize) => {
@@ -1880,93 +1308,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             this.rootOptionTool.html(htmlOptionToolBar)
             this.handles(this.actions.event.handleOptionToolTextArea);
         }
-        else if (
-            this.currentToolbar === this.actions.toolbar.addCreateSubformTool
-            || this.currentToolbar === this.actions.toolbar.addCommentTool
-            || this.currentToolbar === this.actions.toolbar.addBrowseLinkTool
-            || this.currentToolbar === this.actions.toolbar.addBrowseExamTool
-            || this.currentToolbar === this.actions.toolbar.addNote
-            || this.currentToolbar === this.actions.toolbar.cancelTool) {
-            htmlOptionToolBar =
-                '<div class="row p-0 m-0 mt-3 option-cancle">'
-                + '<div class="col-12 d-flex justify-content-center border-bottom">'
-                + '<div class="form-group text-center">'
-                + '<label >Action</label>'
-                + '<div >'
-                + '<img  class="option-action-trash" src="assets/imgs/contentPage/trash.svg">'
-                + '</div>'
-                + '</div>'
-                + '</div>'
-                + '</div>'
-
-            this.rootOptionTool.html(htmlOptionToolBar)
-            this.handles(this.actions.event.handleOptionTools);
-
-        }
-        else if (this.currentToolbar === this.actions.toolbar.addVideoTool) {
-
-            // htmlOptionToolBar =
-            //     '<div class="row p-0 m-0 mt-3 option-video">'
-            //     + '<div class="col-12 d-flex justify-content-center border-bottom">'
-            //     + '<div class="form-group text-center">'
-            //     + '<label>Property</label>'
-            //     + '<div class="custom-control custom-switch">'
-            //     + '<input  type="checkbox" class="custom-control-input video-tracker" id="switch">'
-            //     + '<label class="custom-control-label" for="switch">Must finish watching</label>'
-            //     + '</div>'
-            //     + '</div>'
-            //     + '</div>'
-
-            //     + '<div class="col-12 d-flex justify-content-center border-bottom">'
-            //     + '<div class="form-group text-center">'
-            //     + '<label>Action</label>'
-            //     + '<div >'
-            //     + '<img  class="option-action-trash" src="assets/imgs/contentPage/trash.svg">'
-            //     + '</div>'
-            //     + '</div>'
-            //     + '</div>'
-
-            //     + '</div>'
-            // this.rootOptionTool.html(htmlOptionToolBar)
-            // let targetVideo = this.videos.find((video) => video.parentId === this.currentBox.attr('id'))
-            // if (targetVideo) {
-            //     if (targetVideo.condition.isMustWatchingEnd) {
-            //         $('.option-video').find('.video-tracker').prop('checked', true)
-            //     }
-            // }
-            // this.handles(this.actions.event.handleOptionToolVideo);
-        }
-
-        else if (this.currentToolbar === this.actions.toolbar.addLinkTool) {
-
-            htmlOptionToolBar =
-                '<div class="row p-0 m-0 mt-3 option-link">'
-                + '<div class="col-12 d-flex justify-content-center border-bottom">'
-                + '<div class="form-group text-center w-70">'
-                + '<label>Property</label>'
-               + '<input id="link-input-url" type="text" class="form-control text-center" placeholder="LinkName">'
-                + '</div>'
-                + '</div>'
-
-                + '<div class="col-12 d-flex justify-content-center border-bottom">'
-                + '<div class="form-group text-center">'
-                + '<label>Action</label>'
-                + '<div >'
-                + '<img  class="option-action-trash" src="assets/imgs/contentPage/trash.svg">'
-                + '</div>'
-                + '</div>'
-                + '</div>'
-
-                + '</div>'
-            this.rootOptionTool.html(htmlOptionToolBar)
-            let targetLink = this.links.find((link)=>link.parentId === this.currentBox.attr('id'))
-            if(targetLink){
-                $('.option-link').find('#link-input-url').val(targetLink.name);
-            }
-            this.handles(this.actions.event.handleOptionToolLink);
-        }
-
-
         else if (this.currentToolbar === this.actions.toolbar.addExamTool) {
 
             htmlOptionToolBar =
@@ -1974,8 +1315,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 + '<div class="col-12 d-flex justify-content-center border-bottom">'
                 + '<div class="form-group text-center w-70">'
                 + '<label>Property</label>'
-               + '<input id="exam-input-title" type="text" class="form-control text-center" placeholder="Title">'
-               + '<input id="exam-input-url" type="text" class="form-control text-center" placeholder="LinkName">'
+                + '<input id="exam-input-title" type="text" class="form-control text-center" placeholder="Title">'
+                + '<input id="exam-input-url" type="text" class="form-control text-center" placeholder="LinkName">'
                 + '</div>'
                 + '</div>'
                 + '<div class="col-12 d-flex justify-content-center border-bottom">'
@@ -1989,8 +1330,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
 
                 + '</div>'
             this.rootOptionTool.html(htmlOptionToolBar)
-            let targetExam = this.exams.find((exam)=>exam.parentId === this.currentBox.attr('id'))
-            if(targetExam){
+            let targetExam = this.exams.find((exam) => exam.parentId === this.currentBox.attr('id'))
+            if (targetExam) {
                 $('.option-exam').find('#exam-input-title').val(targetExam.title);
                 $('.option-exam').find('#exam-input-url').val(targetExam.name);
             }
@@ -1999,15 +1340,15 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
 
 
         else if (this.currentToolbar === this.actions.toolbar.addSubformTool) {
-            let targetParentBox =  this.subForms.find(parentBox=>parentBox.parentBoxId === this.currentBox.attr('id'))
+            let targetParentBox = this.subForms.find(parentBox => parentBox.parentBoxId === this.currentBox.attr('id'))
             let subformList = '';
-            if(targetParentBox){
-       
-                targetParentBox.subformList.forEach((subform)=>{
-                    if(subform.type === 'subform-link'){
-                        subformList+= '<div class="form-group w-70 m-auto">';
-                        subformList+= '<input data-subformid="'+subform.id+'" value="'+subform.linkName+'" type="text" class="form-control subform-input mt-2"  placeholder="Document Name">';
-                        subformList+= '</div>';
+            if (targetParentBox) {
+
+                targetParentBox.subformList.forEach((subform) => {
+                    if (subform.type === 'subform-link') {
+                        subformList += '<div class="form-group w-70 m-auto">';
+                        subformList += '<input data-subformid="' + subform.id + '" value="' + subform.linkName + '" type="text" class="form-control subform-input mt-2"  placeholder="Document Name">';
+                        subformList += '</div>';
                     }
                 })
             }
@@ -2042,145 +1383,17 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             // }
             this.handles(this.actions.event.handleOptionToolSubform);
         }
-        else if (this.currentToolbar === this.actions.toolbar.addToDoListTool) {
-            let targetToDoListIndex = this.toDoLists.findIndex(toDoList => toDoList.parentId === this.currentBox.attr('id'))
-            let taskList = "";
-            if (targetToDoListIndex >= 0) {
-                this.toDoLists[targetToDoListIndex].toDoListOrder.forEach(order => {
-                    taskList += '<div data-boxId="' + this.currentBox.attr('id') + '"  id="' + order.id + '" data-taskName="' + order.name + '" class="rounded-0 list-group-item border-0 pl-4 cursor-pointer"><p data-taskId="'+order.id+'" class="taskList-text" contenteditable="true"> Step ' + order.step + ' : ' + order.name
-                    +'</p><div data-taskId="'+order.id+'" class="float-right ml-3 taskList-trash"><img id="trash" src="assets/imgs/contentPage/trash.svg"></div></div>';
-                });
-
-            }
-
-            // this.toDoLists.forEach((toDoList)=>{
-            //     toDoList.
-            // })
-            // let taskLength= ($('.option-toDoList').find('.toDoList-taskList').find('.list-group-item').length + 1) 
-            // let task = '<div data-boxId="'+this.currentBox.attr('id')+'"  id="taskList-'+taskLength +'" data-taskName="' + taskName + '" class="rounded-0 list-group-item border-0 pl-4 cursor-pointer"> Step ' + taskLength + ' : ' + taskName + '</div>';
-            // if (taskName) {
-            //     $('.option-toDoList').find('.toDoList-taskList').append(task);
-            //     this.handles(this.actions.event.handleOptionToolToDoList)
-            // }
-
-            // htmlOptionToolBar=+ '</div>'
-
-            htmlOptionToolBar =
-                '<div class="row p-0 m-0 mt-3 option-toDoList">'
-                + '<div class="col-12">'
-                + '<div class="row p-0 m-0">'
-                + '<div class="col-1">'
-                + '</div>'
-                + '<div class="col-8 item-middle">'
-                + '<input id="toDoList-inputTask" type="text" class="form-control " placeholder="ToDoList...">'
-                + '</div>'
-                + '<div class="col-3 item-middle toDoList-btnPlus">'
-                + '<img src="assets/imgs/contentPage/optionTool/plus.svg">'
-                + '</div>'
-                + '<div class="col">'
-                + '</div>'
-                + '</div>'
-                + '</div>'
-                + '<div class="col-12 mt-3">'
-                + '<div class="border border-left-0 border-right-0 toDoList-taskList-text d-flex align-items-center"><p class="pl-3">Task List</p></div>'
-                + '<div class="list-group text-left toDoList-taskList">'
-                + '</div>'
-                + '<div class="border border-left-0 border-right-0 toDoList-componentList-text d-flex align-items-center"><p class="pl-3">Component List</p></div>'
-                + '<div class="list-group text-left toDoList-componentList">'
-                + '</div>'
-                + '</div>'
-                + '<div class="col-12 mt-3">'
-                + '<div class="border border-left-0 border-right-0 toDoList-label-text d-flex align-items-center"><p class="pl-3">Action</p></div>'
-                + '<div class="list-group toDoList-trash">'
-                + '<img  class="option-action-trash m-auto" src="assets/imgs/contentPage/trash.svg">'
-                + '</div>'
-                + '</div>'
-                + '</div>'
-            this.rootOptionTool.html(htmlOptionToolBar)
-            if (taskList) {
-                $('.option-toDoList').find('.toDoList-taskList').append(taskList);
-                let targetBox = this.currentSelectTaskList.find((box) => box.boxId === this.currentBox.attr('id'))
-                if (targetBox) {
-                    $('.option-toDoList').find('.toDoList-taskList').find('#' + targetBox.taskId).addClass('task-active')
-                    this.createData(this.actions.data.createToDoListBoxList)
-                    let listBox = '';
-                    this.toDoListBoxList.forEach((box, index) => {
-                        listBox += '<input data-taskId="' + targetBox.taskId + '" type="checkbox" value="' + box.id + '" id="compontentList-box-' + box.id + '" />';
-                        listBox += '<label class="list-group-item border-top-0 border-left-0 border-right-0" for="compontentList-box-' + box.id + '">' + box.name + '(' + box.boxTypeName + ')' + '</label>';
-                    });
-
-                    if (listBox) {
-                        $('.option-toDoList').find('.toDoList-componentList').html(listBox);
-                    }
-
-                    let targetTodoListIndex = this.toDoLists.findIndex(parentBox => parentBox.parentId === this.currentBox.attr('id'))
-                    let targetIndexTodoOrder = this.toDoLists[targetTodoListIndex].toDoListOrder.findIndex((order) => order.id === targetBox.taskId);
-                    this.toDoLists[targetTodoListIndex].toDoListOrder[targetIndexTodoOrder].objectTodoList.forEach((object) => {
-                        $('.option-toDoList').find('.toDoList-componentList').find('input[type="checkbox"]').each((index, element) => {
-                            if (object.id === $(element).val()) {
-                                $(element).prop('checked', true);
-                            }
-                        });
-                    })
-                }
-            }
-            this.handles(this.actions.event.handleOptionToolToDoList);
-
-        }
-        else if (this.currentToolbar === this.actions.toolbar.addProgressBarTool) {
-            let listBox = '';
-            //let targetProgressBar = this.progressBars.find((parentBox)=>parentBox.parentId === this.currentBox.attr('id'))
-            this.createData(this.actions.data.createProgressBoxList)
-            this.progressBoxList.forEach((box, index)=>{
-                listBox += '<input  type="checkbox" value="' + box.id + '" id="compontentList-box-' + box.id + '" />';
-                listBox += '<label class="list-group-item border-0" for="compontentList-box-' + box.id + '">' + box.name + '(' + box.boxTypeName + ')' + '</label>';
-            })
-            htmlOptionToolBar =
-            '<div class="row p-0 m-0 mt-3 option-progressBar">'
-            + '<div class="col-12 mt-3">'
-            + '<div class="border border-left-0 border-right-0 progressBar-componentList-text d-flex align-items-center"><p class="pl-3">Component List</p></div>'
-            + '<div class="list-group text-left progressBar-componentList"></div>'
-            + '</div>'
-            + '<div class="col-12 mt-3">'
-            + '<div class="border border-left-0 border-right-0 progressBar-label-text d-flex align-items-center"><p class="pl-3">Action</p></div>'
-            + '<div class="list-group progressBar-trash">'
-            + '<img  class="option-action-trash m-auto" src="assets/imgs/contentPage/trash.svg">'
-            + '</div>'
-            + '</div>'
-            + '</div>'
-            this.rootOptionTool.html(htmlOptionToolBar)
-            if (listBox) {
-                $('.option-progressBar').find('.progressBar-componentList').html(listBox);
-            }    
-            $('.option-progressBar').find('.progressBar-componentList').find('input[type="checkbox"]').each((index,element)=>{
-                let targetProgressBarIndex  =  this.progressBars.findIndex(progressBar=>progressBar.parentId  === this.currentBox.attr('id'));
-                if(targetProgressBarIndex>=0){
-                   if(this.progressBars[targetProgressBarIndex].contentList.find(content=>content.parentId === $(element).val().toString())){
-                         $(element).prop('checked',true);
-                    // let progressBarContentObj  =  new  ProgressBarContentObjectModel();
-                    // progressBarContentObj.parentId =  $(element.currentTarget).val().toString();
-                    // this.progressBars[targetProgressBarIndex].contentList.push(progressBarContentObj)
-                   }
-                }
-
-            });
- 
-            this.handles(this.actions.event.handleOptionToolProgressBar);
-
-        }
-
-
     }
     private setCurrentBox(element?) {
         if (element) {
-            this.currentBox =  this.contentDCtrlService.currentBox =  element;
+            this.currentBox = this.contentDCtrlService.currentBox = element;
         } else {
             this.currentBox = this.contentDCtrlService.currentBox = $(this.rootElement).find('.content-box-current');
         }
-        this.addStyleElements(this.actions.style.addStyleBoxCurrent,this.currentBox)
-        
-        let targetContent  = ContentRouting.routes.find((content)=>content.contentName === this.currentBox.find('[content-name]').attr('content-name'))
-        if(targetContent){
+        this.addStyleElements(this.actions.style.addStyleBoxCurrent, this.currentBox)
+
+        let targetContent = ContentRouting.routes.find((content) => content.contentName === this.currentBox.find('[content-name]').attr('content-name'))
+        if (targetContent) {
             this.rootOptionTool.html(this.createContentOption(targetContent.option))
         }
         // let targetOption =  this.currentBox.find('[name="section-option"]');
@@ -2190,9 +1403,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     private setCurrentToolbar(action?) {
         if (action) {
             this.currentToolbar = action;
-        } 
-        
-        
+        }
+
+
         // else if (this.currentBox) {
         //     if (this.currentBox.hasClass(this.boxType.boxBrowseImg)) {
         //         this.currentToolbar = this.actions.toolbar.addBrowseImgTool;
@@ -2245,7 +1458,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     }
     private saveDocument(nameDocument: string, eventAction?: string) {
         this.createData(this.actions.data.createChildDocument);
-        this.documentService.captureHTML('contentTemplate' ).subscribe((imgData) => {
+        this.documentService.captureHTML('contentTemplate').subscribe((imgData) => {
             this.createData(this.actions.data.createDataToSave).then(() => {
 
                 // let contents: ContentsModel = {
@@ -2264,22 +1477,22 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
 
                 // }
                 let contents = this.contentDCtrlService.poolContents;
-                let otherDetail:OtherDetailModel = new OtherDetailModel();
+                let otherDetail: OtherDetailModel = new OtherDetailModel();
                 otherDetail.screenDevDetail.height = this.contentTemplateSize.height;
                 otherDetail.screenDevDetail.width = this.contentTemplateSize.width;
                 otherDetail.rulerDevDetail = this.rulerDetail;
 
                 let saveobjectTemplate: DocumentModel = {
-                    userId:Constants.common.user.id,
+                    userId: Constants.common.user.id,
                     nameDocument: nameDocument,
                     previewImg: imgData,
                     id: this.commonService.getPatternId(nameDocument), html: this.rootElement.html(),
                     status: Constants.common.message.status.created.text,
                     contents: contents,
-                    otherDetail:otherDetail
+                    otherDetail: otherDetail
                 }
                 let saveobjectNavTemplate: DocumentNavigatorModel = {
-                    userId:Constants.common.user.id,
+                    userId: Constants.common.user.id,
                     id: this.commonService.getPatternId(nameDocument),
                     nameDocument: nameDocument,
                     previewImg: imgData,
@@ -2287,7 +1500,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     childDocuments: this.childDocuments
                 }
                 let saveObjectTrackTemplate: DocumentTrackModel = {
-                    userId:Constants.common.user.id,
+                    userId: Constants.common.user.id,
                     id: this.commonService.getPatternId(nameDocument),
                     nameDocument: nameDocument,
                     status: Constants.common.message.status.created.text,
@@ -2295,21 +1508,21 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     progress: this.findData(this.actions.data.findProgressDocumentTrack),
                     contents: this.documentDataService.documentTrack.contents
                 }
-                console.log("saveobjectTemplate==>",saveobjectTemplate);
-                console.log("saveObjectTrackTemplate==>",saveObjectTrackTemplate);
+                console.log("saveobjectTemplate==>", saveobjectTemplate);
+                console.log("saveObjectTrackTemplate==>", saveObjectTrackTemplate);
                 // this.documentService.uploadFile(this.files).subscribe((status)=>{
-                  
-                        this.documentService.saveDocument(nameDocument, saveobjectTemplate).subscribe((status) => {
-                            if (status === Constants.common.event.load.success) {
-                                this.documentService.saveDocumentNav(nameDocument, saveobjectNavTemplate).subscribe((status) => {
-                                    this.documentService.saveDocumentTrack(nameDocument, saveObjectTrackTemplate).subscribe((status) => {
-                                        this.eventToParent.emit({ action: status, data: eventAction })
-                                    });
-                                });
-                            };
-                        });
 
-                    
+                this.documentService.saveDocument(nameDocument, saveobjectTemplate).subscribe((status) => {
+                    if (status === Constants.common.event.load.success) {
+                        this.documentService.saveDocumentNav(nameDocument, saveobjectNavTemplate).subscribe((status) => {
+                            this.documentService.saveDocumentTrack(nameDocument, saveObjectTrackTemplate).subscribe((status) => {
+                                this.eventToParent.emit({ action: status, data: eventAction })
+                            });
+                        });
+                    };
+                });
+
+
                 // })
             });
         })
@@ -2346,7 +1559,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         if (action === this.actions.data.findIndexBoxData) {
             return this.boxes.findIndex(box => box.id === element.attr('id'));
         }
-        else if(action === this.actions.data.findProgressDocumentTrack){  
+        else if (action === this.actions.data.findProgressDocumentTrack) {
             // let haveCondition = false;
             // this.documentTrack.contents.forEach((content)=>{
             //     if(content.boxType === this.boxType.boxVideo){
@@ -2363,7 +1576,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             //     //     }
             //     // }
             // });
-            return this.documentDataService.documentTrack.contents.length > 0 ? 0:100;
+            return this.documentDataService.documentTrack.contents.length > 0 ? 0 : 100;
         }
         // if(action === this.actions.data.findContentId){
         //     if (this.currentBox.find('.'+this.boxType.boxAddSubform)) {
@@ -2411,8 +1624,13 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         if (action === this.actions.data.retrieveBoxData) {
             this.boxes = results.contents.boxes;
         } else if (action === this.actions.data.retrieveContentsData) {
-  
-            this.contentDCtrlService.poolContents =  results.contents;
+
+            //this.contentDCtrlService.poolContents =  results.contents;
+            // setTimeout(() => {
+            //     this.rootElement.html(this.currentDocument.html); 
+            //     this.defineComponent();            
+            // }, 1000);
+
             // this.subForms = results.contents.subFroms || new Array<SubFormContentModel>();
             // this.imgs = results.contents.imgs||  new Array<ImgContentModel>();
             // this.comments = results.contents.comments ||  new Array<commentContentModel>();
@@ -2423,7 +1641,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             // this.textAreas = results.contents.textAreas ||  new Array<TextAreaContentModel>();
             // this.links = results.contents.links ||  new Array<LinkContentModel>();
             // this.exams  = results.contents.exams ||  new Array<ExamContentModel>();
-            
+
             // this.textAreas.forEach((textArea) => {
             //     if (element) {
             //         $(element).find('[id="' + textArea.id + '"]').val(textArea.value);
@@ -2436,46 +1654,47 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     }
     private async createData(action: string, element?: JQuery<Element>) {
         if (action === this.actions.data.createDataToSave) {
-            return new Promise(async (resolve,reject)=>{
-                let updateAction:UpdateContentModel = new UpdateContentModel()
-                updateAction.actionCase  = Constants.common.event.save.document;
+            return new Promise(async (resolve, reject) => {
+                let updateAction: UpdateContentModel = new UpdateContentModel()
+                updateAction.actionCase = Constants.common.event.save.document;
                 this.contentDCtrlService.updateContent = updateAction
-
-                await this.rootElement.find('.content-box ').find('[content-name = "textarea-content"]').each((index,event)=>{
+          
+                await this.rootElement.find('.content-box ').find('[content-name = "textarea-content"]').each((index, event) => {
                     let targetIndexTextArea = this.contentDCtrlService.poolContents.textAreas.findIndex((textarea) => textarea.parentId === $(event).parents('.content-box').attr('id'));
-                    if(targetIndexTextArea >=0){
+                    if (targetIndexTextArea >= 0) {
                         this.contentDCtrlService.poolContents.textAreas[targetIndexTextArea].value = $(event).text().toString();
                         this.contentDCtrlService.poolContents.textAreas[targetIndexTextArea].html = $(event).html();
                     }
                 })
+                    this.rootElement.find('.content-box').removeClass('ui-resizable');
+                    this.rootElement.find('.content-box').find('.ui-resizable-handle').remove();
+                    this.rootElement.find('.content-box').removeClass('.ui-draggable ui-draggable-handle');
+                    this.rootElement.find('.content-box').find('.content-box').css('cursor', 'default');
+                    this.rootElement.find('.content-box').find('.content-box').removeClass('content-box-current');
+                    this.rootElement.find('.content-box').find('.content-box-label').hide();
+                    this.rootElement.find('.content-box').removeClass('content-box-active border border-primary');
+                    this.rootElement.find('.content-box').css('border', 'hidden');
+                    this.rootElement.find('.content-box').find('[content-name]').html(null)
+                    resolve(Constants.common.message.status.success.text)
+                
 
 
-                this.rootElement.find('.content-box').removeClass('ui-resizable');
-                this.rootElement.find('.content-box').find('.ui-resizable-handle').remove();
-                this.rootElement.find('.content-box').removeClass('.ui-draggable ui-draggable-handle');
-                this.rootElement.find('.content-box').find('.content-box').css('cursor', 'default');
-                this.rootElement.find('.content-box').find('.content-box').removeClass('content-box-current');
-                this.rootElement.find('.content-box').find('.content-box-label').hide();
-                this.rootElement.find('.content-box').removeClass('content-box-active border border-primary');
-                this.rootElement.find('.content-box').css('border', 'hidden');
 
-                // console.log("xxxx",this.rootElement.find('.content-box').find('[content-name]'))
-                this.rootElement.find('.content-box').find('[content-name]').html(null)
 
 
                 // CKEDITOR.instances[this.documentDataService.nameTemplate].destroy()
-                
-                resolve(Constants.common.message.status.success.text)
+
+                //resolve(Constants.common.message.status.success.text)
                 // this.textAreas = new Array<TextAreaContentModel>();
-            
+
                 // $(this.rootElement).find('.content-textarea').each((index, element) => {
                 //     const elementTextArea = $(element);
-                
+
                 //     // const objectTextArea: TextAreaContentModel = { id: elementTextArea.attr('id'), value: elementTextArea.text() };
                 //     // this.textAreas.push(objectTextArea);
                 //     // console.log("this.textAreas",this.textAreas)
                 // });
-                    
+
                 // $(this.rootElement).find('.content-textarea').each((index, element) => {
 
                 // })
@@ -2506,11 +1725,11 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                 //                 resolve(Constants.common.message.status.success.text)
                 //             }
                 //         }
-              
-                //     })
-       
 
-              
+                //     })
+
+
+
 
             })
 
@@ -2525,7 +1744,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             // }];
             // this.imgs.push(img);
             // this.documentService.uploadFile(file).subscribe((result)=>{
-            
+
             //     element.append('<img src="https://e-learning-dev.s3.eu-central-1.amazonaws.com/public/' + awsFileName + '" id="' + element.attr('id') + '-img" class="content-img"></img>');
 
 
@@ -2625,12 +1844,12 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     else if (box.boxType === this.boxType.boxExam) {
                         boxTypeName = "Exam"
                     }
-                    
+
                     this.toDoListBoxList.push({
                         id: box.id,
                         name: box.name,
                         boxType: box.boxType,
-                        boxTypeName:boxTypeName,
+                        boxTypeName: boxTypeName,
                         isChecked: false
                     });
                 }
@@ -2649,76 +1868,76 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
                     else if (box.boxType === this.boxType.boxExam) {
                         boxTypeName = "Exam"
                     }
-                    
+
                     this.progressBoxList.push({
                         id: box.id,
                         name: box.name,
                         boxType: box.boxType,
-                        boxTypeName:boxTypeName,
+                        boxTypeName: boxTypeName,
                     });
                 }
             })
         }
         else if (action === this.actions.data.createDocumentTrack) {
-            if(this.currentBox&&this.boxes.length >0){
-                let targetBox = this.boxes.find(box=>box.id=== this.currentBox.attr('id'));
+            if (this.currentBox && this.boxes.length > 0) {
+                let targetBox = this.boxes.find(box => box.id === this.currentBox.attr('id'));
 
-                if(targetBox &&
-                    (targetBox.boxType === this.boxType.boxSubform||
-                    targetBox.boxType === this.boxType.boxVideo || 
-                    targetBox.boxType === this.boxType.boxExam
+                if (targetBox &&
+                    (targetBox.boxType === this.boxType.boxSubform ||
+                        targetBox.boxType === this.boxType.boxVideo ||
+                        targetBox.boxType === this.boxType.boxExam
                     )
-                    &&  !this.documentTrack.contents.find(content=>content.parentId ===targetBox.id )
-                ){
+                    && !this.documentTrack.contents.find(content => content.parentId === targetBox.id)
+                ) {
                     let documentTrackContent = new DocumentTrackContent;
-                    documentTrackContent.parentId  = this.currentBox.attr('id');
-                    documentTrackContent.name  = this.currentBox.attr('name');
-                    documentTrackContent.id = this.currentBox.find('[id^="'+this.currentBox.attr('id')+'-"]').attr('id');
-                    documentTrackContent.progress= 0;
-                    if(this.currentBox.hasClass(this.boxType.boxVideo)){
+                    documentTrackContent.parentId = this.currentBox.attr('id');
+                    documentTrackContent.name = this.currentBox.attr('name');
+                    documentTrackContent.id = this.currentBox.find('[id^="' + this.currentBox.attr('id') + '-"]').attr('id');
+                    documentTrackContent.progress = 0;
+                    if (this.currentBox.hasClass(this.boxType.boxVideo)) {
                         documentTrackContent.conditions.videoCondition.isMustWatchingEnd = false;
                         documentTrackContent.conditions.videoCondition.isClickPlay = false;
                     }
-                    else if(this.currentBox.hasClass(this.boxType.boxSubform)){
+                    else if (this.currentBox.hasClass(this.boxType.boxSubform)) {
                         documentTrackContent.conditions.subformCondition.haveInDoList = false;
                         // documentTrackContent.conditions.subformCondition.haveInProgressBar = false;
-                        let targetSubform =  this.currentBox.find('#'+documentTrackContent.id);
-                        if(targetSubform.attr('data-subformtype') ==='subform-link'){
-                            targetSubform.find('.subform-list').each((index,element)=>{
-                              if(!documentTrackContent.conditions.subformCondition.isClickLinks.find(link=>link.linkId === $(element).attr('data-subformid'))) { 
-                                let link:SubFormContentLinkModel={
-                                    linkId:$(element).attr('data-subformid'),
-                                    linkName: $(element).attr('data-subformname'),
-                                    isClicked:false,
-                                    progress:0
-                                  }
-                                  documentTrackContent.conditions.subformCondition.isClickLinks.push(link);
-                              }
-         
+                        let targetSubform = this.currentBox.find('#' + documentTrackContent.id);
+                        if (targetSubform.attr('data-subformtype') === 'subform-link') {
+                            targetSubform.find('.subform-list').each((index, element) => {
+                                if (!documentTrackContent.conditions.subformCondition.isClickLinks.find(link => link.linkId === $(element).attr('data-subformid'))) {
+                                    let link: SubFormContentLinkModel = {
+                                        linkId: $(element).attr('data-subformid'),
+                                        linkName: $(element).attr('data-subformname'),
+                                        isClicked: false,
+                                        progress: 0
+                                    }
+                                    documentTrackContent.conditions.subformCondition.isClickLinks.push(link);
+                                }
+
                             })
                         }
                         // documentTrackContent.conditions.subformCondition.isClickLink
                     }
-                    else if(this.currentBox.hasClass(this.boxType.boxExam)){
+                    else if (this.currentBox.hasClass(this.boxType.boxExam)) {
                         documentTrackContent.conditions.examCondition.isSubmitted = false;
 
                     }
-                    documentTrackContent.contentType  = targetBox.boxType;
-        
+                    documentTrackContent.contentType = targetBox.boxType;
+
                     this.documentTrack.contents.push(documentTrackContent);
                     console.log(this.documentTrack.contents);
                 }
-   
-                
+
+
             }
-      
+
         }
 
     }
     private async updateData(action: string, element?: JQuery<Element>) {
-        if(action === this.actions.data.updateNavigatorData){
-            let targetDocNavIndex = this.documentDataService.documentNavList.findIndex((docNav)=>docNav.nameDocument ===  this.documentDataService.currentDocumentNav);
-            if(targetDocNavIndex>=0){
+        if (action === this.actions.data.updateNavigatorData) {
+            let targetDocNavIndex = this.documentDataService.documentNavList.findIndex((docNav) => docNav.nameDocument === this.documentDataService.currentDocumentNav);
+            if (targetDocNavIndex >= 0) {
                 this.documentDataService.documentNavList[targetDocNavIndex].childDocuments = this.childDocuments;
                 this.eventToParent.emit({ action: Constants.common.event.click.update, data: 'updateDocNav' })
             }
@@ -2726,120 +1945,43 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
         }
     }
     private removeData(action: string, element?: any) {
-        if (action === this.actions.data.removeAllContentObj) {
-            this.boxes = new Array<BoxContentModel>();
-            this.textAreas = new Array<TextAreaContentModel>();
-            this.imgs = new Array<ImgContentModel>();
-            this.videos = new Array<VideoContentModel>();
-            this.subForms = new Array<SubFormContentModel>();
-            this.comments = new Array<commentContentModel>();
-            this.progressBars = new Array<ProgressBarContentModel>();
-            this.toDoLists = new Array<ToDoListContentModel>();
-            this.links =  new Array<LinkContentModel>();
-            this.exams  = new  Array<ExamContentModel>();
-            this.notes  = new Array<NoteContentModel>();
-        }
-        else if (action === this.actions.data.removeAllContentObj) {
 
 
-        }
-        else if (action === this.actions.data.removeBoxData) {
-            let currentBoxId = this.currentBox.attr('id');
-            this.boxes = this.boxes.filter((box) => box.id !== currentBoxId);
-            if (this.currentBox.hasClass(this.boxType.boxComment)) {
-                this.comments = this.comments.filter((comment) => comment.id !== currentBoxId + '-comment');
-            }
-            else if (this.currentBox.hasClass(this.boxType.boxImg)) {
-                this.imgs = this.imgs.filter((img) => img.id !== currentBoxId + '-img');
-            }
-            else if (this.currentBox.hasClass(this.boxType.boxProgressBar)) {
-                this.progressBars = this.progressBars.filter((progressBar) => progressBar.id !== currentBoxId + '-progressBar');
-            }
-            else if (this.currentBox.hasClass(this.boxType.boxSubform)) {
-                this.removeData(this.actions.data.removeNavigatorData);
-                this.subForms = this.subForms.filter((subform) => subform.parentBoxId !== currentBoxId);
-            }
-            else if (this.currentBox.hasClass(this.boxType.boxTextarea)) {
-                this.textAreas = this.textAreas.filter((textArea) => textArea.id !== currentBoxId + '-textArea');
-            }
-            else if (this.currentBox.hasClass(this.boxType.boxToDoList)) {
-                this.toDoLists = this.toDoLists.filter((toDoList) => toDoList.id !== currentBoxId + '-todoList');
-            }
-            else if (this.currentBox.hasClass(this.boxType.boxVideo)) {
-                this.videos = this.videos.filter((video) => video.id !== currentBoxId + '-video');
-            }
-            else if (this.currentBox.hasClass(this.boxType.boxFile)) {
-                this.files = this.files.filter((file) => file.id !== currentBoxId + '-file');
-            }
-            else if (this.currentBox.hasClass(this.boxType.boxLink)) {
-                this.links = this.links.filter((link) => link.id !== currentBoxId + '-link');
-            }
-            else if (this.currentBox.hasClass(this.boxType.boxExam)) {
-                this.exams = this.exams.filter((exam) => exam.id !== currentBoxId + '-exam');
-            }
-            else if (this.currentBox.hasClass(this.boxType.boxNote)) {
-                this.notes = this.notes.filter((note) => note.id !== currentBoxId + '-note');
-            }
-            this.removeData(this.actions.data.removeDocumentTrackData);
-            this.removeData(this.actions.data.removeObjInTodoList);
-            this.removeData(this.actions.data.removeObjInProgressBar);
-            
-        }
-        else if(action === this.actions.data.removeObjInTodoList){
-            this.toDoLists.forEach((parentBox)=>{
-                parentBox.toDoListOrder.forEach((task)=>{
-                    task.objectTodoList = task.objectTodoList.filter((content)=>content.id != this.currentBox.attr('id'))
-                })
-
-            })
-
-        }
-        else if(action === this.actions.data.removeDocTrackProgress){
-            this.documentDataService.documentTrack.contents.forEach((content)=>{
+        if (action === this.actions.data.removeDocTrackProgress) {
+            this.documentDataService.documentTrack.contents.forEach((content) => {
                 content.progress = 0;
-                if(content.contentType === this.contentType.subform){
-                    content.conditions.subformCondition.isClickLinks.forEach((link)=>{
+                if (content.contentType === this.contentType.subform) {
+                    content.conditions.subformCondition.isClickLinks.forEach((link) => {
                         link.isClicked = false;
                         link.progress = 0;
                     })
                     // content.conditions.subformCondition.haveInDoList = false;
                     content.progress = 0;
                 }
-                else if(content.contentType === this.contentType.video){
+                else if (content.contentType === this.contentType.video) {
                     content.data = 0;
                     content.conditions.videoCondition.isClickPlay = false;
-                   
+
                 }
             })
-            this.contentDCtrlService.poolContents.videos.forEach((video)=>{
+            this.contentDCtrlService.poolContents.videos.forEach((video) => {
                 video.data.progress = 0;
             })
-            this.contentDCtrlService.poolContents.todoList.forEach((todoList,index)=>{
+            this.contentDCtrlService.poolContents.todoList.forEach((todoList, index) => {
                 todoList.progress = 0;
-                todoList.toDoListOrder.forEach((taskList,taskIndex)=>{
-                    taskList.objectTodoList.forEach((objectTodo)=>{
+                todoList.toDoListOrder.forEach((taskList, taskIndex) => {
+                    taskList.objectTodoList.forEach((objectTodo) => {
                         objectTodo.progress = 0
                     })
-                });    
+                });
             });
-            console.log(this.contentDCtrlService.poolContents.todoList)
             console.log(this.documentDataService.documentTrack.contents)
         }
-        else if(action === this.actions.data.removeDocumentTrackData){
-            this.documentTrack.contents  = this.documentTrack.contents.filter((content)=>content.parentId !== this.currentBox.attr('id')); 
-        }  
-
-        else if(action === this.actions.data.removeObjInProgressBar){
-            this.progressBars.forEach((parentBox)=>{
-                parentBox.contentList = parentBox.contentList.filter((content)=>content.parentId !== this.currentBox.attr('id'))
-
-            }); 
-        }  
-        else if(action === this.actions.data.removeNavigatorData){
-            let targetSubform = this.subForms.find((parentBox)=>parentBox.parentBoxId === this.currentBox.attr('id'))
-            if(targetSubform){
-                targetSubform.subformList.forEach((subform)=>{
-                    this.childDocuments = this.childDocuments.filter((childDoc)=>childDoc.id !==  subform.id);
+        else if (action === this.actions.data.removeNavigatorData) {
+            let targetSubform = this.subForms.find((parentBox) => parentBox.parentBoxId === this.currentBox.attr('id'))
+            if (targetSubform) {
+                targetSubform.subformList.forEach((subform) => {
+                    this.childDocuments = this.childDocuments.filter((childDoc) => childDoc.id !== subform.id);
                 })
                 this.updateData(this.actions.data.updateNavigatorData);
             }
@@ -2849,26 +1991,26 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
     public eventFromChild(eventChild: TriggerEventModel) {
         console.log(eventChild)
         if (eventChild.action === 'range-slider-event') {
-            let rulerDetail:RulerDetailModel = this.rulerDetail =  eventChild.data;
-            if(rulerDetail.paddingLeft<0){
+            let rulerDetail: RulerDetailModel = this.rulerDetail = eventChild.data;
+            if (rulerDetail.paddingLeft < 0) {
                 rulerDetail.paddingLeft = 0;
             }
-            $(this.contentTemplate.nativeElement).css('padding-left',rulerDetail.paddingLeft+ "%")
-            $(this.contentTemplate.nativeElement).css('padding-right',(100-rulerDetail.paddingRight)+ "%")
-            $('.content-box').each((index,element)=>{
-               
-               
-                if(($(element).position().left+$(element).outerWidth()) > $(this.contentTemplate.nativeElement).width()){
-                    $(element).css('left', $(this.contentTemplate.nativeElement).width()-$(element).outerWidth())
+            $(this.contentTemplate.nativeElement).css('padding-left', rulerDetail.paddingLeft + "%")
+            $(this.contentTemplate.nativeElement).css('padding-right', (100 - rulerDetail.paddingRight) + "%")
+            $('.content-box').each((index, element) => {
+
+
+                if (($(element).position().left + $(element).outerWidth()) > $(this.contentTemplate.nativeElement).width()) {
+                    $(element).css('left', $(this.contentTemplate.nativeElement).width() - $(element).outerWidth())
                 }
-                else if( ($(this.contentTemplate.nativeElement).position().left + parseInt($(this.contentTemplate.nativeElement).css('padding-left'))) > $(element).position().left ){
-                     $(element).css('left', $(this.contentTemplate.nativeElement).position().left + parseInt($(this.contentTemplate.nativeElement).css('padding-left')))
+                else if (($(this.contentTemplate.nativeElement).position().left + parseInt($(this.contentTemplate.nativeElement).css('padding-left'))) > $(element).position().left) {
+                    $(element).css('left', $(this.contentTemplate.nativeElement).position().left + parseInt($(this.contentTemplate.nativeElement).css('padding-left')))
                 }
             })
-           //console.log($(this.contentTemplate.nativeElement).width()) 
+            //console.log($(this.contentTemplate.nativeElement).width()) 
             // this.addElements(this.actions.event.addEventBox)
-     
-           //this.rootElement.find('.freedom-layout').draggable( "option", "containment", this.contentTemplate.nativeElement );
+
+            //this.rootElement.find('.freedom-layout').draggable( "option", "containment", this.contentTemplate.nativeElement );
             //console.log(this.rootElement.find('.freedom-layout'))
             // this.rootElement.find('.freedom-layout').each((index,element)=>{
             //     console.log( $(element))
@@ -2882,58 +2024,62 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit {
             // this.rootElement.find('.freedom-layout').draggable("option", "containment", this.contentTemplate.nativeElement);
         }
     }
-    public createContent(componnent:Type<any>,contentName:string){
- 
-        if(contentName){
+    public createContent(componnent: Type<any>, contentName: string) {
+
+        if (contentName) {
             this.documentDataService.lifeCycle = Constants.document.lifeCycle.createContent;
-            const newElement = document.createElement(contentName) as NgElement & WithProperties<{parentBox: JQuery<Element>,lifeCycle:string}>;
-            newElement.setAttribute('content-name',contentName)
+            const newElement = document.createElement(contentName) as NgElement & WithProperties<{ parentBox: JQuery<Element>, lifeCycle: string }>;
+            newElement.setAttribute('content-name', contentName)
             newElement.classList.add("full-screen");
-            newElement.parentBox  =this.currentBox;
-            this.render.appendChild(document.getElementById(this.currentBox.attr('id')),newElement)
-        
+            newElement.parentBox = this.currentBox;
+            this.render.appendChild(document.getElementById(this.currentBox.attr('id')), newElement)
+
+            setTimeout(() => {
+                this.documentDataService.lifeCycle = Constants.document.lifeCycle.loadEditor;
+            }, 2000);
+
             // const newComponent = document.createElement(contentName) as NgElement & WithProperties<{content :string}>;
             // newComponent.content  = "test";
 
             // this.render.appendChild(document.getElementById(this.currentBox.attr('id')),document.createElement(contentName))
-        //     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(Componnent)
-        //     const viewContainerRef = this.adHost.viewContainerRef;
-        // //    viewContainerRef.clear();
-        //     const componentRef = viewContainerRef.createComponent(componentFactory);
-        //     (<ContentInterFace>componentRef.instance).parentBox  = this.currentBox;
-        //     console.log("this.currentBox",this.currentBox);
-        //     return componentRef.location.nativeElement;
+            //     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(Componnent)
+            //     const viewContainerRef = this.adHost.viewContainerRef;
+            // //    viewContainerRef.clear();
+            //     const componentRef = viewContainerRef.createComponent(componentFactory);
+            //     (<ContentInterFace>componentRef.instance).parentBox  = this.currentBox;
+            //     console.log("this.currentBox",this.currentBox);
+            //     return componentRef.location.nativeElement;
         }
     }
-    public createContentOption(Componnent:Type<any>){
-        if(Componnent){
+    public createContentOption(Componnent: Type<any>) {
+        if (Componnent) {
             const componentFactory = this.componentFactoryResolver.resolveComponentFactory(Componnent)
             const viewContainerRef = this.adHost.viewContainerRef;
             const componentRef = viewContainerRef.createComponent(componentFactory);
-            (<ContentInterFace>componentRef.instance).parentBox  = this.currentBox;
+            (<ContentInterFace>componentRef.instance).parentBox = this.currentBox;
             return componentRef.location.nativeElement;
         }
 
     }
 
     private defineComponent() {
-      
-        
-        ContentRouting.routes.forEach((route)=>{
-            const customElement = createCustomElement(route.component, { injector:this.injector });
+
+
+        ContentRouting.routes.forEach((route) => {
+            const customElement = createCustomElement(route.component, { injector: this.injector });
             customElements.get(route.contentName) || customElements.define(route.contentName, customElement)
 
-             
-            
-        //    console.log(this.adHost.viewContainerRef.gets())
+
+
+            //    console.log(this.adHost.viewContainerRef.gets())
             // this.contentTemplate.nativeElement.createElement(route.contentName)
             // document.createElement(route.contentName)
         })
-        
+
         // let updateAction:UpdateContentModel = new UpdateContentModel()
         // updateAction.actionCase  = Constants.common.event.load.component;
         // this.contentDCtrlService.updateContent = updateAction
-    
-        
+
+
     }
 }

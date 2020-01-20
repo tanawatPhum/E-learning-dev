@@ -70,6 +70,7 @@ export class Constants {
     }
     public static readonly document = {
         lifeCycle:{
+            initialEditor:'initialEditor',
             loadEditor:"loadEditor",
             createContent:"createContent",
             loadPreview:"loadPreview",

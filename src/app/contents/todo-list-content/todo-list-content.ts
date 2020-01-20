@@ -56,7 +56,9 @@ export class TodoListContentComponent implements OnInit, ContentInterFace {
             if(detail.actionCase === Constants.document.contents.lifeCycle.addTaskList){
                 this.toDoListOrder = detail.data;
             }
-            else if(detail.actionCase === Constants.document.contents.lifeCycle.playVideo ){
+            else if(detail.actionCase === Constants.document.contents.lifeCycle.playVideo
+                && detail.for === Constants.document.contents.types.todoList
+                ){
        
                     this.handleTodoList();                
          
@@ -84,23 +86,41 @@ export class TodoListContentComponent implements OnInit, ContentInterFace {
         this.toDoListOrder = this.targetToDoList.toDoListOrder;
     }
     private handleTodoList() {
-    
+
         this.targetToDoList.toDoListOrder.forEach((task) => {
             let summaryOfProgress = 0;
+            let numberOfTasks = 0;
             // let progressContent = 0;
             task.objectTodoList.forEach((content) => {
-  
                 let targetContent = this.documentDCtrlService.currentDocumentTrack.contents.find(contentTrack => contentTrack.parentId === content.id);
-                console.log(targetContent)
                 if (targetContent) {
-                    if (targetContent.contentType === this.contentTypes.video && !targetContent.conditions.videoCondition.isMustWatchingEnd && targetContent.conditions.videoCondition.isClickPlay) {
-                        summaryOfProgress += 100;
-                    } else {
-                        summaryOfProgress += targetContent.progress;
+                    if (targetContent.contentType === this.contentTypes.video) {
+                        if(!targetContent.conditions.videoCondition.isMustWatchingEnd && targetContent.conditions.videoCondition.isClickPlay){
+                            summaryOfProgress += 100;
+                        }else{
+                            summaryOfProgress += targetContent.progress;
+                        }
+                        numberOfTasks +=1;
+                    } else if (targetContent.contentType === this.contentTypes.subform) {
+                        targetContent.conditions.subformCondition.isClickLinks.forEach((link)=>{
+                            if(link.isClicked){
+                                summaryOfProgress += link.progress;
+                            }
+                            numberOfTasks +=1;
+                        })
                     }
+                    // if (targetContent.contentType === this.contentTypes.subform) {
+                    //     targetContent.conditions.subformCondition.isClickLinks.forEach((document)=>{
+                    //         if(document.isClicked){
+                    //             summaryOfProgress += 100;
+                    //         }
+
+                    //     })
+
+                    // }
                 }
             });
-            if (summaryOfProgress === task.objectTodoList.length * 100) {
+            if (summaryOfProgress === numberOfTasks * 100) {
                 $('#' + this.targetToDoList.parentId).find('.content-toDoList').find('#' + task.id).find('p').css('text-decoration', 'line-through');
             }
             this.targetToDoList.progress =  this.contentDCtrlService.poolContents.todoList[this.targetIndexToDoList].progress =  summaryOfProgress;

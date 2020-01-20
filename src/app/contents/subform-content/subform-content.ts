@@ -365,7 +365,8 @@ export class SubformContentComponent implements OnInit, ContentInterFace, AfterV
             let targetLinkIndex = this.documentDCtrlService.currentDocumentTrack.contents[targetContentIndex].conditions.subformCondition.isClickLinks.findIndex(link => link.linkName === element.attr('data-subformName'))
             this.documentDCtrlService.currentDocumentTrack.contents[targetContentIndex].conditions.subformCondition.isClickLinks[targetLinkIndex].isClicked = true;
         }
-      
+    
+       // console.log(this.documentDCtrlService.currentDocumentTrack.contents)
         this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName).subscribe(()=>{
             let updateAction: UpdateContentModel = new UpdateContentModel()
             updateAction.actionCase = Constants.document.contents.lifeCycle.clickSubForm; 

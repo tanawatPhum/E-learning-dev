@@ -238,12 +238,15 @@ export class DocumentPreviewPageComponent implements OnInit ,OnDestroy{
         else if (action === this.actions.template.setDocumentTrack) {
             this.documentService.loadDocTrackFromDB().subscribe((documentTrack) => {
                 this.documentTracks = this.documentDCtrlService.documentTracks = documentTrack;
-                console.log('documentTrack',this.documentTracks)
+       
                 if (this.documentTracks.length > 0) {
                     this.currentDocumentTrack = this.documentDCtrlService.documentTrack =this.documentDataService.currentDocumentTrack = documentTrack.find((documentTrack) => documentTrack.id === this.commonService.getPatternId(this.documentDataService.currentDocumentName));
-                    
-                    console.log(this.documentDCtrlService.documentTrack)
+                
                     this.setElements(this.actions.element.setResultElement, null, this.currentResult);
+                    this.documentService.handleDocumentTrack(this.documentDataService.currentDocumentName).subscribe(()=>{
+        
+                    })
+
                     // this.handles(this.actions.handle.handleDocumentTrack);
                     // this.handles(this.actions.handle.handleToDoList);
                     // this.handles(this.actions.handle.handleProgressBar);

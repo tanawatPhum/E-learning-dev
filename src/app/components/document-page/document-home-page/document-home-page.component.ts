@@ -188,7 +188,10 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
                     this.createNavigatorDocument(targetDocument, null)
                 }
              this.documentList =  this.documentDataService.documentList; 
+
              this.contentElement.next(this.currentResult);
+    
+            //  this.contentElement.complete();
               //console.log(this.documentDataService.documentList)  
                 // this.documentNavList.forEach((documentNav, index) => {
                 //     this.getTargetDoc(documentNav.id).subscribe((document) => {
@@ -324,7 +327,7 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
                 this.ngZone.run(() => {
                     this.loading = false;
                     this.loadTargetDoc(this.currentDocumentName);
-                    this.loadDocumentNavigator();
+                    // this.loadDocumentNavigator();
                 })
             }, 1000)
 
