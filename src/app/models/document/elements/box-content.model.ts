@@ -1,7 +1,17 @@
 export class BoxContentModel {
     public id: string;
     public name:string;
-    public isEmpty: boolean;
     public contentType: string;
     public boxType:string;
+    public htmlDetail:BoxHTMLModel = new BoxHTMLModel();
+
+}
+
+export class BoxHTMLModel{
+    public top:number;
+    public left:number;
+    public height:number;
+    public width:number;
+    public selector:string;
+    public level:string;
 }

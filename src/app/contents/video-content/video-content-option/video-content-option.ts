@@ -4,6 +4,8 @@ import { ContentDataControlService } from '../../../services/content/content-dat
 import { DocumentTrackModel } from '../../../models/document/document.model';
 import { DocumentDataControlService } from '../../../services/document/document-data-control.service';
 import { filter } from 'rxjs/operators';
+import { UpdateContentModel } from 'src/app/models/common/common.model';
+import { Constants } from 'src/app/global/constants';
 
 @Component({
     selector: 'video-content-option',
@@ -84,9 +86,10 @@ export class VideoContentOptionComponent implements ContentOptionInterFace,OnIni
                 this.contentDCtrlService.poolContents.todoList[index].toDoListOrder[taskIndex].objectTodoList =  taskList.objectTodoList.filter((component)=>  component.id !== this.parentBox.attr('id'))
             });    
         });
-        console.log(this.contentDCtrlService.poolContents.todoList)
-        console.log( this.documentDCtrlService.documentTrack.contents)
         this.parentBox.remove();
+        let updateContent = new UpdateContentModel();
+        updateContent.actionCase = Constants.document.contents.lifeCycle.delete;
+        this.contentDCtrlService.updateContent =  updateContent;
     }
 
 

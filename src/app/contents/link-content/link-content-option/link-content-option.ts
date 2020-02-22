@@ -1,6 +1,9 @@
 import { Component, Input, OnInit, ElementRef } from '@angular/core';
 import { ContentOptionInterFace } from '../../interface/content-option.interface';
 import { ContentDataControlService } from 'src/app/services/content/content-data-control.service';
+import { DocumentDataControlService } from 'src/app/services/document/document-data-control.service';
+import { UpdateContentModel } from 'src/app/models/common/common.model';
+import { Constants } from 'src/app/global/constants';
 
 @Component({
     selector: 'link-content-option',
@@ -18,7 +21,8 @@ export class LinkContentOptionComponent implements ContentOptionInterFace, OnIni
 
     constructor(
         private contentDCtrlService: ContentDataControlService,
-        private element: ElementRef
+        private element: ElementRef,
+        private documentDCtrlService:DocumentDataControlService
     ) {
 
     }
@@ -56,7 +60,24 @@ export class LinkContentOptionComponent implements ContentOptionInterFace, OnIni
         })
     }
     public removeLink() {
+
+  
+       
+
+        this.documentDCtrlService.documentTrack.contents =  this.documentDCtrlService.documentTrack.contents.filter((link)=>link.parentId !==this.parentBox.attr('id'));
+
+        this.contentDCtrlService.poolContents.progressBar.forEach((progressBar,index)=>{
+            this.contentDCtrlService.poolContents.progressBar[index].contentList =  progressBar.contentList.filter((content)=>content.parentId != this.parentBox.attr('id'));
+        })
+        this.contentDCtrlService.poolContents.todoList.forEach((todoList,index)=>{
+            todoList.toDoListOrder.forEach((taskList,taskIndex)=>{
+                this.contentDCtrlService.poolContents.todoList[index].toDoListOrder[taskIndex].objectTodoList =  taskList.objectTodoList.filter((component)=>  component.id !== this.parentBox.attr('id'))
+            });    
+        });
         this.contentDCtrlService.poolContents.links = this.contentDCtrlService.poolContents.links.filter((link) => link.parentId !== this.parentBox.attr('id'));
         this.parentBox.remove();
+        let updateContent = new UpdateContentModel();
+        updateContent.actionCase = Constants.document.contents.lifeCycle.delete;
+        this.contentDCtrlService.updateContent =  updateContent;
     }
 }

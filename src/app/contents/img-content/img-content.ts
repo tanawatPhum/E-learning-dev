@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, AfterViewChecked, ViewEncapsulation, ElementRef, Input, Output, EventEmitter, ViewChild, HostListener } from '@angular/core';
 import { CommonService } from '../../services/common/common.service';
-import { UploadFileModel } from '../../models/common/common.model';
+import { UploadFileModel, UpdateContentModel } from '../../models/common/common.model';
 import { DocumentService } from '../../services/document/document.service';
 import { ImgContentModel } from 'src/app/models/document/elements/img-content.model';
 import { Constants } from '../../global/constants';
@@ -20,6 +20,7 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
     public targetFile;
     public targetimg:ImgContentModel = new ImgContentModel();
     @Input() parentBox: JQuery<Element>;
+    @Input() data :any;
     @ViewChild('inputFile', { static: true }) inputFile: ElementRef<HTMLElement>;
     @HostListener('click', ['$event']) onClick(event) {
         event.preventDefault();
@@ -33,6 +34,8 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
     }
     public currentCase = this.actionCase.browseImg;
     public rootElement: JQuery<Element>;
+    public targetPathImg:string = null;
+    public targetOriginalPath:string = null;
 
     // private parentBox:JQuery<Element>;
     constructor(
@@ -40,17 +43,20 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
         private documentService: DocumentService,
         private documentDCtrlService: DocumentDataControlService,
         private contentDCtrlService: ContentDataControlService,
-        private element: ElementRef
+        private element: ElementRef,
+        private cdRef: ChangeDetectorRef
 
     ) { }
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
         this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
-            if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm){
+            if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm
+                && detail.for === this.parentBox.attr('id')
+                ){
                 let targetDocumentContent:ContentsModel = detail.data;
                 this.targetimg = targetDocumentContent.imgs.find((img) => img.parentId === this.parentBox.attr('id'))
-                this.initialImg();
+                this.loadImg(this.targetimg.path)
             } 
         })
     }
@@ -60,12 +66,20 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
         this.initialImg();
 
     }
+
     public initialImg(){
         if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.createContent) {
-            this.handleBrowseImg()
+            if(this.data){
+                this.targetFile = this.data;
+                this.addImg('attach')
+            }else{
+                this.handleBrowseImg()
+            }
+
         }
         else if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor || this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadPreview) {
             if(this.targetimg){
+          
                 this.loadImg(this.targetimg.path)
             }
         }
@@ -118,6 +132,7 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
         this.rootElement.find('.toolbar-browse-img').find('#img-input-url').bind("paste", (event: any) => {
             event.preventDefault();
             event.stopPropagation();
+            console.log(event.originalEvent.clipboardData)
             let pastedData = event.originalEvent.clipboardData.getData('text');
             this.targetFile = pastedData;
             console.log(' ❏ File :', this.targetFile);
@@ -138,32 +153,38 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
                 data: this.targetFile[0],
                 awsFileName: awsFileName
             }
-            this.documentService.uploadFile([uploadFile]).subscribe(() => {
-                let imgPath = Constants.common.host.storage + awsFileName;
+            this.documentService.uploadFile([uploadFile]).subscribe((url) => {
+                if(url!==Constants.common.message.status.fail.text){
+                let imgPath = url
+                // let imgPath = Constants.common.host.storage + awsFileName;
+              //  let imgPath =   Constants.common.host.serverSite +'/api/getImage/?originalPath='+url
                 this.currentCase = this.actionCase.showImg;
                 img.path = imgPath;
-                this.rootElement.find('img').attr('src', imgPath)
-                    .attr('id', this.parentBox.attr('id') + '-img')
+                this.rootElement.find('img').attr('id', this.parentBox.attr('id') + '-img')
+                this.targetPathImg  = imgPath;
+                this.cdRef.detectChanges();
                 this.contentDCtrlService.poolContents.imgs.push(img)
                 this.contentDCtrlService.setLastContent(this.parentBox);
+                }
+
                 // this.parentBox.find('[content-name]').attr('content-last','true')
             })
         }
         else if (sourceType === 'url') {
-            img.path = this.targetFile;
+            let imgPath =   Constants.common.host.serverSite + Constants.common.host.getImage+this.targetFile
+            img.path = imgPath;
             this.currentCase = this.actionCase.showImg;
-            this.rootElement.find('img').attr('src', this.targetFile)
+            this.rootElement.find('img').attr('src', imgPath)
                 .attr('id', this.parentBox.attr('id') + '-img')
             this.contentDCtrlService.poolContents.imgs.push(img)
-            this.contentDCtrlService.setLastContent(this.parentBox);
         }
-
-
+        
     }
     public loadImg(imgPath) {
+  
         this.currentCase = this.actionCase.showImg;
-        this.rootElement.find('img').attr('src', imgPath)
-            .attr('id', this.parentBox.attr('id') + '-img')
+        this.targetPathImg  = imgPath;
+        this.rootElement.find('img').attr('id', this.parentBox.attr('id') + '-img')
     }
 
 }

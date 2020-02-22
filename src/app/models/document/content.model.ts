@@ -11,6 +11,7 @@ import { LinkContentModel } from './elements/link-content.model';
 import { ExamContentModel } from './elements/exam-content.model';
 import { ScreenDetailModel, RulerDetailModel } from '../common/common.model';
 import { NoteContentModel } from './elements/note-content.model';
+import { LayoutContentModel } from './elements/layout-content.model';
 
 
 export class DocumentModel {
@@ -20,12 +21,13 @@ export class DocumentModel {
     public status:string;
     public id: string;
     public html: string;
-    public contents: ContentsModel; 
+    public contents: ContentsModel  =  new ContentsModel();
     public otherDetail:OtherDetailModel =  new OtherDetailModel();
 }
 
 export class ContentsModel {
     public boxes: BoxContentModel[] =  new Array<BoxContentModel>();
+    public layouts:LayoutContentModel[] = new Array<LayoutContentModel>();
     public files:FileContentModel[] =  new Array<FileContentModel>();
     public textAreas: TextAreaContentModel[] =  new Array<TextAreaContentModel>();
     public imgs: ImgContentModel[] =  new Array<ImgContentModel>();

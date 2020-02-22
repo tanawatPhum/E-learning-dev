@@ -21,7 +21,7 @@
             <div *ngFor="let order of (toDoListOrder||[])" [attr.data-boxId]="parentBox.attr('id')" [attr.id]="order.id" [attr.data-taskName]="order.name" class="rounded-0 list-group-item border-0 pl-4 cursor-pointer" (click)="handleTaskList($event,'click')">
                 <p (input)="handleTaskList($event,'input')" [attr.data-taskId]="order.id" class="taskList-text" contenteditable="true"> Step {{order.step}} : {{order.name}}
                 </p>
-                <div [attr.data-taskId]="order.id" class="float-right ml-3 taskList-trash"><img id="trash" src="assets/imgs/contentPage/trash.svg"></div>
+                <div [attr.data-taskId]="order.id" class="float-right ml-3 taskList-trash"><img (click)="removeTask(order.id)" id="trash" src="assets/imgs/contentPage/trash.svg"></div>
             </div>
         </div>
         <div class="border border-left-0 border-right-0 toDoList-componentList-text d-flex align-items-center">

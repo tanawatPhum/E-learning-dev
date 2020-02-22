@@ -27,6 +27,10 @@ import { AdHost } from './directives/ad-host/ad-host.directive';
 import { ImgContentComponent } from './contents/img-content/img-content';
 import { ContentRouting } from './app-content-routing';
 import { ContentDataControlService } from './services/content/content-data-control.service';
+import { LoadImagePipe } from './pipes/load-img.pipe';
+import { LayoutRouting } from './app-layout-routing';
+import { CusSrc } from './directives/cus-src.directive';
+import { ToolBarService } from './services/document/toolbar.service';
 
 export const COMPONENTS: any[] = [
   AppComponent,
@@ -41,7 +45,8 @@ export const PLUGINS: any[] = [
   RangeSliderPageComponent,
 ];
 export const LAYOUTS: any[] = [
-
+  ...LayoutRouting.exports
+  
 ];
 export const MODULES: any[] = [
   AppRoutingModule,
@@ -62,13 +67,16 @@ export const SERVICES: any[] = [
   ContentDataControlService,
   HttpClientService,
   AmplifyService,
-  SocketIoService
+  SocketIoService,
+  ToolBarService
 ];
 export const PIPES: any[] = [
+  LoadImagePipe
 
 ];
 export const DIRECTIVES: any[] = [
-AdHost
+AdHost,
+CusSrc
 
 ];
 @NgModule({
@@ -84,11 +92,12 @@ AdHost
     ...MODULES,
     // ...CONTENTS
   ],
+  exports:[],
   providers: [
     ...SERVICES
   ],
 
-  entryComponents: [...CONTENTS ],
+  entryComponents: [...CONTENTS,...LAYOUTS ],
   // exports:[  
   //   ...CONTENTS 
   // ],

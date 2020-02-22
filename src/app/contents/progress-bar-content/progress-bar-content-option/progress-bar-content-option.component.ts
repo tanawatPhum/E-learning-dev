@@ -3,6 +3,8 @@ import { ContentOptionInterFace } from '../../interface/content-option.interface
 import { ContentDataControlService } from 'src/app/services/content/content-data-control.service';
 import { ProgressBoxListModel, ProgressBarContentObjectModel } from 'src/app/models/document/elements/progressBar-content-model';
 import { DocumentDataControlService } from '../../../services/document/document-data-control.service';
+import { Constants } from '../../../global/constants';
+import { UpdateContentModel } from 'src/app/models/common/common.model';
 
 @Component({
     selector: 'progress-bar-content-option',
@@ -13,6 +15,7 @@ export class ProgressBarContentOptionComponent implements OnInit, ContentOptionI
     @Input() parentBox: JQuery<Element>;
     public progressBoxList:ProgressBoxListModel[] = new Array<ProgressBoxListModel>();
     public rootElement:JQuery<Element>;
+    public videoTypes = Constants.document.contents.constats.videoTypes;
     constructor(
         private documentDCtrlService:DocumentDataControlService,
         private contentDCtrlService:ContentDataControlService,
@@ -82,21 +85,31 @@ export class ProgressBarContentOptionComponent implements OnInit, ContentOptionI
     }
     createProgressBoxList(){
         this.progressBoxList = new Array<ProgressBoxListModel>();
-        this.contentDCtrlService.poolContents.subFroms.forEach((content)=>{
-            this.progressBoxList.push({
-                id: content.parentBoxId,
-                name: content.parentBoxId,
-                boxType:'subform',
-                boxTypeName:'Subform',
-            });
-        })
-        this.contentDCtrlService.poolContents.videos.forEach((content)=>{
+            this.contentDCtrlService.poolContents.links.forEach((content)=>{
             this.progressBoxList.push({
                 id: content.parentId,
                 name: content.parentId,
-                boxType:'video',
-                boxTypeName:'Video',
+                boxType:'link',
+                boxTypeName:'link',
             });
+        })
+        // this.contentDCtrlService.poolContents.subFroms.forEach((content)=>{
+        //     this.progressBoxList.push({
+        //         id: content.parentId,
+        //         name: content.parentId,
+        //         boxType:'subform',
+        //         boxTypeName:'Subform',
+        //     });
+        // })
+        this.contentDCtrlService.poolContents.videos.forEach((content)=>{
+            if( content.data.channelStream === this.videoTypes.wistia ){
+                this.progressBoxList.push({
+                    id: content.parentId,
+                    name: content.parentId,
+                    boxType:'video',
+                    boxTypeName:'Video',
+                });
+            }
         })
         this.contentDCtrlService.poolContents.exams.forEach((content)=>{
             this.progressBoxList.push({
@@ -111,6 +124,9 @@ export class ProgressBarContentOptionComponent implements OnInit, ContentOptionI
     removeProgressBar(){
         this.contentDCtrlService.poolContents.progressBar = this.contentDCtrlService.poolContents.progressBar.filter((progressBar)=>progressBar.parentId !== this.parentBox.attr('id'));
         this.parentBox.remove();
+        let updateContent = new UpdateContentModel();
+        updateContent.actionCase = Constants.document.contents.lifeCycle.delete;
+        this.contentDCtrlService.updateContent =  updateContent;
     }
 
 

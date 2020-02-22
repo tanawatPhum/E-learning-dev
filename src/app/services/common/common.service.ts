@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ModuleWithComponentFactories } from '@angular/core';
 import { Constants } from '../../global/constants';
 import { PostitionDetailModel, ScreenDetailModel, ElementDetailModel } from '../../models/common/common.model';
 import { Observable } from 'rxjs';
@@ -23,6 +23,16 @@ export class CommonService {
       localStorage.setItem('boxId','0')
     }
     return boxId
+  }
+  public getlayoutId(){
+    let layoutId:number = 0
+    if(localStorage.getItem('layoutId')){
+      layoutId = parseInt(localStorage.getItem('layoutId')) +1
+      localStorage.setItem('layoutId',layoutId.toString())
+    }else{
+      localStorage.setItem('layoutId','0')
+    }
+    return layoutId
   }
   public getBoxCurrentId(){
     return localStorage.getItem('boxId')
@@ -75,14 +85,22 @@ export class CommonService {
     // }
     return streamId;
   }
-  public getPatternId(string:string){
-    // string = string.replace(/\s/g,'').toLowerCase();
-    let id = string.replace(/\(|\[/g,'_');
-    id = id.replace(/\)|\]/g,'');
-    id = id.replace(/\s/g,'').toLowerCase()
+  public getPatternId(){
+    let currentDate =  new Date();
 
-    // string = string.replace(/\(\d\)/g,numberOfDoc[0])
-    return id
+    return 'document-'+currentDate.getDate()+'_'+currentDate.getMonth()+'_'+currentDate.getFullYear()+'_'+currentDate.getHours()
+    +'_'+currentDate.getMinutes()+'_'+currentDate.getSeconds()
+    
+    //string = string.replace(/\s/g,'').toLowerCase();
+    
+    // let id = string.replace(/\(|\[/g,'_');
+    // id = id.replace(/\)|\]/g,'');
+    // id = id.replace(/\s/g,'').toLowerCase()
+    // id = encodeURIComponent(id)
+    // id = $.trim(id.replace(/[^\w\s]/g,''));
+    // console.log(id)
+    // // string = string.replace(/\(\d\)/g,numberOfDoc[0])
+    // return  id
   }
   public getPatternAWSName(fileName:string){
     // let filename = fileName.match(/^.*?([^\\/.]*)[^\\/]*$/);

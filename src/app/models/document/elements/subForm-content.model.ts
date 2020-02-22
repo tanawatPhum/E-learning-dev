@@ -1,5 +1,5 @@
 export class SubFormContentModel {
-    parentBoxId:string;
+    parentId:string;
     subformType:string;
     subformList:SubFormContentDetailModel[] =  new Array<SubFormContentDetailModel>();
 }

@@ -34,6 +34,7 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
     public targetVideo: VideoContentModel = new VideoContentModel();
     public updateAction: UpdateContentModel = new UpdateContentModel();
     public documentTrackInterval: any;
+    public videoTypes  =Constants.document.contents.constats.videoTypes;
     public actionCase = {
         browseVideo: 'browseVideo',
         loadingVideo: 'loadingVideo',
@@ -55,7 +56,7 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
         this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
         this.contentDCtrlService.getUpdateContent().subscribe((detail) => {
-            if (detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm) {
+            if (detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm  && detail.for === this.parentBox.attr('id')) {
                 let targetDocumentContent: ContentsModel = detail.data;
                 this.targetVideo = targetDocumentContent.videos.find((video) => video.parentId === this.parentBox.attr('id'))
                 this.intialVideo();
@@ -69,18 +70,29 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
         this.targetVideo = this.contentDCtrlService.poolContents.videos.find((video) => video.parentId === this.parentBox.attr('id'))
         this.intialVideo();
     }
+
     public intialVideo() {
         if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.createContent) {
-            this.handleBrowseVideo();
+            if(this.data){
+                this.targetFile = this.data;
+                let dataStreaming = new VideoConetentDataModel();
+                dataStreaming.channelStream = this.videoTypes.browseFile;
+                this.addVideo(dataStreaming, dataStreaming.channelStream);
+            }else{
+                this.handleBrowseVideo();
+            }
         }
         else if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor || this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadPreview) {
             if (this.targetVideo) {
                 this.loadVideo(this.targetVideo)
                 if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor) {
+                    this.parentBox.css('margin','0')
                     this.rootElement.find('.content-video').css('pointer-events', 'none')
 
                 } else if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadPreview) {
                     this.rootElement.find('.content-video').css('pointer-events', 'auto')
+                 
+                    this.parentBox.css('margin','10px 0 10px 0')
                     setTimeout(() => {
                         this.handleVideo();
                     }, 500);
@@ -89,6 +101,7 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
         }
     }
     public handleBrowseVideo() {
+
         this.rootElement.find('#btn-video').unbind('click').bind('click', () => {
             this.rootElement.find('.content-browse-video').click((event) => {
                 event.stopPropagation();
@@ -96,12 +109,12 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
             this.rootElement.find('.content-browse-video').trigger('click');
             this.rootElement.find('.content-browse-video').change((event) => {
                 let dataStreaming = new VideoConetentDataModel();
-                dataStreaming.channelStream = 'videoSource';
+                dataStreaming.channelStream = this.videoTypes.browseFile;
                 const target = event.target as HTMLInputElement;
                 this.targetFile = target.files;
                 // dataStreaming.channelStream = 
                 console.log(' ❏ Video :', this.targetFile);
-                this.addVideo(dataStreaming, 'videoSource');
+                this.addVideo(dataStreaming, dataStreaming.channelStream);
             });
         });
         this.rootElement.find('.toolbar-browse-video').find('.toolbar-drag').on('dragover', (event) => {
@@ -118,8 +131,8 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
             this.targetFile = event.originalEvent.dataTransfer.files;
             console.log(' ❏ Video :', this.targetFile);
             let dataStreaming = new VideoConetentDataModel();
-            dataStreaming.channelStream = 'videoSource';
-            this.addVideo(dataStreaming, 'videoSource');
+            dataStreaming.channelStream = this.videoTypes.browseFile;
+            this.addVideo(dataStreaming, dataStreaming.channelStream);
         });
         this.rootElement.find('.toolbar-browse-video').find('#video-input-url').unbind('click').bind('click', () => {
             event.preventDefault();
@@ -136,7 +149,7 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
                 // let streamId = event.target.value;
                 const streamDetail = this.commonService.getStreamId(url);
 
-                if (streamDetail.streamId != null && streamDetail.channelStream == 'youtube') {
+                if (streamDetail.streamId != null && streamDetail.channelStream == this.videoTypes.youtube) {
                     this.targetFile = 'https://www.youtube.com/embed/' + streamDetail.streamId;
                     dataStreaming.streamId = streamDetail.streamId;
                     dataStreaming.channelStream = streamDetail.channelStream;
@@ -160,7 +173,7 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
                     // let streamId = event.target.value;
                     const streamDetail = this.commonService.getStreamId(url);
 
-                    if (streamDetail.streamId != null && streamDetail.channelStream == 'youtube') {
+                    if (streamDetail.streamId != null && streamDetail.channelStream == this.videoTypes.youtube) {
                         this.targetFile = 'https://www.youtube.com/embed/' + streamDetail.streamId;
                         dataStreaming.streamId = streamDetail.streamId;
                         dataStreaming.channelStream = streamDetail.channelStream;
@@ -188,15 +201,16 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
             parentId: this.parentBox.attr('id'),
             condition: condition
         }
-        if (sourceType === 'videoSource') {
+        if (sourceType === this.videoTypes.browseFile) {
             this.currentCase = this.actionCase.loadingVideo;
             let awsFileName = this.commonService.getPatternAWSName(this.targetFile[0].name) || 'fileName';
             let uploadFile: UploadFileModel = {
                 data: this.targetFile[0],
                 awsFileName: awsFileName
             }
-            this.documentService.uploadFile([uploadFile]).subscribe(() => {
-                let videoPath = Constants.common.host.storage + awsFileName;
+            this.documentService.uploadFile([uploadFile]).subscribe((url) => {
+                // let videoPath = Constants.common.host.storage + awsFileName;
+                let videoPath =url;
                 this.currentCase = this.actionCase.showVideo;
                 video.path = videoPath;
                 this.rootElement.find('video').attr('src', videoPath)
@@ -205,7 +219,7 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
                 this.contentDCtrlService.poolContents.videos.push(video)
                 this.contentDCtrlService.setLastContent(this.parentBox);
             })
-        } else if (sourceType === 'youtube') {
+        } else if (sourceType === this.videoTypes.youtube) {
             video.path = this.targetFile;
             this.rootElement.find('iframe').attr('src', this.targetFile)
                 .attr('id', this.parentBox.attr('id') + '-video')
@@ -213,7 +227,7 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
             this.contentDCtrlService.poolContents.videos.push(video)
             this.contentDCtrlService.setLastContent(this.parentBox);
         }
-        else if (sourceType === 'wistia') {
+        else if (sourceType === this.videoTypes.wistia) {
             this.currentCase = this.actionCase.videoWistia;
             video.path = this.targetFile;
             this.rootElement.find('.content-wistia').addClass('wistia_responsive wistia_embed wistia_async_' + this.targetFile)
@@ -223,27 +237,33 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
         this.updateAction.actionCase = 'showVideo'
         this.contentDCtrlService.updateContent = this.updateAction
         this.contentDCtrlService.setLastContent(this.parentBox);
-        this.addDocumentTrackVideo();
+        if(sourceType === this.videoTypes.wistia){
+            this.addDocumentTrackVideo();
+        }
+        
     }
     private loadVideo(targetVideo: VideoContentModel) {
-
-        if (targetVideo.data.channelStream === 'videoSource') {
+        if (targetVideo.data.channelStream === this.videoTypes.browseFile) {
+            this.currentCase = this.actionCase.videoSource;
             this.rootElement.find('video').attr('src', targetVideo.path)
                 .attr('id', this.parentBox.attr('id') + '-video')
 
-        } else if (targetVideo.data.channelStream === 'youtube') {
+        } else if (targetVideo.data.channelStream === this.videoTypes.youtube) {
 
             this.currentCase = this.actionCase.videoYoutube;
             this.rootElement.find('iframe').attr('src', targetVideo.path)
                 .attr('id', this.parentBox.attr('id') + '-video')
 
-        } else if (targetVideo.data.channelStream === 'wistia') {
+        } else if (targetVideo.data.channelStream === this.videoTypes.wistia) {
             this.currentCase = this.actionCase.videoWistia;
             this.rootElement.find('.content-wistia').addClass('wistia_responsive wistia_embed wistia_async_' + targetVideo.data.streamId)
+           
             // .attr('id', this.parentBox.attr('id') + '-video')
         }
     }
     public handleVideo() {
+        // this.parentBox.after('<br>')
+        // console.log(this.parentBox)
         let targetDocumentTrackIndex = this.documentDCtrlService.currentDocumentTrack.contents.findIndex((content) => content.parentId === this.parentBox.attr('id'))
         let targetDocumentTrack = this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex]
         if (targetDocumentTrack) {
@@ -255,18 +275,24 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
                 targetWistiaVideo.time(targetDocumentTrack.data);
                 this.rootElement.find('.content-video').click((event) => {
                     this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex].conditions.videoCondition.isClickPlay = true;
-                
-                })
-                targetWistiaVideo.bind("play", (e) => {
-                  
                     if(isHasToDoList.length >0){
+                        this.updateAction.for  = this.contentTypes.todoList;
                         this.updateAction.actionCase = Constants.document.contents.lifeCycle.playVideo;
                         this.contentDCtrlService.updateContent = this.updateAction
                     }
-                    return targetWistiaVideo.unblind;
-                });
+                })
+                // targetWistiaVideo.bind("play", (e) => {
+                  
+                    // if(isHasToDoList.length >0){
+                    //     this.updateAction.actionCase = Constants.document.contents.lifeCycle.playVideo;
+                    //     this.contentDCtrlService.updateContent = this.updateAction
+                 
+                    // }
+                //     return targetWistiaVideo.unblind;
+                // });
                 targetWistiaVideo.bind("secondchange", () => {
                     if (isHasProgressBar.length > 0) {
+                        this.updateAction.for  = this.contentTypes.progressBar;
                         this.updateAction.actionCase = Constants.document.contents.lifeCycle.playVideo;
                         this.contentDCtrlService.updateContent = this.updateAction
                     }
@@ -275,7 +301,11 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
                     this.documentDCtrlService.currentDocumentTrack.contents[targetDocumentTrackIndex].progress = (targetWistiaVideo.time() / targetWistiaVideo.duration()) * 100;
                     if(!this.documentTrackInterval){
                         this.documentTrackInterval = setInterval(() => {
-                            this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName).subscribe(()=>{
+                            let currentDocument =  JSON.parse(JSON.stringify(this.documentDCtrlService.currentDocument))
+                            let documentTrack = JSON.parse(JSON.stringify(this.documentDCtrlService.currentDocumentTrack))
+                            let contents = JSON.parse(JSON.stringify(this.contentDCtrlService.poolContents))
+
+                            this.documentService.handleDocumentTrack(currentDocument,documentTrack,contents).subscribe(()=>{
                                 clearInterval(this.documentTrackInterval)
                                 this.documentTrackInterval = null;
                             });
@@ -295,14 +325,20 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
                         this.updateAction.for  = this.contentTypes.progressBar;
                         this.contentDCtrlService.updateContent = this.updateAction
                     }
-                    this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName).subscribe(()=>{
+                    let currentDocument =  JSON.parse(JSON.stringify(this.documentDCtrlService.currentDocument))
+                    let documentTrack = JSON.parse(JSON.stringify(this.documentDCtrlService.currentDocumentTrack))
+                    let contents = JSON.parse(JSON.stringify(this.contentDCtrlService.poolContents))
+                    this.documentService.handleDocumentTrack(currentDocument,documentTrack,contents).subscribe(()=>{
                         clearInterval(this.documentTrackInterval)
                         this.documentTrackInterval = null;
                     });
               
                 })
                 targetWistiaVideo.bind("pause",  (e)=> {
-                    this.documentService.handleDocumentTrack(this.documentDCtrlService.currentDocumentName).subscribe(()=>{
+                    let currentDocument =  JSON.parse(JSON.stringify(this.documentDCtrlService.currentDocument))
+                    let documentTrack = JSON.parse(JSON.stringify(this.documentDCtrlService.currentDocumentTrack))
+                    let contents = JSON.parse(JSON.stringify(this.contentDCtrlService.poolContents))
+                    this.documentService.handleDocumentTrack(currentDocument,documentTrack,contents).subscribe(()=>{
                         clearInterval(this.documentTrackInterval)
                         this.documentTrackInterval = null;
                     });

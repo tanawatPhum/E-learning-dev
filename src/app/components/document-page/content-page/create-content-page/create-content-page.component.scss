@@ -3,6 +3,14 @@ p {
     margin: 0;
 }
 
+section {
+    width: 100%;
+    height: 100%;
+    // display: flex;
+    // justify-content: center;
+    // align-items: center;
+}
+
 //custome bootstrap css
 .list-group-item {
     user-select: none;
@@ -55,6 +63,8 @@ p {
 }
 
 [class*="col"] {
+    // height: 100%;
+    // display: inherit;
     padding: 0;
 }
 
@@ -66,7 +76,7 @@ p {
 }
 
 .content-template {
-    height: 70%;
+    height: 75vh;
     width: 100%;
     word-break: break-all;
     overflow: hidden;
@@ -141,6 +151,28 @@ p {
     }
 }
 
+.content-layout {
+    display: block;
+    // position: absolute;
+    cursor: pointer;
+    width: 100%;
+    & .layout-grid {
+        table-layout: fixed;
+    }
+    &.content-layout-active {
+        box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    }
+    & p {
+        outline: 0;
+        width: 100%;
+    }
+    & .layout-column.active {
+        // position: relative;
+        // border-top: #007bff solid 1px;
+        //outline: #007bff solid 1px;
+    }
+}
+
 //css content in box
 .content-box,
 .content-box-readonly {
@@ -192,7 +224,8 @@ p {
     &.box-subform {
         display: initial;
     }
-    & .content-box-label {
+    & .content-box-label,
+    .content-layout-label {
         cursor: move;
         top: -20px;
         width: 100%;

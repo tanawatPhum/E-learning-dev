@@ -44,6 +44,13 @@ export class ProgressBarContentComponent implements OnInit,ContentInterFace  {
                 // this.targetimg = targetDocumentContent.imgs.find((img) => img.parentId === this.parentBox.attr('id'))
                 // this.initialImg();
             } 
+            else  if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm && detail.for === this.parentBox.attr('id')){
+                this.targetProgressBar  = this.contentDCtrlService.poolContents.progressBar.find((progressBar)=>progressBar.parentId === this.parentBox.attr('id'));      
+                this.initialFile();
+            }
+            else if(detail.actionCase === Constants.document.contents.lifeCycle.clickLink){
+                this.handleProgressBar();
+            }
         })
 
     }
@@ -88,13 +95,19 @@ export class ProgressBarContentComponent implements OnInit,ContentInterFace  {
                         summaryOfPercent += targetDocumentTrack.progress
                         numberOfContentProgress += 1;
                     }
-                    else if(targetDocumentTrack.contentType === this.contentTypes.subform){
-                        targetDocumentTrack.conditions.subformCondition.isClickLinks.forEach((link)=>{
-                            let targetDoc = this.documentDCtrlService.documentTracks.find((docTrack)=>docTrack.id ===link.linkId);
-                            summaryOfPercent += targetDoc.progress;
-                            numberOfContentProgress += 1;
-                        });
-                    } 
+                    else if(targetDocumentTrack.contentType === this.contentTypes.link){
+                        if(targetDocumentTrack.conditions.linkCondition.isClicked){
+                            summaryOfPercent += targetDocumentTrack.progress
+                        }
+                        numberOfContentProgress += 1;
+                    }
+                    // else if(targetDocumentTrack.contentType === this.contentTypes.subform){
+                    //     targetDocumentTrack.conditions.subformCondition.isClickLinks.forEach((link)=>{
+                    //         let targetDoc = this.documentDCtrlService.documentTracks.find((docTrack)=>docTrack.id ===link.linkId);
+                    //         summaryOfPercent += targetDoc.progress;
+                    //         numberOfContentProgress += 1;
+                    //     });
+                    // } 
                     else if(targetDocumentTrack.contentType === this.contentTypes.exam){
                         summaryOfPercent += targetDocumentTrack.progress
                         numberOfContentProgress += 1;

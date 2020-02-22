@@ -2,6 +2,7 @@ import { SubFormContentModel, SubFormContentDetailModel, SubFormContentCondition
 import {  ContentsModel } from './content.model';
 import { VideoConetentConditionModel } from './elements/video-content.model';
 import {  ExamContentConditionModel } from './elements/exam-content.model';
+import { LinkContentConditionModel } from './elements/link-content.model';
 
 export class TriggerEventModel {
     public action:string;
@@ -20,6 +21,7 @@ export class DocumentTrackModel{
     public id:string;
     public nameDocument:string;
     public isTrackProgress:boolean;
+    public rawProgress:number = 0;
     public progress:number = 0;
     public status:string;
     public contents:DocumentTrackContent[] = new Array<DocumentTrackContent>();
@@ -39,6 +41,7 @@ export class DocumentTrackContentCondition{
     public videoCondition:VideoConetentConditionModel = new VideoConetentConditionModel();
     public subformCondition:SubFormContentConditionModel = new SubFormContentConditionModel();
     public examCondition:ExamContentConditionModel = new ExamContentConditionModel();
+    public linkCondition:LinkContentConditionModel   =  new LinkContentConditionModel();
 
 
 }

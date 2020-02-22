@@ -1,7 +1,8 @@
 import { Injectable, ComponentFactoryResolver, ViewChild } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Constants } from '../../global/constants';
 import { Observable, Subscriber } from 'rxjs';
-import { DocumentModel } from '../../models/document/content.model';
+import { DocumentModel, ContentsModel } from '../../models/document/content.model';
 import { DocumentNavigatorModel } from 'src/app/models/document/document.model';
 import { DocumentDataControlService } from './document-data-control.service';
 import html2canvas from 'html2canvas';
@@ -14,16 +15,23 @@ import { SocketIoService } from '../common/socket.service';
 import { CommonDataControlService } from '../common/common-data-control.service';
 import { AdHost } from '../../directives/ad-host/ad-host.directive';
 import domtoimage from 'dom-to-image';
+import { retry, catchError, map } from 'rxjs/operators';
+import { ContentRouting } from '../../app-content-routing';
+import { resolve } from 'url';
+import { ContentDataControlService } from '../content/content-data-control.service';
+import { Router } from '@angular/router';
+import { BoxContentModel } from '../../models/document/elements/box-content.model';
+
 
 Amplify.configure({
     Auth: {
-        identityPoolId: 'eu-central-1:4c9f1222-30c0-4db9-b9ed-57938e9684be',
-        region: 'eu-central-1',
+        identityPoolId: 'ap-southeast-1:d9aeac3b-d08f-4051-ac12-435e46b8162b',
+        region: 'ap-southeast-1',
         // userPoolId: 'us-east-2_qCW1BuFYV',
         // userPoolWebClientId:'663n1uidmi0ao3lrsk7ldsvv3q'
     },
     Storage: {
-        bucket: 'e-learning-dev',
+        bucket: 'e-learning-dev2',
 
     }
 });
@@ -36,12 +44,15 @@ export class DocumentService {
     @ViewChild(AdHost, { static: true }) adHost: AdHost;
     constructor(
         private documentDataService: DocumentDataControlService,
+        private contentDCtrlService:ContentDataControlService,
         private commonDataService: CommonDataControlService,
         private commonService: CommonService,
         private socketIoService: SocketIoService,
+        private http: HttpClient
     ) {
 
     }
+    private linkType = Constants.document.contents.constats.linkTypes;
     public indexDB: any;
     public highlighter: any;
     private contentTypes = Constants.document.contents.types;
@@ -52,54 +63,55 @@ export class DocumentService {
     //     const componentRef = viewContainerRef.createComponent(componentFactory);
     // }
 
-    public initDBDoc(): Observable<any> {
-        return new Observable(subscriber => {
-            if (!electron) {
-                this.socketIoService.sendData(Constants.document.connect.type.documentReadMongoDBToCacheDB).subscribe((status) => {
-                    //this.creaetDocumentModel(objectDoc).subscribe((result)=>{
-                    subscriber.next(status);
-                    subscriber.complete();
-                    //});
-                });
+    // public initDBDoc(): Observable<any> {
+    //     return new Observable(subscriber => {
+    //         if (!electron) {
+    //             this.socketIoService.sendData(Constants.document.connect.type.documentReadMongoDBToCacheDB).subscribe((status) => {
+    //                 //this.creaetDocumentModel(objectDoc).subscribe((result)=>{
+    //                 subscriber.next(status);
+    //                 subscriber.complete();
+    //                 //});
+    //             });
 
-            }
+    //         }
 
-            // const requestDB = window.indexedDB.open('e-learning', 1);
-            // requestDB.onerror = ((error) => {
-            //     console.error('error: ', error);
-            // });
-            // requestDB.onsuccess = (async (event) => {
-            //     subscriber.next('Success to initDB');
-            // })
-            // requestDB.onupgradeneeded = ((event: any) => {
-            //     const db = event.target.result;
-            //     db.createObjectStore('navigators', { keyPath: 'id' });
-            //     db.createObjectStore('documents', { keyPath: 'id' });
-            //     db.createObjectStore('tracks', { keyPath: 'id' });
-            //     subscriber.next('Success to initDB');
-            // });
-        })
-    }
-    public loadDocFromDB(documentName?, userId?): Observable<DocumentModel> {
+    //         // const requestDB = window.indexedDB.open('e-learning', 1);
+    //         // requestDB.onerror = ((error) => {
+    //         //     console.error('error: ', error);
+    //         // });
+    //         // requestDB.onsuccess = (async (event) => {
+    //         //     subscriber.next('Success to initDB');
+    //         // })
+    //         // requestDB.onupgradeneeded = ((event: any) => {
+    //         //     const db = event.target.result;
+    //         //     db.createObjectStore('navigators', { keyPath: 'id' });
+    //         //     db.createObjectStore('documents', { keyPath: 'id' });
+    //         //     db.createObjectStore('tracks', { keyPath: 'id' });
+    //         //     subscriber.next('Success to initDB');
+    //         // });
+    //     })
+    // }
+    public loadDocFromDB(documentId?, userId?): Observable<DocumentModel> {
         return new Observable(subscriber => {
-            let idDoc = null
-            if (documentName) {
-                idDoc = this.commonService.getPatternId(documentName)
-            }
+            let idDoc = documentId || null;
+            // if (documentName) {
+            //     idDoc = this.c
+            // }
             let requestObjDoc = {
                 id: idDoc,
                 userId: userId || this.commonDataService.userId
             }
+
+
             if (electron) {
-                electron.ipcRenderer.send('request-read-target-document', documentName)
-                electron.ipcRenderer.once('reponse-read-target-document', (event, objectDoc) => {
-                    // console.log('☛ Result Document from Flie : ', objectDoc);
-                    subscriber.next(objectDoc);
-                    subscriber.complete();
-                })
+                // electron.ipcRenderer.send('request-read-target-document', documentName)
+                // electron.ipcRenderer.once('reponse-read-target-document', (event, objectDoc) => {
+                //     // console.log('☛ Result Document from Flie : ', objectDoc);
+                //     subscriber.next(objectDoc);
+                //     subscriber.complete();
+                // })
             } else {
                 this.socketIoService.sendData(Constants.document.connect.type.documentRead, requestObjDoc).subscribe((objectDoc: DocumentModel[]) => {
-
                     this.creaetDocumentModel(objectDoc).subscribe((result) => {
                         subscriber.next(result);
                         subscriber.complete();
@@ -194,7 +206,6 @@ export class DocumentService {
 
             } else {
                 this.socketIoService.sendData(Constants.document.connect.type.documentDelete, documentNavObj).subscribe((res) => {
-                    console.log('xxxx', res)
                     if (res === Constants.common.message.status.success.text) {
                         subscriber.next(Constants.common.message.status.success.text);
                         subscriber.complete();
@@ -472,7 +483,7 @@ export class DocumentService {
         });
 
     }
-    public saveDocumentTrack(nameDocument, saveobjectTrack): Observable<string> {
+    public saveDocumentTrack(saveobjectTrack): Observable<string> {
         return new Observable((subscriber) => {
             if (electron) {
                 // console.log(' ❏ Object for Save :', saveobjectTemplate);
@@ -518,30 +529,63 @@ export class DocumentService {
             let numberOfFiles = 0;
             if (files.length > 0) {
                 files.forEach(async (file) => {
-                    await Storage.put(file.awsFileName, file.data, { contentType: file.data.type })
-                        .then(result => {
-                            numberOfFiles += 1;
-                            if (numberOfFiles === files.length) {
-                                console.log("Upload Success")
-                                subscriber.next(Constants.common.message.status.success.text);
-                            }
+                    // let headers = new HttpHeaders({
+                    //     'Content-Type': 'multipart/form-data'
+                    //   })
+                    const formData = new FormData();
+                    formData.append('file', file.data);
+                    formData.append('name',file.awsFileName)
+                    this.http.post<any>(Constants.common.host.serverSite+'/api/uploadFile',formData,{})
+                    .pipe(
+                      retry(1)
+                    ).subscribe((res)=>{
+                        subscriber.next(res && Constants.common.host.serverSite + Constants.common.host.getImage+ res['url']);
+                    })
 
-                        })
-                        .catch(err => subscriber.next(Constants.common.message.status.success.text));
+                    // await Storage.put(file.awsFileName, file.data, { contentType: file.data.type })
+                    //     .then(result => {
+                    //         numberOfFiles += 1;
+                    //         if (numberOfFiles === files.length) {
+                    //             console.log("Upload Success")
+                    //             let imgPath = Constants.common.host.storage + file.awsFileName;
+                    //             subscriber.next(imgPath);
+                    //         }
+
+                    //     })
+                    //     .catch(err => subscriber.next(Constants.common.message.status.fail.text));
                 })
             } else {
                 subscriber.next(Constants.common.message.status.success.text);
             }
         })
     }
-    public downloadFile(awsFileName: string): Observable<Blob> {
+    public downloadFile(targetFile: string): Observable<Blob> {
         return new Observable((subscriber) => {
-            Storage.get(awsFileName, { download: true }).then((result: any) => {
-                let blob = new Blob([result.Body], { type: result.ContentType })
+
+        fetch(targetFile)
+            .then(res => res.blob()) // Gets the response and returns it as a blob
+            .then(blob => {
                 subscriber.next(blob)
-                //  $('#test').attr('href',window.URL.createObjectURL(blob))
-                //  $('#test').attr('download',file.fileName)
-            });
+              // Here's where you get access to the blob
+              // And you can use it for whatever you want
+              // Like calling ref().put(blob)
+          
+              // Here, I use it to make an image appear on the page
+            //   let objectURL = URL.createObjectURL(blob);
+            //   let myImage = new Image();
+            //   myImage.src = objectURL;
+            //   document.getElementById('myImg').appendChild(myImage)
+          });
+
+            // this.http.get<any>(Constants.common.host.serverSite + Constants.common.host.getImage+awsFileName).subscribe(()=>{
+
+            // })
+            // Storage.get(awsFileName, { download: true }).then((result: any) => {
+            //     let blob = new Blob([result.Body], { type: result.ContentType })
+            //     subscriber.next(blob)
+            //     //  $('#test').attr('href',window.URL.createObjectURL(blob))
+            //     //  $('#test').attr('download',file.fileName)
+            // });
         })
 
 
@@ -549,21 +593,100 @@ export class DocumentService {
     // public getFile
     public captureHTML(id): Observable<string> {
         return new Observable((subscriber) => {
+            // html2canvas(document.getElementById(id)).then(canvas => {
+            //     var blobBin = atob(canvas.toDataURL().split(',')[1]);
+            //     var array = [];
+            //     for(var i = 0; i < blobBin.length; i++) {
+            //         array.push(blobBin.charCodeAt(i));
+            //     }
+            //     let newBlob=new Blob([new Uint8Array(array)], {type: 'image/png'})
+            //     let fileImg = new File([newBlob], this.documentDataService.currentDocumentName + '.png', { type: "image/png" })
+            //     let awsFileName = this.commonService.getPatternAWSName(fileImg.name) || 'fileName';
+            //     let uploadFile: UploadFileModel = {
+            //         data: fileImg,
+            //         awsFileName: awsFileName
+            //     }
+            //     this.uploadFile([uploadFile]).subscribe(() => {
+            //         let urlFile = Constants.common.host.storage + awsFileName;
+            //         subscriber.next(urlFile)
+            //     });
+            // });
+    
+
             domtoimage.toBlob(document.getElementById(id))
                 .then((blob) => {
-                    let fileImg = new File([blob], this.documentDataService.currentDocumentName + '.png', { type: "image/png" })
+             
+                    let fileImg = new File([blob], this.documentDataService.currentDocument.nameDocument + '.png', { type: "image/png" })
                     let awsFileName = this.commonService.getPatternAWSName(fileImg.name) || 'fileName';
                     let uploadFile: UploadFileModel = {
                         data: fileImg,
                         awsFileName: awsFileName
                     }
-                    this.uploadFile([uploadFile]).subscribe(() => {
-                        let urlFile = Constants.common.host.storage + awsFileName;
-                        subscriber.next(urlFile)
+                    this.uploadFile([uploadFile]).subscribe((url) => {
+                        // let urlFile = Constants.common.host.storage + awsFileName;
+                        subscriber.next(url)
                     });
-                });
+            });
         });
     }
+    public getBase64Image(imgUrl) {
+        return new Promise((resolve,reject)=>{ 
+            var img = new Image();
+            img.crossOrigin="anonymous" 
+
+            setTimeout(() => {
+                img.src = imgUrl;
+                // onload fires when the image is fully loadded, and has width and height
+            
+                img.onload = ()=>{
+            
+                  var canvas = document.createElement("canvas");
+                  canvas.width = img.width;
+                  canvas.height = img.height;
+                  var ctx = canvas.getContext("2d");
+                  ctx.drawImage(img, 0, 0);
+                  var dataURL = canvas.toDataURL("image/png"),
+                      dataURL = dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
+          
+                  resolve(dataURL) 
+                 
+            
+                };
+                img.onerror = ()=> {
+                  reject("The image could not be loaded.");
+                }            
+            }, 500);
+    
+
+          // set attributes and src
+        })
+
+    
+    }
+    // public dataURItoBlob(dataURI) {
+    //     // convert base64 to raw binary data held in a string
+    //     // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+    //     var byteString = atob(decodeURIComponent(dataURI.split(',')[1]));
+    
+    //     // separate out the mime component
+    //     var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    
+    //     // write the bytes of the string to an ArrayBuffer
+    //     var ab = new ArrayBuffer(byteString.length);
+    //     var ia = new Uint8Array(ab);
+    //     for (var i = 0; i < byteString.length; i++) {
+    //         ia[i] = byteString.charCodeAt(i);
+    //     }
+    
+    //     //Old Code
+    //     //write the ArrayBuffer to a blob, and you're done
+    //     //var bb = new BlobBuilder();
+    //     //bb.append(ab);
+    //     //return bb.getBlob(mimeString);
+    
+    //     //New Code
+    //     return new Blob([ab], {type: mimeString});
+    // }
     public creaetDocumentModel(value): Observable<DocumentModel> {
         return new Observable((subscriber) => {
             // console.log('☛ Result Document from Flie : ', value);
@@ -589,60 +712,145 @@ export class DocumentService {
 
     }
 
-    public handleDocumentTrack(nameDocument):Observable<any>{
+    public handleDocumentTrack(currentDocument:DocumentModel,documentTrack:DocumentTrackModel,contents:ContentsModel, userId?):Observable<any>{
         return new Observable((subscriber)=>{
-            let numberOfCondition = this.documentDataService.currentDocumentTrack.contents.length;
+            let numberOfCondition = documentTrack.contents.length;
             let numberOfProgress =0;
+            let isMustVideoWatchEnd = false;
             // console.log(this.currentDocumentTrack.contents[targetVideoTrackIndex])
-            this.documentDataService.currentDocumentTrack.contents.forEach((content) => {
+            documentTrack.contents.forEach((content) => {
                 if(content.contentType === this.contentTypes.video){
                     if(content.conditions.videoCondition.isMustWatchingEnd){
                         numberOfProgress +=content.progress
+                        isMustVideoWatchEnd = true;
                     }else if(content.conditions.videoCondition.isClickPlay){
                         numberOfProgress +=100
                     }
                 }
-                else if(content.contentType === this.contentTypes.subform){
-                    let numberOfLinks = content.conditions.subformCondition.isClickLinks.length;
-                    let numberOfProgressLink =0;
-                    content.conditions.subformCondition.isClickLinks.forEach((link)=>{
-                        let documentTrackTarget  = this.documentDataService.documentTracks.find((documentTrack)=>documentTrack.id ===link.linkId);
-                        // if(link.isClicked){
-                        //     link.progress =  documentTrackTarget.progress;
-                        // }
-                        link.progress =  documentTrackTarget.progress;
-                        numberOfProgressLink +=link.progress;
-                        // else if(!content.conditions.subformCondition.haveInDoList){
-                        //     numberOfProgressLink +=100;
-                        // }
-
-                    });
-                    content.progress = numberOfProgressLink/numberOfLinks;
-                    numberOfProgress += numberOfProgressLink/numberOfLinks;
+                else if(content.contentType === this.contentTypes.link){
+                    if(content.conditions.linkCondition.linkType  ===  this.linkType.document){
+                        let documentTrackTarget  = this.documentDataService.documentTracks.find((documentTrack)=>documentTrack.id ===content.conditions.linkCondition.linkId);
+                        content.conditions.linkCondition.progress  = documentTrackTarget.progress;
+                    }else if(content.conditions.linkCondition.linkType  ===  this.linkType.url){
+                        if(content.conditions.linkCondition.isClicked){
+                            content.conditions.linkCondition.progress  = 100;
+                        }
+                    }
+                    content.progress =  content.conditions.linkCondition.progress;
+                    numberOfProgress +=content.progress
                 }
+
+
+                // else if(content.contentType === this.contentTypes.subform){
+                //     let numberOfLinks = content.conditions.subformCondition.isClickLinks.length;
+                //     let numberOfProgressLink =0;
+                //     content.conditions.subformCondition.isClickLinks.forEach((link)=>{
+                //         let documentTrackTarget  = this.documentDataService.documentTracks.find((documentTrack)=>documentTrack.id ===link.linkId);
+                //         // if(link.isClicked){
+                //         //     link.progress =  documentTrackTarget.progress;
+                //         // }
+                //         link.progress =  documentTrackTarget.progress;
+                //         numberOfProgressLink +=link.progress;
+                //         // else if(!content.conditions.subformCondition.haveInDoList){
+                //         //     numberOfProgressLink +=100;
+                //         // }
+
+                //     });
+                //     content.progress = numberOfProgressLink/numberOfLinks;
+                //     numberOfProgress += numberOfProgressLink/numberOfLinks;
+                // }
             });
-            // this.currentDocumentTrack.contents.forEach((content) => {
-            //     if()
-            // })
+            documentTrack.rawProgress = (numberOfProgress/numberOfCondition)|| 0;
+
+            if(contents.todoList.length === 0){
+                if(isMustVideoWatchEnd){
+                    documentTrack.progress =   numberOfProgress/numberOfCondition;
+                }else{
+                    documentTrack.progress = 100;
+                }
+            }else{
+                contents.todoList.forEach((todolist,index)=>{
+                    todolist.toDoListOrder.forEach((task)=>{
+                        documentTrack.contents.forEach((content)=>{
+                            let targetContent = task.objectTodoList.find((obj)=>content.parentId === obj.id)
+                            if(!targetContent && !isMustVideoWatchEnd){
+                                numberOfCondition -=1;
+                                numberOfProgress -=content.progress;
+                                
+                            }
+
+                        })    
+                    })
+                    if(index === contents.todoList.length-1 ){
+                        documentTrack.progress =   numberOfProgress/numberOfCondition;
+                    }
     
-            this.documentDataService.currentDocumentTrack.progress =   numberOfProgress/numberOfCondition;
+                })
+            }
+       
+            if(this.documentDataService.currentDocumentTrack.id === documentTrack.id){
+                this.documentDataService.currentDocumentTrack =  this.documentDataService.documentTrack  = documentTrack;
+            }
             let saveObjectTrackTemplate: DocumentTrackModel = {
-                id: this.commonService.getPatternId(nameDocument),
-                nameDocument: nameDocument,
-                userId: Constants.common.user.id,
+                id: currentDocument.id,
+                nameDocument: currentDocument.nameDocument,
+                userId: userId || this.commonDataService.userId,
                 status: Constants.common.message.status.created.text,
-                isTrackProgress: this.documentDataService.currentDocumentTrack.contents.length > 0 ? true : false,
-                progress: this.documentDataService.currentDocumentTrack.contents.length === 0 ? 100 : this.documentDataService.currentDocumentTrack.progress,
-                contents: this.documentDataService.currentDocumentTrack.contents
+                isTrackProgress: documentTrack.contents.length > 0 ? true : false,
+                progress: documentTrack.contents.length === 0 ? 100 : documentTrack.progress,
+                rawProgress:documentTrack.rawProgress,
+                contents:documentTrack.contents
             }
             console.log('saveObjectTrackTemplate',saveObjectTrackTemplate)
-            this.saveDocumentTrack(nameDocument,saveObjectTrackTemplate).subscribe((status)=>{
+            this.saveDocumentTrack(saveObjectTrackTemplate).subscribe((status)=>{
                 subscriber.next(status)
                 subscriber.complete();
                // console.log(" this.currentDocumentTrack", this.currentDocumentTrack)          
             });
         })
 
+    }
+    public loadImage(url,originalPath){
+    
+       return this.http.get(url+'?originalPath='+originalPath ,{ responseType: 'text' }) 
+    }
+
+    public getComponentType(type){
+        
+       if(/image\//.test(type)){
+        return 'img-content';
+       }
+       else if(/video\//.test(type)){
+        return 'video-content';
+       }
+       else if(/application\//.test(type)){
+        return 'file-content';
+       }
+    //    else if(
+    //     type ==='image/apng'||
+    //     type ==='image/bmp'||
+    //     type ==='image/gif'||
+    //     type ==='image/x-icon'||
+    //     type ==='image/jpeg'||
+    //     type ==='image/png'||
+    //     type ==='image/svg+xml'||
+    //     type ==='image/tiff'||
+    //     type === 'image/webp'
+    //    ){
+  
+    //    }
+    }
+    public getBoxContentPreview(box:BoxContentModel){
+       return  `
+        <div contenteditable="false" id="${box.id}" class="content-box freedom-layout"
+        style="
+        top:${box.htmlDetail.top}px;left:${box.htmlDetail.left}px;
+        height:${box.htmlDetail.height}px;width:${box.htmlDetail.width}px;
+        z-index:${box.htmlDetail.level};
+        position:absolute;
+        cursor: default;
+        "
+        name="${box.name}" ><${box.htmlDetail.selector} class="full-screen"></${box.htmlDetail.selector}></div>`
     }
 
     // public createDocumentList(){

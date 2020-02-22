@@ -15,7 +15,7 @@ import { ContentsModel } from 'src/app/models/document/content.model';
     styleUrls: ['file-content.scss']
 })
 export class FileContentComponent implements OnInit, ContentInterFace, AfterViewInit  {
-
+    @Input() data: any;
     @Input() parentBox: JQuery<Element>;
     @HostListener('click', ['$event']) onClick(event) {
         event.preventDefault();
@@ -44,7 +44,7 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
         this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
         this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
-            if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm){
+            if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm && detail.for === this.parentBox.attr('id')){
                 let targetDocumentContent:ContentsModel = detail.data;
                 this.targetFile = targetDocumentContent.files.find((file) => file.parentId === this.parentBox.attr('id'))
                 this.initialFile();
@@ -58,7 +58,16 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
     }
     public initialFile(){
         if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.createContent){
-            this.handleBrowseFile(); 
+   
+
+            if(this.data){
+                this.targetFileUpload = this.data;
+                this.addFile();
+            }else{
+                this.handleBrowseFile(); 
+            }
+
+      
         }
         else if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadEditor || this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadPreview){
             if( this.targetFile){
@@ -108,11 +117,14 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
             id:this.parentBox.attr('id') + '-file',
             fileName:this.commonService.fileNameAndExt(this.targetFileUpload[0].name)[0],
             awsFileName:awsFileName,
-            data:this.targetFileUpload[0]
+            data:this.targetFileUpload[0],
+            filePath:null
         };
-        this.documentService.uploadFile([file]).subscribe((status)=>{
+
+        this.documentService.uploadFile([file]).subscribe((url)=>{
             this.currentCase = this.actionCase.showFile;
             file.data = null;
+            file.filePath =  url;
             this.contentDCtrlService.poolContents.files.push(file);
             this.rootElement.find('.content-file').attr('download',fileName)
             .attr('data-awsname',awsFileName)
@@ -134,7 +146,7 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
     public handleLoadFile(){
         this.rootElement.find('.content-file').bind('click',(element)=>{
             let targetFile = this.contentDCtrlService.poolContents.files.find((file)=>file.awsFileName === $(element.currentTarget).attr('data-awsname'))
-            this.documentService.downloadFile(targetFile.awsFileName).subscribe((blobFile)=>{
+            this.documentService.downloadFile(targetFile.filePath).subscribe((blobFile)=>{
                 let url = window.URL.createObjectURL(blobFile);
                 let link = document.createElement('a');
                 link.download = targetFile.awsFileName;

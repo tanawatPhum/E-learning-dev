@@ -3,7 +3,13 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  SERVER_SITE:process.env.serverSite || 'http://localhost:3001',
+  FRONTEND_SITE:process.env.frontendSite|| 'http://localhost:4200',
+  GET_IMAGE:process.env.getImage|| '/api/getImage/?originalPath='
+  // SERVER_SITE:window["env"]["serverSite"] || 'http://localhost:3001',
+  // FRONTEND_SITE:window["env"]["frontendSite"] || 'http://localhost:4200',
+  // GET_IMAGE:["env"]["getImage"] || '/api/getImage/?originalPath='
 };
 
 /*

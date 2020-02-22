@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 
 export class Constants {
     public static readonly platform = {
@@ -41,8 +42,8 @@ export class Constants {
                 box:{
                     bgNoneColor: 'transparent',
                     bgWhiteColor: '#fff',
-                    height:"300px",
-                    width:"300px"
+                    height:300,
+                    width:300
                 },
                 navBar:{
                     height:55
@@ -64,8 +65,14 @@ export class Constants {
   
         },
         host:{
-            smartDoc:'http://localhost:4200',
-            storage:'https://e-learning-dev.s3.eu-central-1.amazonaws.com/public/'
+         
+            // smartDoc:'https://smartdoc.alworks.io',
+            // serverSite:'https://smartdoc.alworks.io',
+        
+            serverSite:environment.SERVER_SITE,
+            smartDoc:environment.FRONTEND_SITE,
+            //storage:'https://e-learning-dev2.s3-ap-southeast-1.amazonaws.com/public/',
+            getImage:environment.GET_IMAGE
         }
     }
     public static readonly document = {
@@ -74,15 +81,15 @@ export class Constants {
             loadEditor:"loadEditor",
             createContent:"createContent",
             loadPreview:"loadPreview",
+            updateDocumentNav:'updateDocumentNav'
         },
         layouts:{
             types: {
-
-                oneLayout: {name : 'oneLayout', id: 1 },
-                twoLayout: {name : 'twoLayout', id: 2 },
-                threeLayout:  {name : 'threeLayout', id: 4 },
-                fourLayout: {name : 'fourLayout', id: 5 },
-                freedomLayout:  {name : 'freedomLayout', id: 6 }
+                gridLayout:'grid-layout',
+                twoLayout: 'two-layout',
+                threeLayout:'three-layout',
+                fourLayout: 'four-layout',
+                freedomLayout:'freedom-layout'
             }
         },
         contents: {
@@ -91,26 +98,45 @@ export class Constants {
                 playVideo:'playVideo',
                 addTaskList:'addTaskList',
                 saveDocument:'saveComment',
-                clickSubForm:'clickSubForm'
+                clickSubForm:'clickSubForm',
+                clickLink:'clickLink',
+                delete:'delete'
+            },
+            events:{
+                startDrag:'startDrag',
+                stopDrag:'stopDrag',
+                startResize:'startResize',
+                stopResize:'stopResize'
             },
             types: {
-                img:'img',
-                video:'video',
-                link:'link',
-                file:'file',
-                progressBar:'progressBar',
-                subform:'subform',
-                textarea:'textarea',
-                todoList:'todoList',
-                comment:'comment',
-                note:'note',
-                exam:'exam'
+                img:'img-content',
+                video:'video-content',
+                link:'link-content',
+                file:'file-content',
+                progressBar:'progressBar-content',
+                subform:'subform-content',
+                textarea:'textarea-content',
+                todoList:'todoList-content',
+                comment:'comment-content',
+                note:'note-content',
+                exam:'exam-content'
 
                 // oneLayout: {name : 'oneLayout', id: 1 },
                 // twoLayout: {name : 'twoLayout', id: 2 },
                 // threeLayout:  {name : 'threeLayout', id: 4 },
                 // fourLayout: {name : 'fourLayout', id: 5 },
                 // freedomLayout:  {name : 'freedomLayout', id: 6 }
+            },
+            constats:{
+                linkTypes:{
+                    url: 'url',
+                    document: 'document'
+                },
+                videoTypes:{
+                    browseFile:'browseFile',
+                    youtube:'youtube',
+                    wistia:'wistia'
+                }
             }
         },
         modals:{

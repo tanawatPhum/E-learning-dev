@@ -12,7 +12,7 @@ import { DocumentPreviewPageComponent } from './components/document-page/documen
 
 
 const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'documentHome', component: DocumentHomePageComponent },
   { path: 'documentPreview', component: DocumentPreviewPageComponent },
   { path: 'content', component: CreateContentPageComponent },

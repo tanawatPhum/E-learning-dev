@@ -10,6 +10,8 @@ import { find, findIndex } from 'rxjs/operators';
 import { CommonDataControlService } from '../../services/common/common-data-control.service';
 import { element } from 'protractor';
 import { UploadFileModel, UpdateContentModel } from 'src/app/models/common/common.model';
+import { ContentsModel } from 'src/app/models/document/content.model';
+import { SocketIoService } from '../../services/common/socket.service';
 
 @Component({
     moduleId: module.id,
@@ -36,12 +38,18 @@ export class CommentContentComponent implements OnInit,ContentInterFace {
         private documentService:DocumentService,
         private documentDCtrlService:DocumentDataControlService,
         private contentDCtrlService:ContentDataControlService,
-        private element: ElementRef
+        private element: ElementRef,
+        private socketService:SocketIoService
         
     ){}
     ngOnInit(){
         this.rootElement = $(this.element.nativeElement); 
         this.parentBox = this.rootElement.parents('.content-box');
+        this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
+            if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm&& detail.for === this.parentBox.attr('id')){               
+                this.initialComment()
+            }
+        })
     }
     ngAfterViewInit(){
         this.initialComment();
@@ -57,6 +65,7 @@ export class CommentContentComponent implements OnInit,ContentInterFace {
             if(this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadPreview){
                 this.handleComment();
                 this.loadCommentReply();
+                this.updateCommentFromSocket();
             }
         } 
     }
@@ -80,6 +89,7 @@ export class CommentContentComponent implements OnInit,ContentInterFace {
     }
     public async loadCommentReply(){
         this.targetComment =  this.contentDCtrlService.poolContents.comments.find((comment)=>comment.parentId === this.parentBox.attr('id'))
+     
         for await (let comment of this.targetComment.listComment){
             this.rootElement.find('.comment-replys > .col-12').append(
                 this.rootElement.find('.comment-reply-draft').clone()
@@ -169,6 +179,7 @@ export class CommentContentComponent implements OnInit,ContentInterFace {
             if(targetIndexCommentReply >= 0){
                 this.contentDCtrlService.poolContents.comments[targetIndexComment].listComment[targetIndexCommentReply].liked  = likeNumber;
                 this.saveDocument();
+                this.sendCommentToSocket(); 
             }
         })
     }
@@ -194,6 +205,7 @@ export class CommentContentComponent implements OnInit,ContentInterFace {
                 if(targetIndexCommentReplyChild >= 0){
                     this.contentDCtrlService.poolContents.comments[targetIndexComment].listComment[targetIndexCommentReply].childs[targetIndexCommentReplyChild].liked =likeNumber; 
                     this.saveDocument();
+                    this.sendCommentToSocket(); 
                 }
             }
         
@@ -209,8 +221,9 @@ export class CommentContentComponent implements OnInit,ContentInterFace {
         }
         let loading = this.rootElement.find('.loading').clone().removeAttr('hidden')
         parentCommentBox.find('.comment-massege-img').html(null).append(loading)
-        this.documentService.uploadFile([uploadFile]).subscribe(() => {
-            let imgPath = this.targetFile = Constants.common.host.storage + awsFileName;
+        this.documentService.uploadFile([uploadFile]).subscribe((url) => {
+            let imgPath  =url;
+            // let imgPath = this.targetFile = Constants.common.host.storage + awsFileName;
             let commentImg = '<img  src="' + imgPath + '"/>'
             parentCommentBox.find('.comment-massege-img').html(commentImg)
         })
@@ -260,6 +273,7 @@ export class CommentContentComponent implements OnInit,ContentInterFace {
                     this.targetFile = null;
                     this.handleComment()
                     this.saveDocument();
+                    this.sendCommentToSocket();
                 })
             });
     
@@ -307,7 +321,8 @@ export class CommentContentComponent implements OnInit,ContentInterFace {
                     }
                     parentCommentReplyBox.find('.comment-form-child').remove();
                     this.handleChildComment(parentCommentReplyBox,targetComment,targetInput) 
-                    this.saveDocument();   
+                    this.saveDocument();  
+                    this.sendCommentToSocket(); 
                 })
             });
     
@@ -316,7 +331,45 @@ export class CommentContentComponent implements OnInit,ContentInterFace {
 
     public saveDocument() {
         this.updateAction.actionCase = Constants.document.contents.lifeCycle.saveDocument;
+        this.updateAction.data =  Constants.common.user.id;
         this.contentDCtrlService.updateContent = this.updateAction
+    }
+    public sendCommentToSocket(){
+        
+        this.socketService.sendComment(this.targetComment)
+    }
+    public updateCommentFromSocket(){
+        this.socketService.updateComment().subscribe((res)=>{
+            let targetCommentIndex =  this.contentDCtrlService.poolContents.comments.findIndex((comment)=>comment.parentId === res.parentId)
+  
+            if(targetCommentIndex>=0){
+                this.contentDCtrlService.poolContents.comments[targetCommentIndex] =  res;
+            }
+            console.log(this.contentDCtrlService.poolContents.comments)
+            if(res.parentId === this.targetComment.parentId){
+                this.rootElement.find('.comment-replys > .col-12').html(null).ready(()=>{
+                    this.loadCommentReply();
+                })
+           
+            }
+         
+            
+        })
+        // this.socketService.sendData('commentUpdate',this.contentDCtrlService.poolContents.comments).subscribe((res)=>{
+        //     console.log(res)
+        // })
+        
+        // let socket = io.connect(Constants.common.host.serverSite);
+        // socket.emit('commentUpdate', {
+        //     data: this.contentDCtrlService.poolContents.comments
+        // });
+        // this.socket.on('commentResponse',(data)=>{
+        //     console.log(data)
+        // })
+        // this.socketService.sendData('commentUpdate',this.contentDCtrlService.poolContents.comments).subscribe((response)=>{
+        //     console.log(response)
+
+        // })
     }
 
 }

@@ -11,8 +11,8 @@ declare var electron: any;
 @Injectable()
 export class DocumentDataControlService {
 
-    private _currentDocument: string = "New Document1";
-    private _currentDocumentNav: string = "New Document1";
+   // private _currentDocument: string = "New Document32";
+    private _currentDocumentNav: DocumentNavigatorModel = new DocumentNavigatorModel();
     private _currentDocumentTrack: DocumentTrackModel = new DocumentTrackModel();
  
     private _contentSize: ScreenDetailModel = new ScreenDetailModel();
@@ -24,6 +24,22 @@ export class DocumentDataControlService {
     private _documentTrack: DocumentTrackModel = new DocumentTrackModel();
     private _documentTracks: DocumentTrackModel[] = new Array<DocumentTrackModel>();
     private _currentResult: DocumentModel = new DocumentModel();
+    private _systemReult: DocumentModel = new DocumentModel();
+
+    private _currentDocument: DocumentModel = new DocumentModel();
+    public get currentDocument(): DocumentModel {
+        return this._currentDocument;
+    }
+    public set currentDocument(value: DocumentModel) {
+        this._currentDocument = value;
+    }
+
+    public get systemReult(): DocumentModel {
+        return this._systemReult;
+    }
+    public set systemReult(value: DocumentModel) {
+        this._systemReult = value;
+    }
     public get currentResult(): DocumentModel {
         return this._currentResult;
     }
@@ -96,18 +112,18 @@ export class DocumentDataControlService {
     public set contentSize(value: ScreenDetailModel) {
         this._contentSize = value;
     }
-    public get currentDocumentNav(): string {
+    public get currentDocumentNav(): DocumentNavigatorModel {
         return this._currentDocumentNav;
     }
-    public set currentDocumentNav(value: string) {
+    public set currentDocumentNav(value: DocumentNavigatorModel) {
         this._currentDocumentNav = value;
     }
-    public get currentDocumentName(): string {
-        return this._currentDocument;
-    }
-    public set currentDocumentName(value: string) {
-        this._currentDocument = value;
-    }
+    // public get currentDocumentName(): string {
+    //     return this._currentDocument;
+    // }
+    // public set currentDocumentName(value: string) {
+    //     this._currentDocument = value;
+    // }
 
    
 }

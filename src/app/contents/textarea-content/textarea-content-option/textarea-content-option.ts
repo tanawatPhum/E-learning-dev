@@ -4,6 +4,7 @@ import { ContentDataControlService } from 'src/app/services/content/content-data
 import { DocumentDataControlService } from 'src/app/services/document/document-data-control.service';
 import { Constants } from '../../../global/constants';
 import { DocumentService } from 'src/app/services/document/document.service';
+import { UpdateContentModel } from 'src/app/models/common/common.model';
 declare var CKEDITOR: any;
 @Component({
     selector: 'textarea-content-option',
@@ -121,6 +122,9 @@ export class TextareaContentOptionComponent  implements ContentOptionInterFace,O
     public removeTextarea(){
         this.contentDCtrlService.poolContents.textAreas = this.contentDCtrlService.poolContents.textAreas.filter((textarea)=>textarea.parentId !== this.parentBox.attr('id'));
         this.parentBox.remove();
+        let updateContent = new UpdateContentModel();
+        updateContent.actionCase = Constants.document.contents.lifeCycle.delete;
+        this.contentDCtrlService.updateContent =  updateContent;
     }
 
 

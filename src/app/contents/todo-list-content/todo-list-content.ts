@@ -8,7 +8,7 @@ import { ToDoListContentModel, ToDoListContentOrderModel } from '../../models/do
 import { Constants } from 'src/app/global/constants';
 import { DocumentDataControlService } from '../../services/document/document-data-control.service';
 import { UpdateContentModel } from '../../models/common/common.model';
-import { DocumentModel } from 'src/app/models/document/content.model';
+import { DocumentModel, ContentsModel } from 'src/app/models/document/content.model';
 import { CommonDataControlService } from '../../services/common/common-data-control.service';
 
 @Component({
@@ -45,28 +45,30 @@ export class TodoListContentComponent implements OnInit, ContentInterFace {
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
-        console.log(this.documentDCtrlService.documentTrack.contents)
 
+        this.contentDCtrlService.getUpdateContent().subscribe((detail) => {
+            if(detail.actionCase === Constants.document.contents.lifeCycle.addTaskList){
+                this.toDoListOrder = detail.data;
+            }
+            else if((detail.actionCase === Constants.document.contents.lifeCycle.playVideo
+                && detail.for === Constants.document.contents.types.todoList)
+                || detail.actionCase === Constants.document.contents.lifeCycle.clickLink
+                ){
+                    this.handleTodoList();                
+            }
+            else if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm && detail.for === this.parentBox.attr('id')){
+                let targetDocumentContent:ContentsModel = detail.data;
+                this.targetIndexToDoList = targetDocumentContent.todoList.findIndex((todoList) => todoList.parentId === this.parentBox.attr('id'))
+                this.targetToDoList = targetDocumentContent.todoList[this.targetIndexToDoList];
+                this.initialToDoList();
+            } 
+        })
     }
     ngAfterViewInit() {
         this.targetIndexToDoList = this.contentDCtrlService.poolContents.todoList.findIndex((todoList) => todoList.parentId === this.parentBox.attr('id'))
         this.targetToDoList = this.contentDCtrlService.poolContents.todoList[this.targetIndexToDoList];
         this.initialToDoList();
-        this.contentDCtrlService.getUpdateContent().subscribe((detail) => {
-            if(detail.actionCase === Constants.document.contents.lifeCycle.addTaskList){
-                this.toDoListOrder = detail.data;
-            }
-            else if(detail.actionCase === Constants.document.contents.lifeCycle.playVideo
-                && detail.for === Constants.document.contents.types.todoList
-                ){
-       
-                    this.handleTodoList();                
-         
-    
-            }
-            
-           
-        })
+ 
 
     }
     private initialToDoList() {
@@ -83,10 +85,9 @@ export class TodoListContentComponent implements OnInit, ContentInterFace {
         }
     }
     private loadTodoList() {
-        this.toDoListOrder = this.targetToDoList.toDoListOrder;
+        this.toDoListOrder = this.targetToDoList && this.targetToDoList.toDoListOrder;
     }
     private handleTodoList() {
-
         this.targetToDoList.toDoListOrder.forEach((task) => {
             let summaryOfProgress = 0;
             let numberOfTasks = 0;
@@ -101,14 +102,27 @@ export class TodoListContentComponent implements OnInit, ContentInterFace {
                             summaryOfProgress += targetContent.progress;
                         }
                         numberOfTasks +=1;
-                    } else if (targetContent.contentType === this.contentTypes.subform) {
-                        targetContent.conditions.subformCondition.isClickLinks.forEach((link)=>{
-                            if(link.isClicked){
-                                summaryOfProgress += link.progress;
-                            }
-                            numberOfTasks +=1;
-                        })
+                    } 
+                    else if (targetContent.contentType === this.contentTypes.link) {
+                        if(targetContent.conditions.linkCondition.isClicked){
+                            summaryOfProgress += targetContent.conditions.linkCondition.progress;
+                        }
+                        numberOfTasks +=1;
+                        // targetContent.conditions.subformCondition.isClickLinks.forEach((link)=>{
+                        //     if(link.isClicked){
+                        //         summaryOfProgress += link.progress;
+                        //     }
+                        //     numberOfTasks +=1;
+                        // })
                     }
+                    // else if (targetContent.contentType === this.contentTypes.subform) {
+                    //     targetContent.conditions.subformCondition.isClickLinks.forEach((link)=>{
+                    //         if(link.isClicked){
+                    //             summaryOfProgress += link.progress;
+                    //         }
+                    //         numberOfTasks +=1;
+                    //     })
+                    // }
                     // if (targetContent.contentType === this.contentTypes.subform) {
                     //     targetContent.conditions.subformCondition.isClickLinks.forEach((document)=>{
                     //         if(document.isClicked){
@@ -132,8 +146,10 @@ export class TodoListContentComponent implements OnInit, ContentInterFace {
     }
     private saveDocument(){
         this.updateAction.actionCase = Constants.document.contents.lifeCycle.saveDocument;
+        this.updateAction.data  = this.contentDCtrlService.poolContents;
+
         let saveobjectTemplate: DocumentModel = {
-            nameDocument: this.documentDCtrlService.currentDocumentName,
+            nameDocument: this.documentDCtrlService.currentDocument.nameDocument,
             previewImg: this.documentDCtrlService.currentResult.previewImg,
             userId:this.commonDCtrlService.userId,
             id: this.documentDCtrlService.currentResult.id, 
@@ -142,8 +158,22 @@ export class TodoListContentComponent implements OnInit, ContentInterFace {
             otherDetail: this.documentDCtrlService.currentResult.otherDetail,
             contents:this.contentDCtrlService.poolContents
         }
-        this.updateAction.data = saveobjectTemplate;
-        this.contentDCtrlService.updateContent = this.updateAction
+
+        this.documentService.saveDocument(this.documentDCtrlService.currentResult.nameDocument, saveobjectTemplate).subscribe((status) => {
+        })
+
+        // let saveobjectTemplate: DocumentModel = {
+        //     nameDocument: this.documentDCtrlService.currentDocumentName,
+        //     previewImg: this.documentDCtrlService.currentResult.previewImg,
+        //     userId:this.commonDCtrlService.userId,
+        //     id: this.documentDCtrlService.currentResult.id, 
+        //     html: $('#contentTemplate').html(),
+        //     status: this.documentDCtrlService.currentResult.status,
+        //     otherDetail: this.documentDCtrlService.currentResult.otherDetail,
+        //     contents:this.contentDCtrlService.poolContents
+        // }
+        // this.updateAction.data = saveobjectTemplate;
+        // this.contentDCtrlService.updateContent = this.updateAction
     };
 
 

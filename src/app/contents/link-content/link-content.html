@@ -1,12 +1,44 @@
 <section [hidden]="currentCase!==actionCase.browseLink">
     <div class="row content-toolbar toolbar-browse-link">
-        <div class="col-12 toolbar-drag">
-            <div class="w-70 form-group m-auto">
-                <input placeholder="https://example.com" type="text" class="form-control mb-3" id="link-input-url">
+
+        <div class="col-12">
+            <div class="row">
+                <div class="col-11">
+                </div>
+                <div class="col-1 text-danger">
+                    <!-- <i style="font-size: 1em;" class="fa fa-times" (click)="removeLink()"></i> -->
+                </div>
             </div>
-            <p class="content-font-title1">Get your URL</p>
         </div>
+        <div class="col-12">
+
+            <select (ngModelChange)="changeLinkType($event)" [(ngModel)]="createLink.type" class="form-control">
+                    <option disabled value="">Link Type</option>
+                    <option [value]="linkType.url">Url</option>
+                    <option [value]="linkType.document">Document</option>
+                </select>
+
+            <p *ngIf="!createLink.type" class="content-font-title1 mt-3">Choose type url</p>
+        </div>
+        <div class="col-12">
+            <input (change)="handleBrowseLink($event)" (paste)="handleBrowseLink($event)" [(ngModel)]="createLink.name" *ngIf="createLink.type" placeholder="Link Name" type="text" class="form-control mb-1" id="link-input-url">
+
+            <input (change)="handleBrowseLink($event)" (paste)="handleBrowseLink($event)" [(ngModel)]="createLink.path" *ngIf="createLink.type===linkType.url" placeholder="https://example.com" type="text" class="form-control" id="link-input-url">
+            <select (change)="changeDocument($event.target.value)" [(ngModel)]="createLink.childId" *ngIf="createLink.type===linkType.document" class="form-control">
+                    <option  disabled value="">Document List</option>
+                    <option [value]="document.id" *ngFor="let document of documentList">{{document.nameDocument}}</option>
+                </select>
+        </div>
+        <div class="col-12">
+            <button *ngIf="createLink.type" (click)="addLink()" type="button" class="btn btn-success mt-1">Go</button>
+        </div>
+
+
+
     </div>
+
+
+
 </section>
 <section [hidden]="currentCase!==actionCase.showLink">
     <a class="content-link cursor-pointer "></a>

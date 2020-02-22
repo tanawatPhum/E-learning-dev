@@ -7,7 +7,7 @@ import { TextAreaContentModel } from 'src/app/models/document/elements/textarea-
 import { Constants } from 'src/app/global/constants';
 import { DocumentDataControlService } from '../../services/document/document-data-control.service';
 import { ContentsModel } from 'src/app/models/document/content.model';
-
+declare var CKEDITOR:any;
 @Component({
     moduleId: module.id,
     selector: 'textarea-content',
@@ -44,7 +44,7 @@ export class TextareaContentComponent implements OnInit, ContentInterFace, After
         this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
         this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
-            if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm){
+            if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm && detail.for === this.parentBox.attr('id')){
                 let targetDocumentContent:ContentsModel = detail.data;
                 this.targetTextArea = targetDocumentContent.textAreas.find((textarea) => textarea.parentId === this.parentBox.attr('id'));
                 this.initialTextarea()
@@ -91,7 +91,18 @@ export class TextareaContentComponent implements OnInit, ContentInterFace, After
         this.parentBox.draggable({
             handle: this.parentBox.find('.content-box-label')
         })
-        this.rootElement.find('.content-textarea').attr('id',this.parentBox.attr('id') + '-textarea')
+        this.rootElement.find('.content-textarea').attr('id',this.parentBox.attr('id') + '-textarea').ready(()=>{
+            CKEDITOR.disableAutoInline = true;
+            CKEDITOR.inline(this.parentBox.attr('id') + '-textarea', {
+                allowedContent: true,
+            });
+            CKEDITOR.instances[this.parentBox.attr('id') + '-textarea'].on('instanceReady', (ev) => {
+                $('.cke_top').css('display', 'none')
+                $(ev.editor.element.$).removeAttr("title");
+            })
+    
+        })
+
         this.contentDCtrlService.setLastContent(this.parentBox);
 
     }
@@ -114,7 +125,11 @@ export class TextareaContentComponent implements OnInit, ContentInterFace, After
         })
         if(this.targetTextArea){
             this.rootElement.html(this.targetTextArea.html)
-            this.rootElement.find('.content-textarea').attr('contenteditable', 'true');
+            this.rootElement.find('.content-textarea').attr('contenteditable', 'true').ready(()=>{
+                CKEDITOR.inline(this.parentBox.attr('id') + '-textarea', {
+                    allowedContent: true,
+                });
+            })
         }
         
     }

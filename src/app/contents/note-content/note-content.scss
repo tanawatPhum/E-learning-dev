@@ -6,8 +6,9 @@
 }
 
 .note-icon-only {
-    position: absolute;
+    position: absolute!important;
     z-index: 9999 !important;
+    width: 25px;
 }
 
 .note-icon {
