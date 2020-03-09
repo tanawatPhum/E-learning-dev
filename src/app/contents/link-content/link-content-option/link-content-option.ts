@@ -4,6 +4,7 @@ import { ContentDataControlService } from 'src/app/services/content/content-data
 import { DocumentDataControlService } from 'src/app/services/document/document-data-control.service';
 import { UpdateContentModel } from 'src/app/models/common/common.model';
 import { Constants } from 'src/app/global/constants';
+import { ToolBarService } from '../../../services/document/toolbar.service';
 
 @Component({
     selector: 'link-content-option',
@@ -13,6 +14,9 @@ import { Constants } from 'src/app/global/constants';
 export class LinkContentOptionComponent implements ContentOptionInterFace, OnInit {
     @Input() parentBox: JQuery<Element>;
     public rootElement: JQuery<Element>;
+    public fontSizeList = Constants.common.style.fontSizeList;
+    public targetLink;
+    public targetLinkIndex;
     public actionCase = {
         browseLink: 'browseLink',
         showLink: 'showLink'
@@ -22,7 +26,8 @@ export class LinkContentOptionComponent implements ContentOptionInterFace, OnIni
     constructor(
         private contentDCtrlService: ContentDataControlService,
         private element: ElementRef,
-        private documentDCtrlService:DocumentDataControlService
+        private documentDCtrlService:DocumentDataControlService,
+        private toolbarService:ToolBarService
     ) {
 
     }
@@ -32,7 +37,6 @@ export class LinkContentOptionComponent implements ContentOptionInterFace, OnIni
         this.handleOptionLink();
         this.contentDCtrlService.getUpdateContent().subscribe((detail) => {
             this.handleSection();
-
         })
     }
     handleSection() {
@@ -42,9 +46,10 @@ export class LinkContentOptionComponent implements ContentOptionInterFace, OnIni
             }
             else if (this.parentBox.find('.content-link:visible').length > 0) {
                 this.currentCase = this.actionCase.showLink;
-                let targetLink = this.contentDCtrlService.poolContents.links.find((link)=>link.parentId === this.parentBox.attr('id'))
-                if(targetLink){
-                    $('.option-link').find('#link-input-url').val(targetLink.name);
+                this.targetLinkIndex = this.contentDCtrlService.poolContents.links.findIndex((link)=>link.parentId === this.parentBox.attr('id'))
+                this.targetLink =  this.contentDCtrlService.poolContents.links[this.targetLinkIndex]
+                if(this.targetLink){
+                    $('.option-link').find('#link-input-url').val(this.targetLink.name);
                 }
             }
         });
@@ -58,6 +63,22 @@ export class LinkContentOptionComponent implements ContentOptionInterFace, OnIni
                 this.parentBox.find('.content-link').attr('data-name',$(element.currentTarget).val().toString());
             }
         })
+        let targetContentLink = this.parentBox.find('.content-link');
+        this.toolbarService.getFontFamily('#option-font-family',targetContentLink).then(()=>{
+            this.contentDCtrlService.poolContents.links[this.targetLinkIndex].styles  = targetContentLink.attr('style').toString()
+        });
+        this.toolbarService.getFontStyle('[data-font-group="font-style"]',targetContentLink).then(()=>{
+            this.contentDCtrlService.poolContents.links[this.targetLinkIndex].styles  = targetContentLink.attr('style').toString()
+        });
+        this.toolbarService.getFontColor('#option-font-color',targetContentLink).then(()=>{
+            this.contentDCtrlService.poolContents.links[this.targetLinkIndex].styles  = targetContentLink.attr('style').toString()
+        });
+        this.toolbarService.getFontSize('#option-font-size',targetContentLink).then(()=>{
+            this.contentDCtrlService.poolContents.links[this.targetLinkIndex].styles  = targetContentLink.attr('style').toString()
+        });
+        this.toolbarService.getFontBackground('#option-background-color',this.parentBox).then(()=>{
+            this.contentDCtrlService.poolContents.links[this.targetLinkIndex].styles  = targetContentLink.attr('style').toString()
+        });
     }
     public removeLink() {
 

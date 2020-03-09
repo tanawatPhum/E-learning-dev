@@ -66,6 +66,7 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
             handleDocumentTrack: 'handleDocumentTrack'
         },
         data: {
+            createDataToSave:'createDataToSave',
             retrieveResultData: 'retrieveResultData',
             setDocumentTrack: 'setDocumentTrack'
         },
@@ -306,6 +307,8 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
                     // cursor: default;
                     // "
                     // name="${box.name}" ><${box.htmlDetail.selector} class="full-screen"></${box.htmlDetail.selector}></div>`)
+                }else{
+                    this.rootElement.find('#contentTemplate').find('#'+box.id).append(this.documentService.createContentPreview(box))
                 }
             })
             // style="
@@ -435,6 +438,11 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
                 zoom: ratioW
             })
 
+            // let updateAction:UpdateContentModel = new UpdateContentModel()
+            // updateAction.actionCase  = Constants.document.contents.lifeCycle.setRatio;
+            // this.contentDCtrlService.updateContent = updateAction
+
+
         }
 
     }
@@ -554,6 +562,10 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
 
     }
     private saveDocument(userId?,contents?) {
+        // this.createData(this.actions.data.createDataToSave).then((result:DocumentModel) => {
+        //     let contents = result.contents;
+
+        // })
         // let html;
         // if(userId === Constants.common.user.id){
         //     html = this.documentDataService.systemReult.html;
@@ -563,7 +575,7 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
             previewImg: this.currentResult.previewImg,
             userId: userId || this.commonDataService.userId,
             id: this.currentResult.id,
-            html: $('#contentTemplate').html(),
+            html: this.currentResult.html,
             status: this.currentResult.status,
             otherDetail: this.currentResult.otherDetail,
             contents:contents || this.contentDCtrlService.poolContents
@@ -571,9 +583,6 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
         console.log('saveobjectTemplate', saveobjectTemplate)
         this.documentService.saveDocument(this.currentResult.nameDocument, saveobjectTemplate).subscribe((status) => {
         })
-
-
-
     }
     private saveDocumentTrack(documentId): Observable<string> {
         let saveObjectTrackTemplate: DocumentTrackModel = {
@@ -596,7 +605,63 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
     //     })
     // }
 
+    private async createData(action: string, element?: JQuery<Element>) {
+        if (action === this.actions.data.createDataToSave) {
+            return new Promise(async (resolve, reject) => {
+                let updateAction: UpdateContentModel = new UpdateContentModel()
+                updateAction.actionCase = Constants.common.event.save.document;
+                this.contentDCtrlService.updateContent = updateAction
 
+                await this.rootElement.find('.content-box ').find('[content-name = "textarea-content"]').each((index, event) => {
+                    let targetIndexTextArea = this.contentDCtrlService.poolContents.textAreas.findIndex((textarea) => textarea.parentId === $(event).parents('.content-box').attr('id'));
+                    if (targetIndexTextArea >= 0) {
+                        this.contentDCtrlService.poolContents.textAreas[targetIndexTextArea].value = $(event).text().toString();
+                        this.contentDCtrlService.poolContents.textAreas[targetIndexTextArea].html = $(event).html();
+                    }
+                })
+                let createDataBoxes =  ()=>{
+                    return new Promise((resolve,reject)=>{
+                        let boxes = new Array<BoxContentModel>();
+                        if(this.rootElement.find('.content-box').length > 0){
+                            this.rootElement.find('.content-box').each((index, element) => {
+                                let targetElment = $(element);
+                                if (targetElment.find('[content-name]').attr('content-last')) {
+                                    let newBox = new BoxContentModel()
+                                    newBox.id = targetElment.attr('id');
+                                    newBox.boxType = null;
+                                    newBox.contentType = targetElment.find('[content-name]').attr('content-name')
+                                    newBox.htmlDetail.height = targetElment.height();
+                                    newBox.htmlDetail.width = targetElment.width();
+                                    newBox.htmlDetail.top = targetElment.position().top;
+                                    newBox.htmlDetail.left = targetElment.position().left;
+                                    newBox.htmlDetail.selector = targetElment.find('[content-name]').attr('content-name');
+                                    newBox.htmlDetail.level  = targetElment.css("z-index");
+                                    if (!boxes.find((box) => box.id === newBox.id)) {
+                                        boxes.push(newBox)
+                                    }
+                                    if(index === this.rootElement.find('.content-box').length-1){
+                                        this.rootElement.find('.content-box').remove();
+                                        this.contentDCtrlService.poolContents.boxes = boxes;
+                                        resolve(Constants.common.message.status.success)
+                                    }
+                                }
+                            })
+                        }else{
+                            resolve(Constants.common.message.status.success)
+                        }
+        
+                    })
+                }
+                createDataBoxes().then(()=>{
+                    let documentObj = new DocumentModel();
+                    documentObj.html  =  CKEDITOR.instances[this.documentDataService.nameTemplate].getData()
+                    documentObj.contents = this.contentDCtrlService.poolContents
+                    $('#'+this.documentDataService.nameTemplate).remove();
+                    resolve(documentObj)
+                })
+            })
+        }
+    }
     private retrieveData(action: string, results: DocumentModel, element?: JQuery<Element>) {
         if (action === this.actions.data.retrieveResultData) {
             this.contentDCtrlService.poolContents = results.contents;

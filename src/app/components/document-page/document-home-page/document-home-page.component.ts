@@ -72,7 +72,8 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
 
     ngOnInit() {
         this.arrayCols =Array(9).fill(Array(12).fill(1));
-        this.rootElement   = $('section[name="mainSection"]') 
+        this.rootElement   = $('section[name="mainSection"]')
+        
         // console.log(this.arrayCols)
         // this.arrayCols.forEach(element => {
         //     element.push(Array(12).fill(1))
@@ -530,36 +531,66 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
         this.router.navigate(['home'])
     }
     public handleLayoutGrid(event,rowIndex,colIndex){
-        $('.layout-col-grid').css('background','white')
+        $('.layout-col-table').css('background','white')
         for(let row = 0  ; row<=rowIndex;row++){
             for(let col = 0 ;col <=colIndex; col++){
-                $('[grid-index=index-'+row+'_'+col+']').css('background','#007bff')  
+                $('[table-index=index-'+row+'_'+col+']').css('background','#007bff')  
             }
         }
-        let data = { detail:{rowNumber:rowIndex+1,colNumber:colIndex+1,status:'wait' },'layoutName': Constants.document.layouts.types.gridLayout}
+        let data = { detail:{rowNumber:rowIndex+1,colNumber:colIndex+1,status:'wait' },'layoutName': Constants.document.layouts.types.tableLayout}
         this.dropElement.next({ action: this.contents.event.dropTool, data: data })
-        $('.dropdown-menu-grid').unbind('click').bind('click',()=>{
-            data = { detail:{rowNumber:rowIndex+1,colNumber:colIndex+1,status:'create' },'layoutName': Constants.document.layouts.types.gridLayout}
+        $('.dropdown-menu-table').unbind('click').bind('click',()=>{
+            $('.dropdown-menu').hide();
+            data = { detail:{rowNumber:rowIndex+1,colNumber:colIndex+1,status:'create' },'layoutName': Constants.document.layouts.types.tableLayout}
             this.dropElement.next({ action: this.contents.event.dropTool, data: data })
         })
 
 
     }
     handleToolbars(){
-        $('.dropdown').click(()=>{
+        this.setTemplate();
+        $('[toolbar-tools-action][toolbar-tools-action="insert"]').show()
+        $('[toolbar-tools-action][toolbar-tools-action!="insert"]').hide()
+
+        $('[toolbar-title-action]').unbind('click').bind('click',(event)=>{
+            let targetTab =  $('[toolbar-tools-action][toolbar-tools-action='+$(event.currentTarget).attr('toolbar-title-action')+']')
+            let otherTab  =   $('[toolbar-tools-action][toolbar-tools-action!='+$(event.currentTarget).attr('toolbar-title-action')+']');
+            let currentTarget  = $(event.currentTarget)
+            $('[toolbar-title-action]').removeClass('toolbar-background')
+            .css('color','white')
+            otherTab.hide();
+            targetTab.toggle();
+            this.setTemplate();
+           
+            if(targetTab.is(":visible")){
+                currentTarget.addClass('toolbar-background')
+                .css('color','#0049B0')
+            }else{
+                currentTarget.removeClass('toolbar-background')
+                .css('color','white')
+            }
+
+            // targetTab.toggleClass('toolbar-background')
+      
+            // $(event.currentTarget).toggleClass('toolbar-background')
+            // $(event.currentTarget).css('color','#0049B0')
+        })
+        $('.dropdown').unbind('click').bind('click',()=>{
             $('.dropdown-menu').toggle();
         })
    
-        this.toolbarService.getFontFamily('#toolbar-font-family');
-        this.toolbarService.getParagraph('[data-font-group="font-alignment"]');
-        this.toolbarService.getFontStyle('[data-font-group="font-style"]');
-        this.toolbarService.getFontColor('#toolbar-font-color');
-        this.toolbarService.getFontSize('#toolbar-font-size');
-        this.toolbarService.getFontBackground('#toolbar-font-bg');
-
-  
-
-
+        // this.toolbarService.getFontFamily('#toolbar-font-family');
+        // this.toolbarService.getParagraph('[data-font-group="font-alignment"]');
+        // this.toolbarService.getFontStyle('[data-font-group="font-style"]');
+        // this.toolbarService.getFontColor('#toolbar-font-color');
+        // this.toolbarService.getFontSize('#toolbar-font-size');
+        // this.toolbarService.getFontBackground('#toolbar-font-bg');
+    }
+    
+    setTemplate(){
+        
+       let templateHeight = $(document).height() - ( ($('.document-navbar:visible').height()||0)  + ($('.document-toolbar:visible').height()||0) +($('.col-ruler:visible').height()||0))
+        $('.container-content').css('height',templateHeight-20)
     }
 
 }

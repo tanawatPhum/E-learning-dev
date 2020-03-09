@@ -5,6 +5,7 @@ export class LinkContentModel {
     public childId:string = '';
     public path: string;
     public name:string;
+    public styles:string;
 }
 
 export class LinkContentConditionModel{

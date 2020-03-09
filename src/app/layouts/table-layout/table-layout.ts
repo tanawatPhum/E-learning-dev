@@ -5,11 +5,11 @@ import { ContentDataControlService } from 'src/app/services/content/content-data
 import { DocumentDataControlService } from 'src/app/services/document/document-data-control.service';
 
 @Component({
-    selector: 'one-layout',
-    templateUrl: 'one-layout.html',
-    styleUrls: ['one-layout.scss']
+    selector: 'table-layout',
+    templateUrl: 'table-layout.html',
+    styleUrls: ['table-layout.scss']
 })
-export class OneLayoutComponent implements OnInit, AfterViewInit {
+export class TableLayoutComponent implements OnInit, AfterViewInit {
     public rootElement: JQuery<Element>;
     @Input() layoutId:string;
     constructor(

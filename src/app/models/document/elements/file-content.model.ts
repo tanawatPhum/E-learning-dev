@@ -5,4 +5,5 @@ export class FileContentModel {
     public awsFileName:string;
     public data: any;
     public filePath:string;
+    public styles:string;
 }

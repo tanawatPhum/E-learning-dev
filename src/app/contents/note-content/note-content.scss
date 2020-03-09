@@ -1,4 +1,8 @@
 // component css goes here
+.note-container {
+    width: 350px;
+}
+
 .note-bar {
     display: flex;
     align-items: center;
@@ -17,6 +21,10 @@
     &.writing {
         // right: -16px;
         width: 25px;
+    }
+    &.moving {
+        // right: -16px;
+        width: 50px;
     }
     &.arrow {
         // top: 39%;
@@ -39,15 +47,17 @@
 
 .note-area {
     cursor: text;
-    padding: 10px;
+    //padding: 10px;
     overflow-x: hidden;
     overflow-y: auto;
-    background: white;
-    height: 85%;
+    background: white !important;
+    //height: 85%;
     overflow-y: auto;
-    max-height: 250px;
+    height: 100px;
     outline: none;
     .note-editable {
+        padding: 5px;
+        text-align: left;
         height: 100%;
     }
 }

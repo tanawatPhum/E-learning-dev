@@ -841,16 +841,22 @@ export class DocumentService {
     //    }
     }
     public getBoxContentPreview(box:BoxContentModel){
+        console.log(box)
        return  `
         <div contenteditable="false" id="${box.id}" class="content-box freedom-layout"
         style="
         top:${box.htmlDetail.top}px;left:${box.htmlDetail.left}px;
         height:${box.htmlDetail.height}px;width:${box.htmlDetail.width}px;
         z-index:${box.htmlDetail.level};
+        background:${box.htmlDetail.background};
         position:absolute;
         cursor: default;
         "
-        name="${box.name}" ><${box.htmlDetail.selector} class="full-screen"></${box.htmlDetail.selector}></div>`
+        name="${box.name}" >${this.createContentPreview(box)}</div>`
+    }
+
+    public createContentPreview(box:BoxContentModel){
+        return `<${box.htmlDetail.selector} class="full-screen"></${box.htmlDetail.selector}>`
     }
 
     // public createDocumentList(){

@@ -75,14 +75,22 @@ export class ProgressBarContentComponent implements OnInit,ContentInterFace  {
             id: this.parentBox.attr('id') + '-progressBar',
             parentId:this.parentBox.attr('id'),
             progress: 0,
-            contentList:new Array<ProgressBarContentObjectModel>()
+            contentList:new Array<ProgressBarContentObjectModel>(),
+            styles:null
         }
         this.contentDCtrlService.poolContents.progressBar.push(progressBar);
         this.rootElement.find('.content-progress-bar').attr('id',this.parentBox.attr('id') + '-progressBar');
         this.contentDCtrlService.setLastContent(this.parentBox);
+
+
+        this.parentBox.css('height','20')
+        this.parentBox.css('min-height','20')
     }
     loadProgressBar(){
-        this.rootElement.find('.content-progress-bar').attr('id',this.parentBox.attr('id') + '-progressBar');
+        this.rootElement.find('.content-progress-bar').attr('id',this.parentBox.attr('id') + '-progressBar')
+        if(this.targetProgressBar.styles){
+            this.rootElement.find('.progress-bar').attr('style',this.targetProgressBar.styles)
+        }
     }
     public async handleProgressBar(){
         let summaryOfPercent = 0;

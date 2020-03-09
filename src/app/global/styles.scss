@@ -215,6 +215,13 @@ input:focus {
 
 .row {
     height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.col {
+    padding: 0;
 }
 
 // [class*="col"] {
@@ -345,8 +352,8 @@ input:focus {
 
 .content-file,
 .content-link {
-    color: #007bff !important;
-    text-decoration: underline !important;
+    color: #007bff;
+    text-decoration: underline;
 }
 
 .content-toDoList {

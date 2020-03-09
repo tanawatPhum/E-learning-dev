@@ -2,6 +2,7 @@ import { Injectable, ComponentFactoryResolver, ViewChild } from '@angular/core';
 import { DocumentService } from './document.service';
 import { Observable } from 'rxjs';
 import { DocumentDataControlService } from './document-data-control.service';
+import { Element } from '@angular/compiler';
 declare  var CKEDITOR:any;
 @Injectable()
 export class ToolBarService {
@@ -11,7 +12,7 @@ export class ToolBarService {
     ){
      
     }
-    public getFontFamily(selector:string):Promise<any>{
+    public getFontFamily(selector:string,element?):Promise<any>{
         return new Promise((resovle,reject)=>{
             $(selector).fontselect(
                 {
@@ -23,58 +24,100 @@ export class ToolBarService {
                 font = font.split(':');
                 let fontFamily = font[0];
                 let fontWeight = font[1] || 400;
-                let style = 'font-family:"' + fontFamily + '";font-weight:' + fontWeight;
+
+
+                let style;
+                if(element instanceof jQuery){
+                    style = {fontFamily:fontFamily,'font-weight':fontWeight}
+                    this.addStylesWithElement(style,element)
+                }else{
+                    style = 'font-family:"' + fontFamily + '";font-weight:' + fontWeight;
+                    this.addStyles(style,element)
+                }
+
                 this.addStyles(style)
                 resovle(style)
             });
         })
     }
-    public getParagraph(selector:string):Promise<any>{4
+    public getParagraph(selector:string,element?):Promise<any>{4
         return new Promise((resovle,reject)=>{
             $(selector).unbind().on('click',(element) => {
-                let style = 'text-align:' + $(element.currentTarget).attr('data-font-alignment');
+                let style = 'text-align:' + $(element.currentTarget).find('[data-font-alignment]').attr('data-font-alignment');
                 this.addStyles(style, 'div')
                 resovle(resovle)
             })
         })
     }
 
-    public getFontStyle(selector:string):Promise<any>{
+    public getFontStyle(selector:string,targetElement?:any):Promise<any>{
+        let element:JQuery<Element> = targetElement;
         return new Promise((resovle,reject)=>{
-            $(selector).click((element) => {
+            $(selector).click((event) => {
                 let style;
-                let dataStyle = $(element.currentTarget).attr('data-font-style');
+                let targetStyle =$(event.target)
+                let dataStyle = targetStyle.attr('data-font-style');
                 let editor = CKEDITOR.instances[this.documentDCtrlService.nameTemplate];
                 let selectedElement = $(editor.getSelection().getStartElement().$);
                 let allwrapElement = $('span:contains("' + selectedElement.text() + '")');
                 if (dataStyle === 'bold') {
-                    if (allwrapElement.css('font-weight') === '700') {
+                    if(element instanceof jQuery && element.css('font-weight') === '700'){
+                        style = {'font-weight':'400'};
+                    }
+                    else if (!(element instanceof jQuery) && allwrapElement.css('font-weight') === '700') {
                         style = 'font-weight:400';
+                        
                     } else {
-                        style = 'font-weight:' + $(element.currentTarget).attr('data-font-style');
+                        if(element instanceof jQuery){
+                            style =  {'font-weight':targetStyle.attr('data-font-style')}
+                        }else{
+                            style = 'font-weight:' + targetStyle.attr('data-font-style');
+                        }
                     }
                 }
                 else if (dataStyle === 'italic') {
-                    if (allwrapElement.css('font-style') === 'italic') {
+                    if(element instanceof jQuery && element.css('font-style') === 'italic'){
+                        style = {'font-style':'normal'};
+                    }
+                    else if (!(element instanceof jQuery) && allwrapElement.css('font-style') === 'italic') {
                         style = 'font-style:normal';
                     } else {
-                        style = 'font-style:' + $(element.currentTarget).attr('data-font-style');
+                        if(element instanceof jQuery){
+                            style =  {'font-style':targetStyle.attr('data-font-style')}
+                        }else{
+                            style = 'font-style:' + targetStyle.attr('data-font-style');
+                        }
+                        
                     }
                 }
                 else if (dataStyle === 'underline') {
-                    if (/none/.test(allwrapElement.css('text-decoration'))) {
-                        style = 'text-decoration:' + $(element.currentTarget).attr('data-font-style');
+                    if(element instanceof jQuery && /none/.test(element.css('text-decoration'))){
+                        style =  {'text-decoration':targetStyle.attr('data-font-style')}
+                    }
+                    else if (!(element instanceof jQuery) && /none/.test(allwrapElement.css('text-decoration'))) {
+                        style = 'text-decoration:' + targetStyle.attr('data-font-style');
                     } else {
-                        style = 'text-decoration:none'
+                        if(element instanceof jQuery){
+                            style = {'text-decoration':'none'};
+                        }else{
+                            style = 'text-decoration:none'
+                        }
                     }
                 }
-                this.addStyles(style);
+
+        
+                if(element instanceof jQuery){
+                    this.addStylesWithElement(style,element)
+                }else{
+                    this.addStyles(style,element)
+                }
+
                 resovle(style);
             })
 
         })
     }
-    public getFontColor(selector:string):Promise<any>{
+    public getFontColor(selector:string,element?):Promise<any>{
         return new Promise((resovle,reject)=>{
             $(selector).spectrum({
                 showPalette: true,
@@ -82,15 +125,22 @@ export class ToolBarService {
                 showSelectionPalette: true, // true by default
                 selectionPalette: ["red", "green", "blue"],
                 change:(color)=> {
-                    let style = 'color:' + color.toHexString();
-                    this.addStyles(style)
+                    let style;
+                    if(element instanceof jQuery){
+                        style = {color:color.toHexString()}
+                        this.addStylesWithElement(style,element)
+                    }else{
+                        style = 'color:' + color.toHexString();
+                        this.addStyles(style,element)
+                    }
+ 
                     resovle(style); 
                 }
             });
         })
     }
 
-    public getFontBackground(selector:string):Promise<any>{
+    public getFontBackground(selector:string,element?):Promise<any>{
         return new Promise((resovle,reject)=>{
             $(selector).spectrum({
                 showPalette: true,
@@ -98,26 +148,48 @@ export class ToolBarService {
                 showSelectionPalette: true, // true by default
                 selectionPalette: ["red", "green", "blue"],
                 change:(color)=> {
-                    let style = 'background:' + color.toHexString();
-                    this.addStyles(style)
+                    let style
+                    if(element instanceof jQuery){
+                        style = {'background': color.toHexString()}
+                        this.addStylesWithElement(style,element)
+                    }else{
+                        style  ='background:' + color.toHexString();
+                        this.addStyles(style)
+                    }
                     resovle(style); 
                 }
+            });
+            setTimeout(() => {
+                $(selector).next().html(
+                    '<img style="width:100%;height:100%" src="assets/imgs/contentPage/optionTool/paint-bucket.svg">'
+                )                 
             });
         })
     }
 
-    public getFontSize(selector:string):Promise<any>{
+    public getFontSize(selector:string,element?):Promise<any>{
         return new Promise((resovle,reject)=>{
-            $(selector).change((element) => {
-                let style = 'font-size:' + $(element.currentTarget).val() + 'px';
-                this.addStyles(style)
+            $(selector).change((event) => {
+                let style;
+                if(element instanceof jQuery){
+                    style = {'font-size':$(event.currentTarget).val() + 'px'}
+                    this.addStylesWithElement(style,element)
+                }else{
+                    style = 'font-size:' + $(event.currentTarget).val() + 'px';
+                    this.addStyles(style,element)
+                }
                 resovle(style); 
             });
         })
     }
 
 
-
+    public addStylesWithElement(style,element){
+        console.log(style)
+        Object.keys(style).forEach((key)=>{
+            $(element).css(key, style[key])
+        })
+    }
 
     public addStyles(styles,element?){
         this.documentService.compileStyles(styles, element);

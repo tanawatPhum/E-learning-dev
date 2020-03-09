@@ -1,4 +1,4 @@
-<section [hidden]="currentCase!==actionCase.browseFile">
+<section action-case="browseFile" [hidden]="currentCase!==actionCase.browseFile">
     <div class="row content-toolbar toolbar-browse-file">
         <div class="col-12">
             <input type="file" class="content-browse-file" id="input-file">
@@ -15,6 +15,6 @@
         </div>
     </div>
 </section>
-<section [hidden]="currentCase!==actionCase.showFile">
-    <a class="content-file cursor-pointer "></a>
+<section action-case="showFile" [hidden]="currentCase!==actionCase.showFile">
+    <a href="javascript:void(0)" class="content-file cursor-pointer "></a>
 </section>

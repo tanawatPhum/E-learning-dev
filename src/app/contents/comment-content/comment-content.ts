@@ -81,6 +81,10 @@ export class CommentContentComponent implements OnInit,ContentInterFace {
         }
         this.contentDCtrlService.poolContents.comments.push(comment);
         this.contentDCtrlService.setLastContent(this.parentBox);
+        this.parentBox.css('height','160')
+        this.parentBox.css('width','400') 
+
+
     }
     public loadComment(){
         this.rootElement.find('.content-comment').attr('id',this.parentBox.attr('id') + '-comment')

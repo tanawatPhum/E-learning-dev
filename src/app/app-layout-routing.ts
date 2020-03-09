@@ -1,14 +1,14 @@
-import { OneLayoutComponent } from './layouts/one-layout/one-layout';
-import { OneLayoutOptionComponent } from './layouts/one-layout/one-layout-option/one-layout-option';
+import { TableLayoutComponent } from './layouts/table-layout/table-layout';
+import { TableLayoutOptionComponent } from './layouts/table-layout/table-layout-option/table-layout-option';
 
 
 export class LayoutRouting {
     public static routes  = [
-        {component:OneLayoutComponent,layoutName:'grid-layout',option:OneLayoutOptionComponent},
+        {component:TableLayoutComponent,layoutName:'table-layout',option:TableLayoutOptionComponent},
     ]
     public static exports = [
-      OneLayoutComponent,
-      OneLayoutOptionComponent
+      TableLayoutComponent,
+      TableLayoutOptionComponent
     ]
 
 

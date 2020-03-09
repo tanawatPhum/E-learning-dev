@@ -3,6 +3,7 @@ export class ProgressBarContentModel{
     public parentId:string;
     public progress:number;
     public contentList:ProgressBarContentObjectModel[] = new Array<ProgressBarContentObjectModel>();
+    public styles:string;
 }
 
 export class ProgressBarContentObjectModel{

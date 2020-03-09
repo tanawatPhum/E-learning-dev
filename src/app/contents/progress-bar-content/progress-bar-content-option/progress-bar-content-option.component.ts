@@ -1,32 +1,39 @@
-import { Component, Input, OnInit, ElementRef } from '@angular/core';
+import { Component, Input, OnInit, ElementRef, AfterViewInit } from '@angular/core';
 import { ContentOptionInterFace } from '../../interface/content-option.interface';
 import { ContentDataControlService } from 'src/app/services/content/content-data-control.service';
 import { ProgressBoxListModel, ProgressBarContentObjectModel } from 'src/app/models/document/elements/progressBar-content-model';
 import { DocumentDataControlService } from '../../../services/document/document-data-control.service';
 import { Constants } from '../../../global/constants';
 import { UpdateContentModel } from 'src/app/models/common/common.model';
+import { ToolBarService } from '../../../services/document/toolbar.service';
 
 @Component({
     selector: 'progress-bar-content-option',
     templateUrl: 'progress-bar-content-option.html',
     styleUrls: ['progress-bar-content-option.scss']
 })
-export class ProgressBarContentOptionComponent implements OnInit, ContentOptionInterFace {
+export class ProgressBarContentOptionComponent implements OnInit, ContentOptionInterFace ,AfterViewInit{
     @Input() parentBox: JQuery<Element>;
     public progressBoxList:ProgressBoxListModel[] = new Array<ProgressBoxListModel>();
     public rootElement:JQuery<Element>;
     public videoTypes = Constants.document.contents.constats.videoTypes;
+    public targetProgressBar;
+    public targetProgressBarIndex;
     constructor(
         private documentDCtrlService:DocumentDataControlService,
         private contentDCtrlService:ContentDataControlService,
-        private element:ElementRef
+        private element:ElementRef,
+        private toolbarService:ToolBarService
     ){
 
     }
     ngOnInit(){
         this.rootElement = $(this.element.nativeElement); 
+    }
+    ngAfterViewInit(){
+        this.targetProgressBarIndex  =  this.contentDCtrlService.poolContents.progressBar.findIndex(progressBar=>progressBar.parentId  === this.parentBox.attr('id'));
+        this.targetProgressBar =  this.contentDCtrlService.poolContents.progressBar[this.targetProgressBarIndex]
         this.handleAddProgressBar()
-        console.log(this.documentDCtrlService.documentTrack)
     }
     handleAddProgressBar(){
         this.createProgressBoxList();
@@ -41,7 +48,6 @@ export class ProgressBarContentOptionComponent implements OnInit, ContentOptionI
         this.rootElement.find('.option-progressBar').find('.progressBar-componentList').find('input[type="checkbox"]').each((index,element)=>{
             let targetProgressBarIndex  =  this.contentDCtrlService.poolContents.progressBar.findIndex(progressBar=>progressBar.parentId  === this.parentBox.attr('id'));         
             if(targetProgressBarIndex>=0){
-                console.log(this.contentDCtrlService.poolContents.progressBar[targetProgressBarIndex].contentList)
                if(this.contentDCtrlService.poolContents.progressBar[targetProgressBarIndex].contentList.find(content=>content.parentId === $(element).val().toString())){
                      $(element).prop('checked',true);
                }
@@ -81,6 +87,10 @@ export class ProgressBarContentOptionComponent implements OnInit, ContentOptionI
                     // this.documentTrack.contents[targetParentBoxSubformIndex].conditions.subformCondition.haveInProgressBar  =false;
                 }
             }
+        });
+        let targetContentProgressBar = this.parentBox.find('.progress-bar');
+        this.toolbarService.getFontBackground('#option-background-color',targetContentProgressBar).then(()=>{
+            this.contentDCtrlService.poolContents.progressBar[this.targetProgressBarIndex].styles  = targetContentProgressBar.attr('style').toString()
         });
     }
     createProgressBoxList(){

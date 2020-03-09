@@ -7,6 +7,7 @@ import { CommonService } from '../../services/common/common.service';
 import { FileContentModel } from 'src/app/models/document/elements/file-content.model';
 import { Constants } from '../../global/constants';
 import { ContentsModel } from 'src/app/models/document/content.model';
+import { UpdateContentModel } from '../../models/common/common.model';
 
 @Component({
     moduleId: module.id,
@@ -118,7 +119,8 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
             fileName:this.commonService.fileNameAndExt(this.targetFileUpload[0].name)[0],
             awsFileName:awsFileName,
             data:this.targetFileUpload[0],
-            filePath:null
+            filePath:null,
+            styles:null
         };
 
         this.documentService.uploadFile([file]).subscribe((url)=>{
@@ -131,7 +133,17 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
             .attr('id',this.parentBox.attr('id') + '-file')
             .text(fileName)
             this.contentDCtrlService.setLastContent(this.parentBox);
+
+            this.parentBox.css('height','auto')
+            this.parentBox.css('width','70') 
+            this.parentBox.css('min-width','70') 
+            setTimeout(() => {
+                let updateAction: UpdateContentModel = new UpdateContentModel()
+                updateAction.actionCase = 'showFile'
+                this.contentDCtrlService.updateContent = updateAction 
+            });
         })
+  
 
         
     }
@@ -142,6 +154,10 @@ export class FileContentComponent implements OnInit, ContentInterFace, AfterView
         .attr('data-awsname',targetFile.awsFileName)
         .attr('id',this.parentBox.attr('id') + '-file')
         .text(targetFile.fileName)
+
+        if(targetFile.styles){
+            this.rootElement.find('.content-file').attr('style',targetFile.styles)
+        }
     }
     public handleLoadFile(){
         this.rootElement.find('.content-file').bind('click',(element)=>{

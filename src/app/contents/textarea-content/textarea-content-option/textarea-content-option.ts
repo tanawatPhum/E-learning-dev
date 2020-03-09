@@ -114,7 +114,6 @@ export class TextareaContentOptionComponent  implements ContentOptionInterFace,O
         if(this.currentColorCode){
             $("#option-font-color").spectrum("set", this.currentColorCode)
         }
-
     }
     public addStyles(styles,element?){
         this.documentService.compileStyles(styles, element);

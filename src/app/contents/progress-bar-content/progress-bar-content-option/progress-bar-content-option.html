@@ -1,16 +1,38 @@
-<div class="row p-0 m-0 mt-3 option-progressBar">
-    <div class="col-12 mt-3">
-        <div class="border border-left-0 border-right-0 progressBar-componentList-text d-flex align-items-center">
-            <p class="pl-3">Component List</p>
+<section style="overflow: auto;height: 75%;">
+
+    <div class="row p-0 m-0 mt-3 option-progressBar">
+        <div class="col-12 item-middle bg-secondary">
+            <label class="text-white m-0">Propreties</label>
         </div>
-        <div class="list-group text-left progressBar-componentList"></div>
+        <div class="col-12 mt-3">
+            <div class="border border-left-0 border-right-0 progressBar-componentList-text d-flex align-items-center">
+                <p class="pl-3">Content List</p>
+            </div>
+            <div class="list-group text-left progressBar-componentList"></div>
+        </div>
+
+        <div class="col-12 item-middle bg-secondary">
+            <label class="text-white m-0">Styles</label>
+        </div>
+        <div class="col-12 d-flex justify-content-center">
+            <div class="form-group w-70 text-center">
+                <label class="mt-2">Background</label>
+                <input type="text" id="option-background-color" class="form-control mb-2 pl-5">
+            </div>
+        </div>
+        <div class="col-12 item-middle bg-secondary">
+            <label class="text-white m-0">Actions</label>
+        </div>
+
+        <div class="col-12 d-flex justify-content-center border-bottom">
+            <div class="form-group text-center">
+                <label>Delete</label>
+                <div>
+                    <img (click)="removeProgressBar()" class="option-action-trash m-auto" src="assets/imgs/contentPage/trash.svg">
+                </div>
+            </div>
+        </div>
+
+
     </div>
-    <div class="col-12 mt-3">
-        <div class="border border-left-0 border-right-0 progressBar-label-text d-flex align-items-center">
-            <p class="pl-3">Action</p>
-        </div>
-        <div class="list-group progressBar-trash">
-            <img (click)="removeProgressBar()" class="option-action-trash m-auto" src="assets/imgs/contentPage/trash.svg">
-        </div>
-    </div>
-</div>
+</section>

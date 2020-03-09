@@ -31,6 +31,7 @@ import { LoadImagePipe } from './pipes/load-img.pipe';
 import { LayoutRouting } from './app-layout-routing';
 import { CusSrc } from './directives/cus-src.directive';
 import { ToolBarService } from './services/document/toolbar.service';
+import { ContentService } from './services/content/content.service';
 
 export const COMPONENTS: any[] = [
   AppComponent,
@@ -68,7 +69,8 @@ export const SERVICES: any[] = [
   HttpClientService,
   AmplifyService,
   SocketIoService,
-  ToolBarService
+  ToolBarService,
+  ContentService
 ];
 export const PIPES: any[] = [
   LoadImagePipe

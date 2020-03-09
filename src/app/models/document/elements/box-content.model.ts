@@ -12,6 +12,7 @@ export class BoxHTMLModel{
     public left:number;
     public height:number;
     public width:number;
+    public background:string;
     public selector:string;
     public level:string;
 }

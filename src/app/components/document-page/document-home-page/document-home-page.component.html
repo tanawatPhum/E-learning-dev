@@ -1,6 +1,178 @@
 <!--component html goes here -->
 <section name="mainSection" style="overflow: hidden;height: 100vh;">
-    <nav class="document-navbar navbar navbar-expand-sm bg-primary-2" [ngStyle]="{'width':currentScreenSize.width+'px'}">
+    <div class="document-navbar bg-primary-2 cursor-pointer row">
+        <div class="col-12">
+            <div class="row  pt-2" style="height: 35px;">
+                <div class="col-4 d-flex align-items-center pl-3">
+                    <!-- <i (click)="goToHome()" style="font-size:1.5em;font-weight: bolder;" class="fa fa-angle-left  arrow-custome text-white"></i> -->
+                </div>
+                <div class="col-4 item-middle">
+                    <input style="background: transparent;border: none" class="text-white" type="text" [(ngModel)]="currentDocumentName">
+                </div>
+                <div class="col-4 align-items-center justify-content-end">
+                    <a class="nav-link text-white " (click)="saveDocument(contents.data.savecurrentDoc)" href="javascript:void(0)">
+                        <img style="width: 20px;height: 20px;" src="assets/imgs/documentPage/saveDocument.svg">
+                    </a>
+                    <a class="nav-link text-white" (click)="previewDocument()" href="javascript:void(0)">
+                        <img style="width: 20px;height: 20px;" src="assets/imgs/documentPage/previewDocument.svg">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="row  pt-1 text-white h-100 ">
+                <div class="col-4 pl-3">
+                    <div toolbar-title-action="home" (click)="goToHome()" class="col-2  pr-1 pt-1 rounded-top">
+                        <span class="text-center w-100">Home</span>
+                    </div>
+                    <div toolbar-title-action="file" class="col-2 pl-1 pr-1 pt-1 rounded-top ">
+                        <span class="text-center w-100">File</span>
+                    </div>
+                    <div toolbar-title-action="insert" class="col-2 pl-1 pr-1 pt-1 rounded-top toolbar-background toolbar-color">
+                        <span class="text-center w-100">Insert</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="document-toolbar toolbar-background row" toolbar-tools-action="file">
+        <div class="col-12">
+            <div class="row pt-1 pb-1 h-100">
+                <div class="col-1 d-flex flex-column border-right">
+                    <!-- <div class="d-flex align-content-center flex-wrap"> -->
+                    <div class="d-flex flex-column pt-2" style="height: 75%">
+                        <div class="row">
+                            <div class="col-12 d-flex flex-column">
+                                <img style="height: 38px;" (click)="newDocument()" src="assets/imgs/documentPage/add-file.svg">
+                                <label class="toolbar-name pt-1">New</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="toolbar-title">Action</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="document-toolbar toolbar-background row" toolbar-tools-action="insert">
+        <div class="col-12">
+            <div class="row  pt-1 pb-1 h-100">
+                <div class="col-2 d-flex flex-column border-right">
+                    <!-- <div class="d-flex align-content-center flex-wrap"> -->
+                    <div class="d-flex flex-column pt-2" style="height: 80%">
+                        <div class="row">
+                            <div class="col-6 d-flex flex-column">
+                                <img content-name="textarea-content" document-data="text-area" draggable="true" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/text-area.svg">
+                                <label class="toolbar-name pt-1">Textarea</label>
+                            </div>
+                            <div class="col-6 d-flex flex-column">
+                                <img content-name="note-content" document-data="note" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/note.svg">
+                                <label class="toolbar-name pt-1">Note</label>
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <div class="toolbar-title">Text</div>
+                </div>
+
+                <div class="col-2 d-flex flex-column border-right">
+                    <!-- <div class="d-flex align-content-center flex-wrap"> -->
+                    <div class="d-flex flex-column pt-2" style="height: 80%">
+                        <div class="row">
+                            <div class="col-4 d-flex flex-column">
+                                <img content-name="img-content" document-data="img-browse" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/image-picker.svg">
+                                <label class="toolbar-name pt-1">Image</label>
+                            </div>
+                            <div class="col-4 d-flex flex-column">
+                                <img content-name="file-content" document-data="file-browse" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/file-picker.svg">
+                                <label class="toolbar-name pt-1">File</label>
+                            </div>
+                            <div class="col-4 d-flex flex-column">
+                                <img content-name="video-content" document-data="video-browse" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/video-camera.svg">
+                                <label class="toolbar-name pt-1">Video</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="toolbar-title">Media</div>
+                </div>
+
+                <div class="col-2 d-flex flex-column border-right">
+                    <!-- <div class="d-flex align-content-center flex-wrap"> -->
+                    <div class="d-flex flex-column pt-2" style="height: 80%">
+                        <div class="row">
+                            <div class="col-6 d-flex flex-column">
+                                <img content-name="link-content" document-data="link-browse" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/link.svg">
+                                <label class="toolbar-name pt-1">Link</label>
+                            </div>
+                            <div class="col-6 d-flex flex-column">
+                                <img content-name="subform-content" document-data="subform" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/subform.svg">
+                                <label class="toolbar-name pt-1">Subform</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="toolbar-title">Links</div>
+                </div>
+
+
+                <div class="col-2 d-flex flex-column border-right">
+                    <!-- <div class="d-flex align-content-center flex-wrap"> -->
+                    <div class="d-flex flex-column pt-2" style="height: 80%">
+                        <div class="row">
+                            <div class="col-6 d-flex flex-column">
+                                <img content-name="progress-bar-content" document-data="progress-bar" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/progress-bar.svg">
+                                <label class="toolbar-name pt-1">Progress Bar</label>
+                            </div>
+                            <div class="col-6 d-flex flex-column">
+                                <img content-name="todo-list-content" document-data="todo-list" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/todo-list.svg">
+                                <label class="toolbar-name pt-1">To do List</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="toolbar-title">Progress</div>
+                </div>
+                <div class="col-1 d-flex flex-column border-right">
+                    <!-- <div class="d-flex align-content-center flex-wrap"> -->
+                    <div class="d-flex flex-column pt-2" style="height: 80%">
+                        <div class="row">
+                            <div class="col-12 d-flex flex-column">
+                                <img class="dropdown" style="width: 26px;height: 26px;" src="assets/imgs/documentPage/layouts/grid.svg">
+                                <label class="toolbar-name pt-1">Table</label>
+                                <div class="dropdown-menu m-0 dropdown-menu-center dropdown-menu-table" style="width: 300px;">
+                                    <div *ngFor="let row of arrayCols;let rowIndex =index" class="row m-0 pl-1 pr-1">
+                                        <div style="height:25px;width: 8.33%;" *ngFor="let col of row;let colIndex =index" class="p-1">
+                                            <div (mouseenter)="handleLayoutGrid($event,rowIndex,colIndex)" [attr.table-index]='"index-"+rowIndex+"_"+colIndex' class="layout-col-table border" style="height:100%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="toolbar-title">Layout</div>
+                </div>
+
+
+                <div class="col-1 d-flex flex-column border-right">
+                    <!-- <div class="d-flex align-content-center flex-wrap"> -->
+                    <div class="d-flex flex-column pt-2" style="height: 80%">
+                        <div class="row">
+                            <div class="col-12 d-flex flex-column">
+                                <img content-name="comment-content" document-data="comment" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/comment.svg">
+                                <label class="toolbar-name pt-1">Comment</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="toolbar-title">Comments</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- <nav class="document-navbar navbar navbar-expand-sm bg-primary-2" [ngStyle]="{'width':currentScreenSize.width+'px'}">
         <ul class="nav navbar-nav mr-auto pl-2">
             <li class="nav-item item-middle cursor-pointer">
                 <i (click)="goToHome()" style="font-size:2em" class="fa fa-angle-left  arrow-custome text-white"></i>
@@ -9,67 +181,11 @@
                 <a class="nav-link text-white bg-primary-2 pr-4 pl-4" (click)="newDocument()" href="javascript:void(0)">New</a>
             </li>
         </ul>
-        <!-- <ul class="nav navbar-nav ml-auto">
-            <li class="nav-item">
-                <a class="nav-link item-middle">
-                    <div class="spinner-border text-warning" role="status">
-                    </div>
-                    <span class="pl-1 text-white">Loading...</span>
-                </a>
-            </li>
-        </ul> -->
-        <!-- <ul class="nav navbar-nav m-auto d-flex align-items-center" style="width: 50%"> -->
-        <!-- <li class="nav-item">
-                <a class="nav-link item-middle">
-                    <div class="spinner-border text-warning" role="status">
-                    </div>
-                    <span class="pl-1 text-white">Loading...</span>
-                </a>
-            </li> -->
         <li class="nav-item m-auto">
             <span class="text-white">
                     <input style="background: transparent;border: none"  class="text-white" type="text" [(ngModel)]="currentDocumentName">
                 </span>
         </li>
-        <!-- <div class="navbar-form pull-left">
-                    <select (ngModelChange)="changeDocument($event)" [(ngModel)]="currentDocumentName" class="form-control text-white shadow-none document-select-custome">
-                        <option class="text-dark" *ngIf="currentDocumentName =='Blank document'" value="Blank document">Please Select</option>
-                        <option class="text-dark" *ngFor="let document of documentNavList" [value]="document.nameDocument">{{document.nameDocument}}</option>
-                            </select>
-                </div> -->
-        <!-- <select [(ngModel)]="currentDocument" multiple class="form-control">
-                            <option *ngFor="let document of documentList" [value]="document.nameDocument">{{document.nameDocument}}</option>
-                    </select> -->
-        <!-- <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="documentList" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                              {{currentDocument}}
-                            </button>
-                    <div *ngIf="(documentList||[]).length>0" style="z-index: 99999" class="dropdown-menu dropdown-menu-center" aria-labelledby="dropdown-toggle">
-                        <button (click)="changeDocument(document.nameDocument)" *ngFor="let document of documentList" class="dropdown-item" [ngClass]="{'active':currentDocument === document.nameDocument}" type="button">{{document.nameDocument}}</button>
-                    </div>
-                </div> -->
-        <!-- <a class="nav-link text-white" (click)="newDocument()" href="javascript:void(0)">New</a>
-        </li>
-
-
-        <li class="nav-item mr-5">
-            <div class="dropdown">
-                <a class="nav-link text-white" href="javascript:void(0)" data-toggle="dropdown">
-                    <img style="width: 26px;height: 26px;" src="assets/imgs/documentPage/layouts/grid.svg">
-                </a>
-                <div class="dropdown-menu m-0 dropdown-menu-center dropdown-menu-grid" style="width: 300px;">
-                    <div *ngFor="let row of arrayCols;let rowIndex =index" class="row m-0 pl-1 pr-1">
-                        <div style="height:25px" *ngFor="let col of row;let colIndex =index" class="col-1 p-1">
-                            <div (mouseenter)="handleLayoutGrid($event,rowIndex,colIndex)" [attr.grid-index]='"index-"+rowIndex+"_"+colIndex' class="layout-col-grid border" style="height:100%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </li>
-
-
-
-        </ul> -->
         <ul class="nav navbar-nav ml-auto">
 
             <li class="nav-item">
@@ -93,37 +209,8 @@
         <div class="row">
             <div class="col-12">
                 <div class="row m-0">
-                    <div class="col-2 pl-2 pt-2">
-                        <input value="Arial" id="toolbar-font-family" class="form-control toolbar-input">
-                    </div>
-                    <div class="col-1 pl-2 pt-2">
-                        <select class="form-control toolbar-select" id="toolbar-font-size">
-                    <option *ngFor="let number of fontSizeList">{{number}}</option>
-                </select>
-                    </div>
-                    <div class="col-2 pl-2">
-                        <input type="text" id="toolbar-font-color" class="form-control toolbar-input">
-                    </div>
-                    <div class="col-2 pl-2">
-                        <input type="text" id="toolbar-font-bg" class="form-control toolbar-input">
-                    </div>
-                    <div class="col-1 pt-1">
-                        <div class="dropdown">
-                            <a class="nav-link text-white" href="javascript:void(0)">
-                                <img style="width: 26px;height: 26px;" src="assets/imgs/documentPage/layouts/grid.svg">
-                            </a>
-                            <div class="dropdown-menu m-0 dropdown-menu-center dropdown-menu-grid" style="width: 300px;">
-                                <div *ngFor="let row of arrayCols;let rowIndex =index" class="row m-0 pl-1 pr-1">
-                                    <div style="height:25px;width: 8.33%;" *ngFor="let col of row;let colIndex =index" class="p-1">
-                                        <div (mouseenter)="handleLayoutGrid($event,rowIndex,colIndex)" [attr.grid-index]='"index-"+rowIndex+"_"+colIndex' class="layout-col-grid border" style="height:100%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div class="col-4 pl-2 pt-2 toolbar-content">
+    
+                    <div class="col-6 pl-2 pt-2 toolbar-content">
 
                         <img content-name="textarea-content" document-data="text-area" draggable="true" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/text-area.svg">
                         <img content-name="img-content" document-data="img-browse" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/image-picker.svg">
@@ -134,56 +221,49 @@
                         <img content-name="progress-bar-content" document-data="progress-bar" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/progress-bar.svg">
                         <img content-name="comment-content" document-data="comment" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/comment.svg">
                         <img content-name="todo-list-content" document-data="todo-list" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/todo-list.svg">
-                        <!-- <li class="nav-item d-flex justify-content-center pb-2 pt-2">
-                            <img class="w-40" document-data="exam" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/exam.svg">
-                        </li> -->
                         <img content-name="note-content" document-data="note" (dragstart)="dragTool($event)" src="assets/imgs/contentPage/note.svg">
-
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="col-8">
-                <div class="row m-0">
-                    <div class="col-6 pl-2">
-                        <img data-font-group="font-style" data-font-style="bold" class="toolbar-icon m-0" src="assets/imgs/contentPage/optionTool/bold.svg">
-                        <img data-font-group="font-style" data-font-style="italic" class="toolbar-icon" src="assets/imgs/contentPage/optionTool/italic.svg">
-                        <img data-font-group="font-style" data-font-style="underline" class="toolbar-icon" src="assets/imgs/contentPage/optionTool/underlined.svg">
-                    </div>
-                    <div class="col-6 pl-2 border-left">
-                        <img data-font-group="font-alignment" data-font-alignment="left" class="toolbar-icon" src="assets/imgs/contentPage/optionTool/left-alignment.svg">
-                        <img data-font-group="font-alignment" data-font-alignment="center" class="toolbar-icon" src="assets/imgs/contentPage/optionTool/center-alignment.svg">
-                        <img data-font-group="font-alignment" data-font-alignment="right" class="toolbar-icon" src="assets/imgs/contentPage/optionTool/right-alignment.svg">
-                        <img data-font-group="font-alignment" data-font-alignment="justify" class="toolbar-icon" src="assets/imgs/contentPage/optionTool/justify.svg">
+                        <div class="dropdown">
+                            <a class="nav-link text-white" href="javascript:void(0)">
+                                <img style="width: 26px;height: 26px;" src="assets/imgs/documentPage/layouts/grid.svg">
+                            </a>
+                            <div class="dropdown-menu m-0 dropdown-menu-center dropdown-menu-table" style="width: 300px;">
+                                <div *ngFor="let row of arrayCols;let rowIndex =index" class="row m-0 pl-1 pr-1">
+                                    <div style="height:25px;width: 8.33%;" *ngFor="let col of row;let colIndex =index" class="p-1">
+                                        <div (mouseenter)="handleLayoutGrid($event,rowIndex,colIndex)" [attr.table-index]='"index-"+rowIndex+"_"+colIndex' class="layout-col-table border" style="height:100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
         </div>
-    </div>
+    </div> -->
 
     <!-- [ngStyle]="{'width':currentScreenSize.width+'px','height':(currentScreenSize.height-55)+'px' }" -->
     <!-- <div class="row min-height m-0" [ngStyle]="{'width':currentScreenSize.width+'px','height':(currentScreenSize.height-55)+'px' }"> -->
     <!-- [ngStyle]="{'width':isOpenMenu? '200px':'50px'}" -->
-    <div class="container-fluid full-screen">
-        <div class="row">
-            <div class="col-1">
-                <!-- <div id="document-sidenav"> -->
-                <div class="document-sidenav">
-                    <div class="document-sidenav-btnNav p-3 pl-4"><span class="text-lightGrey2" *ngIf="isOpenMenu">Navigation</span> <i (click)="toggleMenu()" class="fa fa-angle-{{isOpenMenu? 'left':'right'}} float-right arrow-custome text-lightGrey2"></i></div>
-                    <div class="document-sidenav-content pt-3" *ngIf="isOpenMenu">
-                    </div>
+    <!-- <div class="container-fluid full-screen"> -->
+    <div class="row h-100">
+        <div class="col-1">
+            <!-- <div id="document-sidenav"> -->
+            <div class="document-sidenav">
+                <div class="document-sidenav-btnNav p-3 pl-4"><span class="text-lightGrey2" *ngIf="isOpenMenu">Navigation</span>
+                    <!-- <i (click)="toggleMenu()" class="fa fa-angle-{{isOpenMenu? 'left':'right'}} float-right arrow-custome text-lightGrey2"></i> -->
                 </div>
-                <!-- </div> -->
+                <div class="document-sidenav-content pt-3" *ngIf="isOpenMenu">
+                </div>
             </div>
-            <div class="col-11">
-                <create-content-page class="full-screen" (drop)="dropTool($event)" (dragover)="$event.preventDefault()" [dropElement]="dropElement" [contentElement]="contentElement" [contentTypeSelected]="contentTypeSelected" [triggerElement]="triggerElement" (eventToParent)="eventFromChild($event)"></create-content-page>
-                <document-modal-page [triggerModal]="triggerModal" (eventModal)="eventModal($event)"></document-modal-page>
-            </div>
+            <!-- </div> -->
         </div>
-
+        <div class="col-11">
+            <create-content-page class="full-screen" (drop)="dropTool($event)" (dragover)="$event.preventDefault()" [dropElement]="dropElement" [contentElement]="contentElement" [contentTypeSelected]="contentTypeSelected" [triggerElement]="triggerElement" (eventToParent)="eventFromChild($event)"></create-content-page>
+            <document-modal-page [triggerModal]="triggerModal" (eventModal)="eventModal($event)"></document-modal-page>
+        </div>
     </div>
+
+    <!-- </div> -->
 
     <!-- [ngStyle]="{'width':isOpenMenu? '80px':'50px'}" -->
     <!-- <div id="document-sidenav">

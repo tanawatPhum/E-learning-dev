@@ -116,7 +116,22 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
             this.parentBox.find('.ui-resizable-handle').remove();
             this.parentBox.find('.content-box-label').remove();
             this.replaceSelectionWithHtml(this.parentBox)
+            this.parentBox.css('height','auto')
+            this.parentBox.css('width','auto') 
+            let updateAction: UpdateContentModel = new UpdateContentModel()
+            updateAction.actionCase = Constants.document.contents.lifeCycle.updateHandleContentBox
+            this.contentDCtrlService.updateContent = updateAction
+            this.contentDCtrlService.setLastContent(this.parentBox);
+            this.parentBox.attr('content-box-type','text')
+           // this.parentBox.wrapInner("<div/>").children(0).unwrap()
+
+        }else{
+            this.parentBox.css('height','auto')
+            this.parentBox.css('width','70') 
+            this.parentBox.css('min-width','70')
         }
+
+ 
         
         if(this.createLink.type === this.linkType.url && !this.createLink.name){
             try{
@@ -140,7 +155,8 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
             id: this.createLink.id,
             path: this.createLink.path,
             name: this.createLink.name,
-            childId:this.createLink.childId
+            childId:this.createLink.childId,
+            styles:null
         };
         this.currentCase = this.actionCase.showLink;
         this.contentDCtrlService.setLastContent(this.parentBox);
@@ -156,9 +172,20 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
     }
     public loadLink() {
         this.currentCase = this.actionCase.showLink;
+        if(this.parentBox.attr('content-box-type')){
+            this.parentBox.css('position','initial')
+            let updateAction: UpdateContentModel = new UpdateContentModel()
+            updateAction.actionCase = Constants.document.contents.lifeCycle.updateHandleContentBox
+            this.contentDCtrlService.updateContent = updateAction
+        }
         this.rootElement.find('.content-link').attr('data-name', this.targetLink.name)
             .attr('id', this.parentBox.attr('id') + '-link')
             .text(this.targetLink.name)
+
+        if(this.targetLink.styles){
+            this.rootElement.find('.content-link').attr('style',this.targetLink.styles)
+        } 
+           
     }
     public handleLink() {
 
@@ -251,7 +278,7 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
     
             //     })
             // }
-            console.log(documentTrackContent)
+            //console.log(documentTrackContent)
             this.documentDCtrlService.documentTrack.contents.push(documentTrackContent)
         }
 
@@ -266,12 +293,15 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
             // div.innerHTML = html;
             var frag = document.createDocumentFragment(), child;
             // while ( (child = div.firstChild) ) {
+          
             $(element).detach().appendTo(frag)
+            
+           // $(element).wrap('<span></span>')
    
             // }
             range.insertNode(frag);
-        
-           
+
+          //  $('<span>&nbsp;</span>').insertAfter(element)
         }
      
     }

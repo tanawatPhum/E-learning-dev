@@ -3,21 +3,20 @@
 
 <ng-template ad-host></ng-template>
 
-<div class="row m-0">
-    <!-- <div class="col-10">
+<div class="row  h-100">
+    <div class="col-11 pl-2 pr-2 col-ruler" style="height: 65px;">
         <range-slider-page class="full-screen" [rulerDetailSubject]="rulerDetailSubject" (eventToParent)="eventFromChild($event)"></range-slider-page>
-    </div> -->
-    <div class="col-11 mt-3">
+    </div>
+    <div class="col-11 pl-2 pr-2 h-100 col-template">
 
         <div class="dropdown-menu dropdown-menu-sm cursor-pointer " id="context-menu">
             <a class="dropdown-item" *ngFor="let context of ContextMenuList" (click)="handleContextMenu(context)">{{context.name}}</a>
         </div>
-        <!-- <div class="container-content"> -->
-        <div #contentTemplate id="contentTemplate" class="content-template content-template-create">
-            <!-- <loading-page *ngIf="loading"></loading-page> -->
+        <div class="container-content">
+            <div #contentTemplate id="contentTemplate" class="content-template content-template-create">
+                <!-- <loading-page *ngIf="loading"></loading-page> -->
+            </div>
         </div>
-
-        <!-- </div> -->
     </div>
 
 
