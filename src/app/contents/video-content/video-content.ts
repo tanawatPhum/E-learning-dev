@@ -260,8 +260,11 @@ export class VideoContentComponent implements OnInit,OnDestroy, ContentInterFace
            
             // .attr('id', this.parentBox.attr('id') + '-video')
         }
+
+      
     }
     public handleVideo() {
+        this.rootElement.find('.content-video').css('height',this.parentBox.height())
         // this.parentBox.after('<br>')
         // console.log(this.parentBox)
         let targetDocumentTrackIndex = this.documentDCtrlService.currentDocumentTrack.contents.findIndex((content) => content.parentId === this.parentBox.attr('id'))

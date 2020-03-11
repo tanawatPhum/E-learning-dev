@@ -118,6 +118,7 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
             this.replaceSelectionWithHtml(this.parentBox)
             this.parentBox.css('height','auto')
             this.parentBox.css('width','auto') 
+            this.parentBox.css('background','transparent') 
             let updateAction: UpdateContentModel = new UpdateContentModel()
             updateAction.actionCase = Constants.document.contents.lifeCycle.updateHandleContentBox
             this.contentDCtrlService.updateContent = updateAction
@@ -143,7 +144,7 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
                 if(!this.createLink.name){
                     this.createLink.name = targetDocument.nameDocument;
                 }
-                this.createLink.path  =  targetDocument.nameDocument;
+                this.createLink.path  =  targetDocument.id;
   
             }
         }
@@ -158,6 +159,7 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
             childId:this.createLink.childId,
             styles:null
         };
+    console.log(link)
         this.currentCase = this.actionCase.showLink;
         this.contentDCtrlService.setLastContent(this.parentBox);
         this.contentDCtrlService.poolContents.links.push(link)
@@ -209,10 +211,11 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
                 }else if(this.targetLink.type  ===  this.linkType.document){        
                     this.router.routeReuseStrategy.shouldReuseRoute = function () { return false; };
                     let currentUrl = this.router.url + '?';
+
                     this.router.navigateByUrl(currentUrl)
                         .then(() => {
                             this.router.navigated = false;
-                            this.router.navigate(['documentPreview'], { queryParams: { documentName: this.targetLink.path } })
+                            this.router.navigate(['documentPreview'], { queryParams: { documentId: this.targetLink.path} })
                         });
                 }
 

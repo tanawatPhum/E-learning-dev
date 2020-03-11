@@ -44,6 +44,9 @@ import { ContextMenu } from 'src/app/models/document/context-menu.model';
 import { BoxHTMLModel } from '../../../../models/document/elements/box-content.model';
 import { LayoutContentModel } from 'src/app/models/document/elements/layout-content.model';
 import { ContentService } from 'src/app/services/content/content.service';
+import { ToolBarService } from '../../../../services/document/toolbar.service';
+import { position } from 'html2canvas/dist/types/css/property-descriptors/position';
+import { commentDetailModel } from '../../../../models/document/elements/comment-content.model';
 declare var electron: any;
 declare var rangy: any;
 declare var CKEDITOR: any;
@@ -216,6 +219,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
         private componentFactoryResolver: ComponentFactoryResolver,
         private injector: Injector,
         private render: Renderer2,
+        private toolBarService:ToolBarService,
         private ngZone:NgZone,
         private applicationRef: ApplicationRef,
 
@@ -233,7 +237,11 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             this.documentDataService.lifeCycle = Constants.document.lifeCycle.loadEditor;
             console.log('result', result)
             this.currentDocument = result || new DocumentModel();
-
+            
+        //    let doc =  this.documentDataService.documentList.find((doc)=>doc.id === "document-10_2_2020_18_21_44")
+  
+        //    this.currentDocument = doc;
+        // this.contentDCtrlService.poolContents  = this.currentDocument.contents
             // this.setTemplate(this.actions.template.setDocument);
             // this.setTemplate(this.actions.template.setDocumentTrack);
             // if (res.actionCase === Constants.document.lifeCycle.initialEditor) {
@@ -248,7 +256,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             // }
 
 
-            this.contentDCtrlService.poolContents =  result && result.contents || new ContentsModel();
+           this.contentDCtrlService.poolContents =  result && result.contents || new ContentsModel();
             let updateContent = new UpdateContentModel();
             updateContent.actionCase = Constants.document.lifeCycle.initialEditor;
             updateContent.data = result && result.contents;
@@ -302,11 +310,11 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             }
 
             // this.rootElement.find('.template-doc').find('p').remove();
-            this.rootElement.find('.template-doc').find('p').find('img').remove()
-            // this.rootElement.find('.template-doc').find('p').find('img').unwrap().remove();
-            this.rootElement.find('.template-doc').find('content-layout').find('p').find('img[content-name]').unwrap().remove();
+            // this.rootElement.find('.template-doc').find('p').find('img').remove()
+            // // this.rootElement.find('.template-doc').find('p').find('img').unwrap().remove();
+            // this.rootElement.find('.template-doc').find('content-layout').find('img[content-name]').unwrap().remove();
 
-
+            this.rootElement.find('img[content-name]').remove();
         })
         this.triggerElement.subscribe((event) => {
             if (event.action === Constants.common.event.click.add) {
@@ -340,6 +348,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
         if (action === this.actions.template.setDocument) {
             if ($('.template-doc').length == 0) {
                 this.rootElement.append('<div id="template-doc"  class="template-doc"></div>')
+
             }
             this.handleEditor(this.actions.editor.setEditor);             
        
@@ -403,6 +412,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 $('.cke_top').css('display', 'none')
                 $(ev.editor.element.$).removeAttr("title");
                 $('#' + this.documentDataService.nameTemplate).focus();
+                $('#' + this.documentDataService.nameTemplate).attr('style',this.currentDocument.styles)
                 this.currentTextSelection  = window.getSelection().getRangeAt(0);
                 this.currentToolbar = this.actions.toolbar.templateDocTool;
                 this.addOptionToolBar();
@@ -698,7 +708,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 let numberOfLayout;
                 if (targetLayout.status == 'create') {
                     numberOfLayout = this.commonService.getBoxId();
-                    layoutHtml = `<div layout-name="${data.layoutName}"  id="layout-${numberOfLayout}" class="content-layout">`;
+                    layoutHtml = `<div layout-name="${data.layoutName}"  id="layout-${numberOfLayout}" class="content-layout"> 
+            
+                    `;
                 } else {
                     layoutHtml = `<div  class="content-layout layout-draft">`;
                 }
@@ -753,20 +765,21 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
 
             // this.rootElement.find('.content-layout').draggable({
             //     containment: this.contentTemplate.nativeElement,
+            //     handle: this.rootElement.find('.content-layout').find('.content-layout-label'),
             //     start:((event)=>{
             //         console.log(event);
             //     }),
             //     // handle: this.currentLayout.find('.content-box-label'),
             //     stop: ((event) => {
 
-            //         let l = (100 * parseFloat(($(event.target).position().left / $(event.target).parent().width()).toString()));
-            //         let t = (100 * parseFloat((($(event.target).position().top + $('#template-doc').scrollTop()) / $(event.target).parent().height()).toString()));
+            //         // let l = (100 * parseFloat(($(event.target).position().left / $(event.target).parent().width()).toString()));
+            //         // let t = (100 * parseFloat((($(event.target).position().top + $('#template-doc').scrollTop()) / $(event.target).parent().height()).toString()));
 
-            //         if (l > 100 || l < 0) {
-            //             l = 0;
-            //         }
-            //         $(event.target).css("left", l + '%');
-            //         $(event.target).css("top", t + '%');
+            //         // if (l > 100 || l < 0) {
+            //         //     l = 0;
+            //         // }
+            //         // $(event.target).css("left", l + '%');
+            //         // $(event.target).css("top", t + '%');
 
 
             //     }),
@@ -801,7 +814,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
         }
         else if (action === this.actions.event.addElBox || action === this.actions.event.addEventBox) {
             let createBox = async (boxId: string, htmlDetail: BoxHTMLModel) => {
-                
+                    console.log(htmlDetail)
                 let topZindex = 0;
                 this.rootElement.find('.content-box').each((index,element)=>{
                    let targetZindex =  parseInt($(element).css('z-index'))
@@ -810,7 +823,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                    }
                 })
                 let tagElement = `div`
-                if(data.action==="link"){
+                if(data &&data.action==="link"){
                     tagElement = `span`
                 }
 
@@ -907,7 +920,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                     this.rootOptionTool.html(this.createContentOption(this.currentBox,targetContent.option))
 
                   //  CKEDITOR.instances[this.documentDataService.nameTemplate].insertHtml($('#' + boxId));
-                    if(box &&box.boxType !=='text'){
+                    if(box &&box.boxType !=='text' || !box){
                         $('#' + this.documentDataService.nameTemplate).append(this.currentBox)
                     }
                 } else {
@@ -1274,6 +1287,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 $("#option-font-color").spectrum("set", this.currentColorCode)
             }
 
+            this.toolBarService.getFontBackground('#option-background-color',$('#'+this.documentDataService.nameTemplate))
 
             $('.option-action-trash').click(() => {
                 this.removeStyleElements(this.actions.option.removeOptionTool);
@@ -1601,6 +1615,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 + htmlFontSizeList
                 + '</select>'
                 + '<input type="text" id="option-font-color" class="form-control mb-2 pl-5">'
+                + '<input type="text" id="option-background-color" class="form-control mb-2 pl-5">'
+
                 + '</div>'
                 + '</div>'
                 + '<div class="col-12 d-flex justify-content-center border-bottom">'
@@ -1806,6 +1822,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 otherDetail.rulerDevDetail = this.rulerDetail;
                 let saveobjectTemplate: DocumentModel = {
                     userId: Constants.common.user.id,
+                    styles:result.styles,
                     nameDocument: this.documentDataService.currentDocument.nameDocument,
                     previewImg: imgData,
                     id: idDocument,
@@ -2006,20 +2023,23 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                     }
                 })
                 let createDataBoxes =  ()=>{
-                    return new Promise((resolve,reject)=>{
+                    return new Promise(async (resolve,reject)=>{
                         let boxes = new Array<BoxContentModel>();
                         if(this.rootElement.find('.content-box').length > 0){
-                            this.rootElement.find('.content-box').each((index, element) => {
+                           await this.rootElement.find('.content-box').each((index, element) => {
                                 let targetElment = $(element);
-                                if (targetElment.find('[content-name]').attr('content-last')) {
+                        
+                                // if (targetElment.find('[content-name]').attr('content-last')) {
                                     let newBox = new BoxContentModel()
                                     newBox.id = targetElment.attr('id');
                                     newBox.boxType = targetElment.attr('content-box-type');
                                     newBox.contentType = targetElment.find('[content-name]').attr('content-name')
                                     newBox.htmlDetail.height = targetElment.height();
                                     newBox.htmlDetail.width = targetElment.width();
-                                    newBox.htmlDetail.top = targetElment.position().top;
-                                    newBox.htmlDetail.left = targetElment.position().left;
+                                    newBox.htmlDetail.top = targetElment.position().top + $('#'+this.documentDataService.nameTemplate).scrollTop();
+                                    newBox.htmlDetail.left = targetElment.position().left + $('#'+this.documentDataService.nameTemplate).scrollLeft();
+                                    // console.log(targetElment.get(0).getBoundingClientRect().top)
+                                    // console.log(targetElment.get(0).getBoundingClientRect().left)
                                     newBox.htmlDetail.background  = targetElment.css('background')
                                     newBox.htmlDetail.selector = targetElment.find('[content-name]').attr('content-name');
                                     newBox.htmlDetail.level  = targetElment.css("z-index");
@@ -2033,7 +2053,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                                         this.contentDCtrlService.poolContents.boxes = boxes;
                                         resolve(Constants.common.message.status.success)
                                     }
-                                }
+                                // }
                             })
                         }else{
                             resolve(Constants.common.message.status.success)
@@ -2055,8 +2075,14 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                     createDataBoxes().then(()=>{
                         let documentObj = new DocumentModel();
                         documentObj.html  = $('#'+this.documentDataService.nameTemplate).html();
+                        documentObj.styles =  $('#'+this.documentDataService.nameTemplate).attr('style') && $('#'+this.documentDataService.nameTemplate).attr('style').toString();
                         // documentObj.html  = CKEDITOR.instances[this.documentDataService.nameTemplate].getData()
                         documentObj.contents = this.contentDCtrlService.poolContents
+
+                        documentObj.contents.comments.forEach((comment)=>{
+                            comment.listComment  = new Array<commentDetailModel>();
+                        })
+
                         $('#'+this.documentDataService.nameTemplate).remove();
                         resolve(documentObj)
                     })

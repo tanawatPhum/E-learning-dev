@@ -3,4 +3,5 @@ export class TextAreaContentModel {
     public id: string;
     public value: string;
     public html:string;
+    public styles:string;
 }

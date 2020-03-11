@@ -62,6 +62,7 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
     }
 
     ngAfterViewInit() {
+        console.log(this.contentDCtrlService.poolContents)
         this.targetimg = this.contentDCtrlService.poolContents.imgs.find((img) => img.parentId === this.parentBox.attr('id'))
         this.initialImg();
 

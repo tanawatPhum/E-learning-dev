@@ -150,6 +150,7 @@ export class TodoListContentComponent implements OnInit, ContentInterFace {
 
         let saveobjectTemplate: DocumentModel = {
             nameDocument: this.documentDCtrlService.currentDocument.nameDocument,
+            styles:this.documentDCtrlService.currentResult.styles,
             previewImg: this.documentDCtrlService.currentResult.previewImg,
             userId:this.commonDCtrlService.userId,
             id: this.documentDCtrlService.currentResult.id, 

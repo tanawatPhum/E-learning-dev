@@ -126,6 +126,17 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
 
             }
         })
+        this.route.queryParams.subscribe((params) => {
+            this.currentUrlParam = params
+            this.isUrlChannel = true;
+            this.documentDataService.currentDocument.id = this.currentUrlParam['documentId'];
+            if (this.currentUrlParam['userId']) {
+                this.commonDataService.userId = this.currentUrlParam['userId'];
+            }
+            // console.log(this.documentDataService.currentDocumentName);
+
+            this.loadDocFromDB();
+        })
 
     }
     ngOnDestroy() {
@@ -151,22 +162,13 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
         //     this.setElements(this.actions.element.previewElement);
         // });
         this.setTemplate(this.actions.template.setDocument);
-        this.route.queryParams.subscribe((params) => {
-            this.currentUrlParam = params
-            this.isUrlChannel = true;
-            this.documentDataService.currentDocument.id = this.currentUrlParam['documentId'];
-            if (this.currentUrlParam['userId']) {
-                this.commonDataService.userId = this.currentUrlParam['userId'];
-            }
-            // console.log(this.documentDataService.currentDocumentName);
-
-            this.loadDocFromDB();
-        })
+  
 
 
     }
     public loadDocFromDB() {
         this.documentService.loadDocFromDB().subscribe((documentList: any) => {
+            console.log(this.documentDCtrlService.documentList)
             this.documentDCtrlService.documentList = documentList;
             this.documentDataService.currentDocument =  this.documentDCtrlService.documentList.find((document)=>document.id === this.documentDataService.currentDocument.id)
             this.loadHtml();
@@ -262,6 +264,7 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
     }
     public setElements(action, elment?: JQuery<Element>, data?: any) {
         if (action === this.actions.element.setResultElement) {
+               
             this.currentResult = data;
             try {
                 this.contentTemplateSize = this.currentResult.otherDetail.screenDevDetail;
@@ -291,9 +294,13 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
             // "
 
             // ></div>`
-            this.rootElement.find('#contentTemplate').html(null);
+            console.log('this.currentResult',this.currentResult)
+            this.contentDCtrlService.poolContents =  this.currentResult.contents;
 
-            this.rootElement.find('#contentTemplate').append(this.currentResult.html);
+            this.rootElement.find('#contentTemplate').html(this.currentResult.html);
+            this.rootElement.find('#contentTemplate').attr('style',this.currentResult.styles)
+
+            // this.rootElement.find('#contentTemplate').append(this.currentResult.html);
             this.currentResult.contents.boxes.forEach((box)=>{
                 if(this.rootElement.find('#contentTemplate').find('#'+box.id).length ===0){
                     this.rootElement.find('#contentTemplate').append(this.documentService.getBoxContentPreview(box));
@@ -317,7 +324,10 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
             // "
             this.retrieveData(this.actions.data.retrieveResultData, data);
             // this.rootElement.html(html);
-            this.defineComponent()
+               
+            this.defineComponent()                
+          
+    
 
 
             // this.rootElement.find('.template-doc').css('height',this.contentTemplateSize.height +'px');
@@ -577,6 +587,7 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
             id: this.currentResult.id,
             html: this.currentResult.html,
             status: this.currentResult.status,
+            styles:this.currentResult.styles,
             otherDetail: this.currentResult.otherDetail,
             contents:contents || this.contentDCtrlService.poolContents
         }

@@ -5,6 +5,8 @@ import { DocumentDataControlService } from 'src/app/services/document/document-d
 import { Constants } from '../../../global/constants';
 import { DocumentService } from 'src/app/services/document/document.service';
 import { UpdateContentModel } from 'src/app/models/common/common.model';
+import { ToolBarService } from '../../../services/document/toolbar.service';
+import { TextAreaContentModel } from '../../../models/document/elements/textarea-content.model';
 declare var CKEDITOR: any;
 @Component({
     selector: 'textarea-content-option',
@@ -16,12 +18,16 @@ export class TextareaContentOptionComponent  implements ContentOptionInterFace,O
     public rootElement: JQuery<Element>;
     public fontSizeList:Number[] =  new Array<Number>();
     public currentColorCode:string;
+    public targetTextArea:TextAreaContentModel = new TextAreaContentModel();
+    public targetTextAreaIndex;
+
 
     constructor(
         private contentDCtrlService:ContentDataControlService,
         private documentDCtrlService:DocumentDataControlService,
         private documentService:DocumentService,
         private element: ElementRef,
+        private toolbarService:ToolBarService
     ){
 
     }
@@ -36,6 +42,8 @@ export class TextareaContentOptionComponent  implements ContentOptionInterFace,O
         // })
     } 
     ngAfterViewInit(){
+        this.targetTextAreaIndex =  this.contentDCtrlService.poolContents.textAreas.findIndex(textarea=>textarea.parentId === this.parentBox.attr('id'))
+        this.targetTextArea = this.contentDCtrlService.poolContents.textAreas[this.targetTextAreaIndex]
         this.handleOptionTextArea();
     }
     public handleOptionTextArea(){
@@ -114,6 +122,12 @@ export class TextareaContentOptionComponent  implements ContentOptionInterFace,O
         if(this.currentColorCode){
             $("#option-font-color").spectrum("set", this.currentColorCode)
         }
+        let targetContentTextarea = this.parentBox.find('.content-textarea');
+        this.toolbarService.getFontBackground('#option-background-color',targetContentTextarea).then(()=>{
+            this.contentDCtrlService.poolContents.textAreas[this.targetTextAreaIndex].styles  = targetContentTextarea.attr('style').toString()
+        
+        });
+
     }
     public addStyles(styles,element?){
         this.documentService.compileStyles(styles, element);

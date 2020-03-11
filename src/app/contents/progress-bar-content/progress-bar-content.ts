@@ -91,8 +91,11 @@ export class ProgressBarContentComponent implements OnInit,ContentInterFace  {
         if(this.targetProgressBar.styles){
             this.rootElement.find('.progress-bar').attr('style',this.targetProgressBar.styles)
         }
+      
     }
     public async handleProgressBar(){
+        this.rootElement.css('height',this.parentBox.height())
+        this.parentBox.css('background','transparent')
         let summaryOfPercent = 0;
         let numberOfContentProgress =0;
         for await (let parentBox of this.contentDCtrlService.poolContents.progressBar){

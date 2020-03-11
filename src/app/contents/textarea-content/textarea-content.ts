@@ -85,7 +85,8 @@ export class TextareaContentComponent implements OnInit, ContentInterFace, After
             parentId: this.parentBox.attr('id'), 
             id: this.parentBox.attr('id') + '-img', 
             value: '', 
-            html:''
+            html:'',
+            styles:null
         };
         this.contentDCtrlService.poolContents.textAreas.push(textArea);
         this.parentBox.draggable({
@@ -124,11 +125,15 @@ export class TextareaContentComponent implements OnInit, ContentInterFace, After
             handle: this.parentBox.find('.content-box-label')
         })
         if(this.targetTextArea){
-            this.rootElement.html(this.targetTextArea.html)
+            this.rootElement.html(this.targetTextArea.html).attr('style',this.targetTextArea.styles)
             this.rootElement.find('.content-textarea').attr('contenteditable', 'true').ready(()=>{
                 CKEDITOR.inline(this.parentBox.attr('id') + '-textarea', {
                     allowedContent: true,
                 });
+                CKEDITOR.instances[this.parentBox.attr('id') + '-textarea'].on('instanceReady', (ev) => {
+                    $('.cke_top').css('display', 'none')
+                    $(ev.editor.element.$).removeAttr("title");
+                })
             })
         }
         

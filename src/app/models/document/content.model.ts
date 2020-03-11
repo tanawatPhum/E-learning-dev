@@ -21,6 +21,7 @@ export class DocumentModel {
     public status:string;
     public id: string;
     public html: string;
+    public styles:string;
     public contents: ContentsModel  =  new ContentsModel();
     public otherDetail:OtherDetailModel =  new OtherDetailModel();
 }
