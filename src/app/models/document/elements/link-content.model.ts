@@ -6,6 +6,7 @@ export class LinkContentModel {
     public path: string;
     public name:string;
     public styles:string;
+    public otherDetail:LinkContentOtherDetail  = new LinkContentOtherDetail();
 }
 
 export class LinkContentConditionModel{
@@ -14,4 +15,8 @@ export class LinkContentConditionModel{
     public linkId:string;
     public linkName:string;
     public isClicked:boolean;
+}
+
+export class LinkContentOtherDetail{
+ 
 }

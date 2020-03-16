@@ -4,12 +4,12 @@
 
 export const environment = {
   production: false,
-  SERVER_SITE:'https://smartdoc.alworks.io',
-  FRONTEND_SITE:'https://smartdoc.alworks.io',
-  GET_IMAGE:'/api/getImage/?originalPath='
-  // SERVER_SITE:process.env.serverSite || 'http://localhost:3001',
-  // FRONTEND_SITE:process.env.frontendSite|| 'http://localhost:4200',
-  // GET_IMAGE:process.env.getImage|| '/api/getImage/?originalPath='
+  // SERVER_SITE:'https://smartdoc.alworks.io',
+  // FRONTEND_SITE:'https://smartdoc.alworks.io',
+  // GET_IMAGE:'/api/getImage/?originalPath='
+  SERVER_SITE:process.env.serverSite || 'http://localhost:3001',
+  FRONTEND_SITE:process.env.frontendSite|| 'http://localhost:4200',
+  GET_IMAGE:process.env.getImage|| '/api/getImage/?originalPath='
   // SERVER_SITE:window["env"]["serverSite"] || 'http://localhost:3001',
   // FRONTEND_SITE:window["env"]["frontendSite"] || 'http://localhost:4200',
   // GET_IMAGE:["env"]["getImage"] || '/api/getImage/?originalPath='

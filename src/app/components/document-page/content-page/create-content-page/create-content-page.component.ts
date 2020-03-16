@@ -47,6 +47,7 @@ import { ContentService } from 'src/app/services/content/content.service';
 import { ToolBarService } from '../../../../services/document/toolbar.service';
 import { position } from 'html2canvas/dist/types/css/property-descriptors/position';
 import { commentDetailModel } from '../../../../models/document/elements/comment-content.model';
+import { resolve } from 'url';
 declare var electron: any;
 declare var rangy: any;
 declare var CKEDITOR: any;
@@ -185,7 +186,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
         },
         template: {
             setDocument: 'setDocument',
-            setHTML: 'setHTML',
             setDocumentTrack: 'setDocumentTrack',
 
 
@@ -196,8 +196,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             setEditorContentNote: 'setEditorContentNote',
             openEditorContentNote: 'openEditorContentNote',
             closeEditorContentNote: 'closeEditorContentNote',
-            setRuler:'setRuler',
-            setTabIndent:'setTabIndent'
+            setRuler: 'setRuler',
+            setTabIndent: 'setTabIndent'
         }
     };
 
@@ -206,7 +206,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
     public boxes: BoxContentModel[] = new Array<BoxContentModel>();
     public loading: boolean = true;
 
- 
+
 
 
 
@@ -215,12 +215,12 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
         private documentService: DocumentService,
         private documentDataService: DocumentDataControlService,
         private contentDCtrlService: ContentDataControlService,
-        private contentService:ContentService,
+        private contentService: ContentService,
         private componentFactoryResolver: ComponentFactoryResolver,
         private injector: Injector,
         private render: Renderer2,
-        private toolBarService:ToolBarService,
-        private ngZone:NgZone,
+        private toolBarService: ToolBarService,
+        private ngZone: NgZone,
         private applicationRef: ApplicationRef,
 
     ) { }
@@ -235,13 +235,14 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
         this.controlSubscribe = this.contentElement.subscribe((result) => {
             this.documentDataService.documentTrack = new DocumentTrackModel();
             this.documentDataService.lifeCycle = Constants.document.lifeCycle.loadEditor;
-            console.log('result', result)
+            // console.log('result', JSON.stringify(result) )
             this.currentDocument = result || new DocumentModel();
-            
-        //    let doc =  this.documentDataService.documentList.find((doc)=>doc.id === "document-10_2_2020_18_21_44")
-  
-        //    this.currentDocument = doc;
-        // this.contentDCtrlService.poolContents  = this.currentDocument.contents
+
+
+            //    let doc =  this.documentDataService.documentList.find((doc)=>doc.id === "document-10_2_2020_18_21_44")
+
+            //    this.currentDocument = doc;
+            // this.contentDCtrlService.poolContents  = this.currentDocument.contents
             // this.setTemplate(this.actions.template.setDocument);
             // this.setTemplate(this.actions.template.setDocumentTrack);
             // if (res.actionCase === Constants.document.lifeCycle.initialEditor) {
@@ -256,13 +257,13 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             // }
 
 
-           this.contentDCtrlService.poolContents =  result && result.contents || new ContentsModel();
+            this.contentDCtrlService.poolContents = result && result.contents || new ContentsModel();
             let updateContent = new UpdateContentModel();
             updateContent.actionCase = Constants.document.lifeCycle.initialEditor;
             updateContent.data = result && result.contents;
             this.contentDCtrlService.updateContent = updateContent;
             //this.rulerDetailSubject.next(result && result.otherDetail.rulerDevDetail)                
-       
+
 
 
         });
@@ -271,12 +272,12 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 this.setTemplate(this.actions.template.setDocument);
                 this.setTemplate(this.actions.template.setDocumentTrack);
             }
-            else if(res.actionCase === Constants.document.contents.lifeCycle.delete){
+            else if (res.actionCase === Constants.document.contents.lifeCycle.delete) {
                 this.rootElement.find('.template-doc').focus();
                 this.removeStyleElements(this.actions.style.removeAllStyleBoxCurrent)
                 this.rootOptionTool.html(null);
                 this.currentToolbar = this.actions.toolbar.templateDocTool;
-               this.addOptionToolBar();
+                this.addOptionToolBar();
             }
             else if (res.actionCase === Constants.document.contents.lifeCycle.updateHandleContentBox) {
                 this.handles(this.actions.event.handleCurrentBox)
@@ -350,9 +351,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 this.rootElement.append('<div id="template-doc"  class="template-doc"></div>')
 
             }
-            this.handleEditor(this.actions.editor.setEditor);             
-       
-   
+            this.handleEditor(this.actions.editor.setEditor);
+
+
             // this.handleEditor(this.actions.editor.closeEditorContentNote,this.rootElement);
             //this.handles(this.actions.event.handleNote);
             // this.handles(this.actions.event.handleTextArea);
@@ -370,15 +371,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 }
 
             })
-        }
-        else if (action === this.actions.template.setHTML) {
-            if (this.currentDocument.status !== Constants.common.message.status.notFound.text) {
-                this.retrieveData(this.actions.data.retrieveBoxData, this.currentDocument);
-                this.retrieveData(this.actions.data.retrieveContentsData, this.currentDocument);
-
-            }
-            $('#' + this.documentDataService.nameTemplate).attr('contenteditable', 'true');
-            $('#' + this.documentDataService.nameTemplate).css('overflow-y', 'auto')
         }
     }
     private getContentTemplateSize() {
@@ -405,74 +397,52 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 allowedContent: true,
                 menu_groups: '',
                 removePlugins: 'contextmenu,liststyle,tabletools,magicline',
-                extraPlugins:'tableresizerowandcolumn,undo'
+                extraPlugins: 'tableresizerowandcolumn,undo'
             });
 
             CKEDITOR.instances[this.documentDataService.nameTemplate].on('instanceReady', (ev) => {
                 $('.cke_top').css('display', 'none')
                 $(ev.editor.element.$).removeAttr("title");
-                $('#' + this.documentDataService.nameTemplate).focus();
-                $('#' + this.documentDataService.nameTemplate).attr('style',this.currentDocument.styles)
-                this.currentTextSelection  = window.getSelection().getRangeAt(0);
+
+                $('#' + this.documentDataService.nameTemplate).attr('style', this.currentDocument.styles)
+                this.currentTextSelection = window.getSelection().getRangeAt(0);
                 this.currentToolbar = this.actions.toolbar.templateDocTool;
                 this.addOptionToolBar();
 
-                    $('#' + this.documentDataService.nameTemplate).click((event) => {
-                        console.log(event)
-                        $("#context-menu").removeClass("show").hide();
-                        this.rootOptionTool.html(null);
-                        this.removeStyleElements(this.actions.style.removeAllStyleBoxCurrent)
-                        this.currentToolbar = this.actions.toolbar.templateDocTool;
-                        this.addOptionToolBar();
-                        this.handleEditor(this.actions.editor.setRuler);
-                        
-                    })                    
-            
-
-                // $('#' + this.documentDataService.nameTemplate).dblclick((event) => {
-                          
-                //     let editorTemplate =  $('#' + this.documentDataService.nameTemplate)
-                //     if(editorTemplate.find('p').last().offset().top < event.clientY-23){
-                //         while(true){
-                //             if(editorTemplate.find('p').last().offset().top < event.clientY-23){
-                //              //   editorTemplate.append($("<p>xxx</p>"))
-                //             }else{
-                //                 break
-                //             }
-                //         }
-                //     }
-                //     //let targetCaret = editorTemplate.find('p').last().find('text')
-
-                //         //console.log(targetCaret)
-                //     // if(targetCaret.offset().left < event.clientY-23){
-                //     //     while(true){
-                //     //         if(editorTemplate.find('p').last().offset().top < event.clientY-23){
-                //     //             editorTemplate.append($("<p></p>"))
-                //     //         }else{
-                //     //             break
-                //     //         }
-                //     //     }
-                //     // }
-
-                //     // // editorTemplate.append($("<p current-caret >&nbsp</p>").css('position','fixed').css('top',event.clientY-12).css('left',event.clientX)) 
-                        
-
-                //     // let range = document.createRange();
-                //     // let sel = window.getSelection();
-                //     // range.setStart(targetCaret.get(0), 1);
-                //     // // range.setEnd(targetCaret.get(0),2);
-                //     // range.collapse(true);
-                //     // sel.removeAllRanges();
-                //     // sel.addRange(range);
-
-                //     // targetCaret.removeAttr('current-caret')
 
 
-                
-                // })
+                $('#' + this.documentDataService.nameTemplate).focus();
+
+                if (this.contentDCtrlService.poolContents.paragraphs.length > 0) {
+                    $('#' + this.documentDataService.nameTemplate).find('p').not('[id]').remove();
+                }
+
+
+                $('#' + this.documentDataService.nameTemplate).click((event) => {
+                    console.log(event)
+                    $("#context-menu").removeClass("show").hide();
+                    this.rootOptionTool.html(null);
+                    this.removeStyleElements(this.actions.style.removeAllStyleBoxCurrent)
+                    this.currentToolbar = this.actions.toolbar.templateDocTool;
+                    this.addOptionToolBar();
+                    this.handleEditor(this.actions.editor.setRuler);
+
+                })
+
 
                 this.handleEditor(this.actions.editor.setTabIndent);
-                $('#' + this.documentDataService.nameTemplate).html(this.currentDocument.html)
+
+             //    console.log(this.currentDocument)
+            //    $('#' + this.documentDataService.nameTemplate).html(this.currentDocument.html)
+
+
+
+                //section Paragraph
+                this.contentService.createParagraph();
+                this.contentService.handleInsertParagraph();
+                this.contentService.handleUpdateParagraph();
+                this.contentService.handleRemoveParagraph();
+
                 //CKEDITOR.instances[this.documentDataService.nameTemplate].insertHtml(this.currentDocument.html);
                 // CKEDITOR.instances[this.documentDataService.nameTemplate].editable().on('click',  (event)=> {
                 //     console.log('xxxxxxxxxxxxxxxxx');
@@ -480,20 +450,22 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 //     this.currentToolbar = this.actions.toolbar.templateDocTool;
                 //     this.addOptionToolBar();
                 // });
-
-                this.addElements(this.actions.event.addElLayout).then(() => {
-                    //this.removeData(this.actions.data.removeAllContentObj);
-                });
-                this.addElements(this.actions.event.addContextMenu, this.rootElement)
-
-                this.addElements(this.actions.event.addEventBox).then(() => {
-
-                });
-
-                this.addElements(this.actions.event.addEventLayout).then(() => {
-
-                });
-
+                
+                    this.addElements(this.actions.event.addElLayout).then(() => {
+                        //this.removeData(this.actions.data.removeAllContentObj);
+                    });
+                    this.addElements(this.actions.event.addContextMenu, this.rootElement)
+    
+                    this.addElements(this.actions.event.addEventBox).then(() => {
+    
+                    });
+    
+                    this.addElements(this.actions.event.addEventLayout).then(() => {
+    
+                    });
+    
+            
+ 
                 // setTimeout(() => {
                 //     this.addElements(this.actions.event.addEventBox).then(() => {
                 //         //this.removeData(this.actions.data.removeAllContentObj);
@@ -510,7 +482,82 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                     });
                 });
 
+
+
+
+                // $('#'+this.documentDataService.nameTemplate).unbind('keyup').bind('keyup',this.commonService.debounce((event)=> {
+                //         console.log('event',event.cur)
+
+                // },500))
+                // this.commonService.test();
+
+
+                // $('#'+this.documentDataService.nameTemplate).unbind('keyup').bind('keyup',this.commonService.debounce((event)=> {
+                //     if(event.keyCode == 32 || event.keyCode == 68 ){
+                //         let caret =  window.getSelection().getRangeAt(0);
+                //        // let caretRect:any  = caret.getBoundingClientRect();
+
+                //         let targetText =  $(caret.startContainer);
+
+                //         if(targetText.prop('tagName') !== 'P'){
+                //             targetText =  targetText.parents('p')
+                //         }
+
+                //        console.log(this.commonService.getCaretCharacterOffsetWithin(targetText))
+
+                //         let stringArray =  targetText.text().split(/(\s+)/)
+                //         let newText = ''
+                //         for(let i = 0 ; i< stringArray.length ; i++){
+                //                 // if(/(\s+)/.test(stringArray[i])  )
+                //             newText +=  '<span>'+stringArray[i]+'</span>'
+                //         }
+
+                //         // caret.collapse(true);
+
+                //         // targetText.html(newText).ready(()=>{
+                //         //     let targetSetCaret =  document.elementFromPoint(caretRect.x, caretRect.y)
+
+
+                //         //     let range = document.createRange();
+                //         //     range.setStart(window.getSelection().anchorNode, window.getSelection().anchorOffset);
+                //         //     range.setEnd(window.getSelection().focusNode, window.getSelection().focusOffset);
+
+                //         //        // window.getSelection().setPosition(targetText.get(0), xx);                        
+
+
+                //         // })
+
+
+
+
+
+
+
+                //     }
+
+                // },300));
+
+
+                // CKEDITOR.instances[this.documentDataService.nameTemplate].on('change',( event )=>{
+                //     console.log(event)
+                //     let caret =  window.getSelection().getRangeAt(0);
+                //     let caretPosTop  = $(caret.startContainer).offset().top;
+                //     if(!$(caret.startContainer).text()){
+                //         $('.content-box').each((index,elementbox)=>{
+                //             if($(elementbox).offset().top >= caretPosTop){
+                //                 $(elementbox).css('top',$(elementbox).position().top-$(caret.startContainer).height())
+                //             }
+
+                //         })
+                //     }
+
+                //     // console.log($(caret.startContainer))
+
+                //  } )
+
+
                 // 
+
 
             });
 
@@ -577,7 +624,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
 
 
         }
- 
+
         else if (action === this.actions.editor.openEditorContentNote) {
 
             element.find('.note-icon.writing.hideCK').hide();
@@ -593,26 +640,26 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
 
         }
         else if (action === this.actions.editor.setRuler) {
-         
-           let targetText = $(this.currentTextSelection.startContainer)
-           console.log('targetText',targetText)
-           if(targetText.prop("tagName") !== 'P'){
-            targetText =  targetText.parents('p')
-            }
-            let plow  =  targetText.prop('style') && targetText.prop('style')['padding-left'] || '0%'
-            let phigh =   targetText.prop('style') &&targetText.prop('style')['padding-right'] || '100%'
 
-            plow  = Math.ceil(parseFloat(plow.replace('%',''))).toString()
-            if(phigh !== '100%'){
-                phigh  =Math.ceil(100-parseFloat(phigh.replace('%',''))).toString()
-            }else{
-                phigh  =phigh.replace('%','')
+            let targetText = $(this.currentTextSelection.startContainer)
+            console.log('targetText', targetText)
+            if (targetText.prop("tagName") !== 'P') {
+                targetText = targetText.parents('p')
             }
-           
+            let plow = targetText.prop('style') && targetText.prop('style')['padding-left'] || '0%'
+            let phigh = targetText.prop('style') && targetText.prop('style')['padding-right'] || '100%'
 
-            let rulerDetail  = new RulerDetailModel;
-            rulerDetail.pointerLeft  = plow;
-            rulerDetail.pointerRight  = phigh;
+            plow = Math.ceil(parseFloat(plow.replace('%', ''))).toString()
+            if (phigh !== '100%') {
+                phigh = Math.ceil(100 - parseFloat(phigh.replace('%', ''))).toString()
+            } else {
+                phigh = phigh.replace('%', '')
+            }
+
+
+            let rulerDetail = new RulerDetailModel;
+            rulerDetail.pointerLeft = plow;
+            rulerDetail.pointerRight = phigh;
 
             this.rulerDetailSubject.next(rulerDetail)
             // targetText.css('padding-right')
@@ -623,7 +670,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             //     let code = e.keyCode || e.which;
             //     if (code === 9) {  
             //         let targetText = $(this.currentTextSelection.startContainer)
-    
+
             //         if(targetText.prop("tagName") !== 'P'){
             //             targetText =  targetText.parents('p')
             //             }
@@ -635,7 +682,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             //         }else{
             //             phigh  =phigh.replace('%','')
             //         }
-                   
+
 
             //         let rulerDetail  = new RulerDetailModel;
             //         rulerDetail.paddingLeft  = Constants.common.style.indent.left + plow;
@@ -650,57 +697,20 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
 
         }
     }
-    private setCaretPosition(element, offset) {
-        var range = document.createRange();
-        var sel = window.getSelection();
-
-        //select appropriate node
-        var currentNode = null;
-        var previousNode = null;
-
-        for (var i = 0; i < element.childNodes.length; i++) {
-            //save previous node
-            previousNode = currentNode;
-
-            //get current node
-            currentNode = element.childNodes[i];
-            //if we get span or something else then we should get child node
-           while(currentNode.childNodes.length > 0){
-              currentNode = currentNode.childNodes[0];
-           }
-
-            //calc offset in current node
-            if (previousNode != null) {
-                offset -= previousNode.length;
-            }
-            //check whether current node has enough length
-            if (offset <= currentNode.length) {
-                break;
-            }
-        }
-        //move caret to specified offset
-        if (currentNode != null) {
-            range.setStart(currentNode, offset);
-            range.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(range);
-        }
-    }
-
     private async addElements(action: string, element?: any, subaction?: string, subElement?: any, data?: any) {
         if (action === this.actions.event.addElLayout || action === this.actions.event.addEventLayout) {
-            
-            let addEventLayout = ()=>{
-                this.rootElement.find('.content-layout').find('[contenteditable]').attr('contenteditable','true')
+
+            let addEventLayout = () => {
+                this.rootElement.find('.content-layout').find('[contenteditable]').attr('contenteditable', 'true')
                 this.handles(this.actions.event.handleCurrentLayout)
                 this.rootElement.find('.content-layout').resizable({
                     handles: 's',
                 }).ready(() => {
                     this.rootElement.find('.content-layout')
                         .resizable({ disabled: false })
-                })    
+                })
             }
-            
+
 
             if (data && data.layoutName === Constants.document.layouts.types.tableLayout && action === this.actions.event.addElLayout) {
                 let targetLayout = data.detail;
@@ -727,10 +737,10 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 layoutHtml += '</div>'
                 $('.layout-draft').remove().ready(() => {
                     let targetText
-                    if(this.currentTextSelection){
+                    if (this.currentTextSelection) {
                         targetText = $(this.currentTextSelection.startContainer)
-                        if(targetText.prop("tagName") !== 'P'){
-                            targetText =  targetText.parents('p')
+                        if (targetText.prop("tagName") !== 'P') {
+                            targetText = targetText.parents('p')
                         }
                     }
                     $(layoutHtml).insertAfter(targetText).ready(() => {
@@ -740,7 +750,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                                 $("<p layout-end>&nbsp</p>").insertAfter(this.currentLayout)
                                 this.addElements(this.actions.event.addContextMenu, this.currentLayout)
                             }
-                            this.currentLayout.find('tr:first').find('.layout-column').css('width',this.currentLayout.width()/this.currentLayout.find('tr:first').find('.layout-column').length)
+                            this.currentLayout.find('tr:first').find('.layout-column').css('width', this.currentLayout.width() / this.currentLayout.find('tr:first').find('.layout-column').length)
                             addEventLayout();
                             // $(this.currentLayout).detach().appendTo($('#template-doc'))
                         } else {
@@ -749,16 +759,16 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                     });
                 })
             }
-            else if( action === this.actions.event.addEventLayout){
+            else if (action === this.actions.event.addEventLayout) {
                 addEventLayout();
             }
-     
-   
+
+
             // setTimeout(() => {
             //     //this.currentLayout.find('.layout-column').css('max-width','20%')
 
 
-          
+
             // }, 2000);
 
 
@@ -813,118 +823,172 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
 
         }
         else if (action === this.actions.event.addElBox || action === this.actions.event.addEventBox) {
-            let createBox = async (boxId: string, htmlDetail: BoxHTMLModel) => {
-                    console.log(htmlDetail)
-                let topZindex = 0;
-                this.rootElement.find('.content-box').each((index,element)=>{
-                   let targetZindex =  parseInt($(element).css('z-index'))
-                   if(targetZindex >  topZindex){
-                        topZindex  =  targetZindex;
-                   }
-                })
-                let tagElement = `div`
-                if(data &&data.action==="link"){
-                    tagElement = `span`
-                }
+            let createBox = (boxId: string, htmlDetail: BoxHTMLModel) => {
+                 return new Promise((resolve,reject)=>{
+                    let topZindex = 0;
+                    this.rootElement.find('.content-box').each((index, element) => {
+                        let targetZindex = parseInt($(element).css('z-index'))
+                        if (targetZindex > topZindex) {
+                            topZindex = targetZindex;
+                        }
+                    })
+                    let tagElement = `div`
+                    if (data && data.action === "link" || htmlDetail.boxType === Constants.document.boxes.types.boxAsText) {
+                        tagElement = `span`
+                    }
+                    
+                    // <span class="content-box-label">${boxId}</span>
+                    this.rootElement.append(`<${tagElement} content-box-type="${htmlDetail.boxType||Constants.document.boxes.types.boxInitial}"  contenteditable="false" id="${boxId}" class="content-box ${this.boxType.boxInitial} freedom-layout"
+                    > </${tagElement}>`).ready(async () => {
+                        this.removeStyleElements(this.actions.toolbar.removeTool);
+                        $('[id="' + boxId + '"]').css('position', 'absolute')
+                            .css('top', htmlDetail.top)
+                            .css('left', htmlDetail.left)
+                            .css('width', htmlDetail.width)
+                            .css('height', htmlDetail.height)
+                            .css('background', htmlDetail.background)
+                            .css('z-index', topZindex)
+                    }).ready(() => {
+                        if (!this.contentDCtrlService.poolContents.boxes.find(box => box.id === boxId)) {
+                            let newBox = new BoxContentModel();
+                            newBox.id = boxId
+                            newBox.htmlDetail = htmlDetail;
+                            newBox.htmlDetail.boxType =  htmlDetail.boxType;
+                            this.contentDCtrlService.poolContents.boxes.push(newBox);
+                        }
+                        resolve(Constants.common.message.status.success)
 
-                this.rootElement.append(`<${tagElement} contenteditable="false" id="${boxId}" class="content-box ${this.boxType.boxInitial} freedom-layout"
-                     name="${boxId}" ><span class="content-box-label">${boxId}</div> </${tagElement}>`).ready(async () => {
-                    this.removeStyleElements(this.actions.toolbar.removeTool); 
-                    $('[id="' + boxId + '"]').css('position', 'absolute')
-                    .css('top', htmlDetail.top)
-                    .css('left', htmlDetail.left)
-                    .css('width', htmlDetail.width)
-                    .css('height', htmlDetail.height)
-                    .css('background', htmlDetail.background)
-                    .css('z-index',topZindex)
-                })
+                    })
+                 })
+
             }
             let addEventBox = async () => {
-                this.rootElement.find('.freedom-layout').draggable({
-                    containment: this.contentTemplate.nativeElement,
-                    stack: '.freedom-layout',
-                    scroll: true,
-                    start: ((event) => {
-                        let updateContent = new UpdateContentModel();
-                        updateContent.actionCase = Constants.document.contents.events.startDrag;
-                        this.contentDCtrlService.updateContent = updateContent;
-                        updateContent.for = $(event.target).attr('id');
-                        this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'startDrag');
-                    }),
-                    stop: ((event) => {
-                        let updateContent = new UpdateContentModel();
-                        updateContent.actionCase = Constants.document.contents.events.stopDrag;
-                        updateContent.for = $(event.target).attr('id');
-                        this.contentDCtrlService.updateContent = updateContent;
-                        // let l = (100 * parseFloat(($(event.target).position().left / $(event.target).parent().width()).toString()));
-                        // let t = (100 * parseFloat((($(event.target).position().top + $('#template-doc').scrollTop()) / $(event.target).parent().height()).toString()));
-                        // // let l = (100 * parseFloat(($(event.target).position().left  / this.rootElement.width()).toString())) + "%";
-                        // // let t = (100 * parseFloat((($(event.target).position().top+$('#template-doc').scrollTop()) / this.rootElement.height()).toString())) + "%";
-    
-                        // //    console.log($(event.target).position().top)
-                        // //     console.log($('#template-doc').scrollTop())
-                        // if (l > 100 || l < 0) {
-                        //     l = 0;
-                        // }
-                        // $(event.target).css("left", l + '%');
-                        // $(event.target).css("top", t + '%');
-                       this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'endDrag');
-                        //this.removeStyleElements(this.actions.style.removeStyleBoxActive);
-                        // console.log($('#template-doc').scrollTop())
-                    }),
-                });
-                this.rootElement.find('.content-box')
-                    .resizable({
-                        disabled: true,
-                        handles: 'n, e, s, w, se, ne, sw, nw',
+                return new Promise((resolve,reject)=>{
+                    this.rootElement.find('.freedom-layout').draggable({
                         containment: this.contentTemplate.nativeElement,
+                        stack: '.freedom-layout',
+                        scroll: true,
                         start: ((event) => {
                             let updateContent = new UpdateContentModel();
-                            updateContent.actionCase = Constants.document.contents.events.startResize;
-                            updateContent.for = $(event.target).attr('id');
+                            updateContent.actionCase = Constants.document.contents.events.startDrag;
                             this.contentDCtrlService.updateContent = updateContent;
-                            this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'startResize');
+                            updateContent.for = $(event.target).attr('id');
+                            this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'startDrag');
+                        }),
+                        drag: ((event) => {
+                            let target = $(event.target)
+                            this.contentService.calPositionImg(target)
                         }),
                         stop: ((event) => {
+    
                             let updateContent = new UpdateContentModel();
-                            updateContent.actionCase = Constants.document.contents.events.stopResize;
+                            updateContent.actionCase = Constants.document.contents.events.stopDrag;
                             updateContent.for = $(event.target).attr('id');
                             this.contentDCtrlService.updateContent = updateContent;
-                            // let w = (100 * parseFloat(($(event.target).width() / $(event.target).parent().width()).toString())) + "%";
-                            // let h = (100 * parseFloat(($(event.target).height() / $(event.target).parent().height()).toString())) + "%";
     
-                            // // let w = (100 * parseFloat(($(event.target).width() / this.rootElement.width()).toString())) + "%";
-                            // // let h = (100 * parseFloat(($(event.target).height() / this.rootElement.height()).toString())) + "%";
-                            // $(event.target).css("width", w);
-                            // $(event.target).css("height", h);
-                            this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'endResize');
+    
+    
+                            //console.log(target)
+                            // $('p').each((index,element)=>{
+                            //     if(target.position().top <= $(element).position().top){
+                            //         $(element).css('width','max-content')
+                            //         $(element).css('padding-left',target.width()+5)
+                            //     }else{
+                            //         $(element).css('padding-left',0)
+                            //     }
+    
+                            // })
+    
+                            // let l = (100 * parseFloat(($(event.target).position().left / $(event.target).parent().width()).toString()));
+                            // let t = (100 * parseFloat((($(event.target).position().top + $('#template-doc').scrollTop()) / $(event.target).parent().height()).toString()));
+                            // // let l = (100 * parseFloat(($(event.target).position().left  / this.rootElement.width()).toString())) + "%";
+                            // // let t = (100 * parseFloat((($(event.target).position().top+$('#template-doc').scrollTop()) / this.rootElement.height()).toString())) + "%";
+    
+                            // //    console.log($(event.target).position().top)
+                            // //     console.log($('#template-doc').scrollTop())
+                            // if (l > 100 || l < 0) {
+                            //     l = 0;
+                            // }
+                            // $(event.target).css("left", l + '%');
+                            // $(event.target).css("top", t + '%');
+                            this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'endDrag');
                             //this.removeStyleElements(this.actions.style.removeStyleBoxActive);
-                            if ($(event.target).hasClass(this.boxType.boxSubform)) {
-                                this.handles(this.actions.event.handleElRatio, $(event.target).find('#contentTemplate'), $(event.target).find('.subform-preview'))
-                            }
+                            // console.log($('#template-doc').scrollTop())
                         }),
-                    }).ready(() => {
-                        this.rootElement.find('.content-box')
-                            .resizable({ disabled: false })
-                    })
-                    this.handles(this.actions.event.handleCurrentBox);
+                    });
+                    this.rootElement.find('.content-box')
+                        .resizable({
+                            disabled: true,
+                            handles: 'n, e, s, w, se, ne, sw, nw',
+                            containment: this.contentTemplate.nativeElement,
+                            start: ((event) => {
+                                let updateContent = new UpdateContentModel();
+                                updateContent.actionCase = Constants.document.contents.events.startResize;
+                                updateContent.for = $(event.target).attr('id');
+                                this.contentDCtrlService.updateContent = updateContent;
+                                this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'startResize');
+                            }),
+                            resize: ((event) => {
+                                let target = $(event.target)
+                                this.contentService.calPositionImg(target)
+                            }),
+                            stop: ((event) => {
+                                let updateContent = new UpdateContentModel();
+                                updateContent.actionCase = Constants.document.contents.events.stopResize;
+                                updateContent.for = $(event.target).attr('id');
+                                this.contentDCtrlService.updateContent = updateContent;
+    
+    
+    
+    
+    
+                                // let w = (100 * parseFloat(($(event.target).width() / $(event.target).parent().width()).toString())) + "%";
+                                // let h = (100 * parseFloat(($(event.target).height() / $(event.target).parent().height()).toString())) + "%";
+    
+                                // // let w = (100 * parseFloat(($(event.target).width() / this.rootElement.width()).toString())) + "%";
+                                // // let h = (100 * parseFloat(($(event.target).height() / this.rootElement.height()).toString())) + "%";
+                                // $(event.target).css("width", w);
+                                // $(event.target).css("height", h);
+                                this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'endResize');
+                                //this.removeStyleElements(this.actions.style.removeStyleBoxActive);
+                                if ($(event.target).hasClass(this.boxType.boxSubform)) {
+                                    this.handles(this.actions.event.handleElRatio, $(event.target).find('#contentTemplate'), $(event.target).find('.subform-preview'))
+                                }
+                            }),
+                        }).ready(() => {
+                            this.rootElement.find('.content-box')
+                                .resizable({ disabled: false })
+                        })
+                        this.handles(this.actions.event.handleCurrentBox);
+                        resolve(Constants.common.message.status.success)
+                })
             }
-            let addContent = async (targetContent, data?,box?:BoxContentModel) => {
+            let addContent = async (targetContent, data?, box?: BoxContentModel) => {
                 if (subaction === this.actions.event.dropTool || this.actions.event.dropAny) {
-                    await this.createContent(this.currentBox,targetContent.component, targetContent.contentName, data && data.result);
-                   // this.currentBox.find('[content-name]').show();
-                    if(action ===this.actions.event.addEventBox){
-                        $('.content-box').find('[content-name]').attr('content-last','true');
+                    await this.createContent(this.currentBox, targetContent.component, targetContent.contentName, data && data.result);
+                    // this.currentBox.find('[content-name]').show();
+                    if (action === this.actions.event.addEventBox) {
+                        $('.content-box').find('[content-name]').attr('content-last', 'true');
                     }
-                   // $('.content-box').find('[content-name][content-last!="true"]').hide();
-                    this.rootOptionTool.html(this.createContentOption(this.currentBox,targetContent.option))
+                    // $('.content-box').find('[content-name][content-last!="true"]').hide();
+                    this.rootOptionTool.html(this.createContentOption(this.currentBox, targetContent.option))
 
-                  //  CKEDITOR.instances[this.documentDataService.nameTemplate].insertHtml($('#' + boxId));
-                    if(box &&box.boxType !=='text' || !box){
+                    //  CKEDITOR.instances[this.documentDataService.nameTemplate].insertHtml($('#' + boxId));
+                    if (box && box.htmlDetail.boxType !== Constants.document.boxes.types.boxAsText || !box) {
                         $('#' + this.documentDataService.nameTemplate).append(this.currentBox)
                     }
+
                 } else {
                     // this.setCurrentToolbar();
+                }
+                let targetBoxIndex = this.contentDCtrlService.poolContents.boxes.findIndex(box => box.id === this.currentBox.attr('id'))
+
+                if (targetBoxIndex >= 0) {
+                    let boxName = targetContent.contentName.replace('-content', '')
+                    this.contentDCtrlService.poolContents.boxes[targetBoxIndex].name = this.commonService.getTextCapitalize(boxName) + ' (' + this.currentBox.attr('id') + ')'
+                    this.contentDCtrlService.poolContents.boxes[targetBoxIndex].contentType = targetContent.contentName;
+                    this.contentDCtrlService.poolContents.boxes[targetBoxIndex].htmlDetail.boxType = box && box.htmlDetail.boxType;
+                    this.currentBox.attr('name', this.contentDCtrlService.poolContents.boxes[targetBoxIndex].name)
                 }
                 this.documentDataService.lifeCycle = Constants.document.lifeCycle.loadEditor;
 
@@ -947,39 +1011,55 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                     } else {
                         targetContent = data.targetContent;
                     }
-                    createBox(boxId, htmlDetail).then(()=>{
+                    await createBox(boxId, htmlDetail).then(async () => {
                         // setTimeout(() => {
-                            this.documentDataService.lifeCycle = Constants.document.lifeCycle.loadEditor;
-                            this.setCurrentBox($('#' + boxId));
-                            addEventBox().then(()=>{
-                                setTimeout(() => {
-                                    this.documentDataService.lifeCycle = Constants.document.lifeCycle.createContent;
-                                    addContent(targetContent,data)
-                                });
-                            });
+                        this.documentDataService.lifeCycle = Constants.document.lifeCycle.loadEditor;
+                        this.setCurrentBox($('#' + boxId));
+                        await  addEventBox().then(async () => {
+                            this.documentDataService.lifeCycle = Constants.document.lifeCycle.createContent;
+                            await addContent(targetContent, data)
+                        });
                         // });
                     })
                 }
             } else if (action === this.actions.event.addEventBox) {
-                let boxes = this.currentDocument.contents.boxes
-                for  await (let box of boxes){
+              
+                let boxes =  this.currentDocument.contents.boxes
+                for await (let box of boxes) {
                     let boxId = box.id
                     let htmlDetail = box.htmlDetail;
                     let targetContent = ContentRouting.routes.find((content) => content.contentName === htmlDetail.selector)
-                    if(box.boxType !=='text'){
-                        await createBox(boxId, htmlDetail).then(async ()=>{
-                            this.setCurrentBox($('#' + boxId));
-                            await addEventBox().then(async ()=>{
-                                await addContent(targetContent)
-                            });
-                        })
-                    }else{
+
+
+            //   await createBox(boxId, htmlDetail).then(async () => {
+            //                 this.setCurrentBox($('#' + boxId));
+            //                 await addEventBox().then(async () => {
+            //                     await addContent(targetContent)
+            //                 });
+            //             })
+
+                   await createBox(boxId, htmlDetail).then(async () => {
                         this.setCurrentBox($('#' + boxId));
-                       await addEventBox().then(async ()=>{
-                            await addContent(targetContent,null,box)
-                                       
+                        await addEventBox().then(async () => {
+                            await addContent(targetContent)                                
                         });
-                    }
+                    })
+
+                    // if (box.boxType !== Constants.document.boxes.types.boxAsText) {
+                    //     await createBox(boxId, htmlDetail).then(async () => {
+                    //         this.setCurrentBox($('#' + boxId));
+                    //         await addEventBox().then(async () => {
+                    //             await addContent(targetContent)
+                    //         });
+                    //     })
+                    // } else {
+                    //     this.currentBox = $('#' + boxId); 
+                    //     //this.setCurrentBox($('#' + boxId));
+                    //     await addEventBox().then(async () => {
+                    //         addContent(targetContent, null, box)                
+                
+                    //     });
+                    // }
                 }
 
                 // boxes.forEach((box) => {
@@ -999,14 +1079,14 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 //         let currentBox  =$('#' + boxId)
                 //         console.log(this.currentBox)
                 //         addEventBox().then(()=>{
-                          
+
                 //             addContent(targetContent,null,box)
-                                       
+
                 //         });
                 //     }
                 // })
             }
-      
+
             // .find('.ui-resizable-handle').removeClass('ui-icon ui-icon-gripsmall-diagonal-se'); 
             // this.rootElement.find('.content-box').css("border", "");
             // this.rootElement.find('.content-box').find('.content-box-label').show();
@@ -1018,9 +1098,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             //     this.addElements(this.actions.style.addStyleBoxCurrent, this.currentBox);
             // }
         } else if (action === this.actions.style.addStyleBoxCurrent) {
-         
+
             this.setCurrentBox(element);
-            
+
 
             // this.addStyleElements(this.actions.style.addStyleBoxCurrent, element);
             // this.addStyleElements(this.actions.style.addStyleBorderBox, element);
@@ -1038,12 +1118,12 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 let top = e.pageY;
                 let left = e.pageX;
                 let target = $(e.currentTarget);
-                if (target.hasClass('content-layout') ) {
+                if (target.hasClass('content-layout')) {
                     let targetTd = $(e.target);
-                    if(targetTd.prop("tagName") !== 'TD'){
-                        targetTd =  targetTd.parents('td')
+                    if (targetTd.prop("tagName") !== 'TD') {
+                        targetTd = targetTd.parents('td')
                     }
-                    if(targetTd.attr('colspan')  || targetTd.attr('rowspan')){
+                    if (targetTd.attr('colspan') || targetTd.attr('rowspan')) {
                         this.ContextMenuList = [{
                             layoutType: this.layoutTypes.tableLayout,
                             contentType: null,
@@ -1051,7 +1131,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                             name: 'Unmerge',
                             targetElement: targetTd
                         }]
-                    }else{
+                    } else {
                         this.ContextMenuList = [{
                             layoutType: this.layoutTypes.tableLayout,
                             contentType: null,
@@ -1073,13 +1153,13 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
 
                 $("#context-menu").css({
                     display: "block",
-                    position:'fixed',
+                    position: 'fixed',
                     top: top,
                     left: left
                 }).addClass("show");
                 return false; //blocks default Webbrowser right click menu
             }).on("click", () => {
-                
+
                 $("#context-menu").removeClass("show").hide();
             });
             $("#context-menu a").on("click", (e) => {
@@ -1125,7 +1205,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
         }
         this.setCurrentToolbar();
         // this.addOptionToolBar();
-       // this.createData(this.actions.data.addBoxType, element)
+        // this.createData(this.actions.data.addBoxType, element)
         //this.createData(this.actions.data.createDocumentTrack);
     }
     private handles(action: string, element?: any, subElement?: any) {
@@ -1138,15 +1218,15 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             })
         }
         if (action === this.actions.event.handleCurrentBox) {
-            this.rootElement.find('.content-box').find('.content-textarea').unbind('click').bind('click',(event) => {
+            this.rootElement.find('.content-box').find('.content-textarea').unbind('click').bind('click', (event) => {
                 this.currentElement = $(event.target);
                 if (!this.currentElement.parents('.content-box').hasClass('content-box-current')) {
                     this.setCurrentBox(this.currentElement.parents('.content-box'));
                 }
             })
 
-            this.rootElement.find('.content-box ,[content-name != "textarea-content"]').unbind('click').bind('click',(event) => {
-               // console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', $(event.target))
+            this.rootElement.find('.content-box ,[content-name != "textarea-content"]').unbind('click').bind('click', (event) => {
+                // console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', $(event.target))
                 //event.preventDefault();
                 $("#context-menu").removeClass("show").hide();
                 event.stopPropagation();
@@ -1287,7 +1367,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 $("#option-font-color").spectrum("set", this.currentColorCode)
             }
 
-            this.toolBarService.getFontBackground('#option-background-color',$('#'+this.documentDataService.nameTemplate))
+            this.toolBarService.getFontBackground('#option-background-color', $('#' + this.documentDataService.nameTemplate))
 
             $('.option-action-trash').click(() => {
                 this.removeStyleElements(this.actions.option.removeOptionTool);
@@ -1367,14 +1447,14 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             this.currentBox = null;
         }
         else if (action === this.actions.style.removeStyleBoxCurrent) {
-            
-           // console.log(this.rootElement.find('.content-box:not(#'+element.attr('id')+')'))
-   
-            this.rootElement.find('.content-box:not(#'+element.attr('id')+')').find('[content-name][content-last!="true"]').hide()
-            this.rootElement.find('.content-box:not(#'+element.attr('id')+')').removeClass('content-box-current content-box-active border border-primary')
-    
 
-      
+            // console.log(this.rootElement.find('.content-box:not(#'+element.attr('id')+')'))
+
+            this.rootElement.find('.content-box:not(#' + element.attr('id') + ')').find('[content-name][content-last!="true"]').hide()
+            this.rootElement.find('.content-box:not(#' + element.attr('id') + ')').removeClass('content-box-current content-box-active border border-primary')
+
+
+
         }
         else if (action === this.actions.style.removeStyleLayoutCurrent) {
             // this.rootElement.find('.content-layout').removeClass('content-layout-current')
@@ -1450,13 +1530,13 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
     }
     private addStyleElements(action: string, element?: JQuery<Element>, styles?: string, subaction?: string) {
         if (action === this.actions.style.addStyleLayoutCurrent) {
-         
+
             this.removeStyleElements(this.actions.style.removeStyleLayoutCurrent);
 
             element.addClass('content-layout-current')
-            .find('.layout-column').addClass('border-primary')
-            
-           // this.removeStyleElements(this.actions.style.removeStyleBoxCurrent);
+                .find('.layout-column').addClass('border-primary')
+
+            // this.removeStyleElements(this.actions.style.removeStyleBoxCurrent);
             // setTimeout(() => {
             //     element.find('.layout-column').addClass('border-primary')
             //     // element.addClass('border-primary')
@@ -1466,19 +1546,19 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             // })
         }
         else if (action === this.actions.style.addStyleBoxCurrent) {
-           
-            this.removeStyleElements(this.actions.style.removeStyleBoxCurrent,element);
-            this.removeStyleElements(this.actions.style.removeStyleLayoutCurrent);   
-          //  console.log(element.find('[content-name]'),element)
-        //   setTimeout(() => {
-            element
-            .addClass('border-primary')
-            .addClass('content-box-current')
-            .find('[content-name]').show()              
-        //   });
 
-                 
-    
+            this.removeStyleElements(this.actions.style.removeStyleBoxCurrent, element);
+            this.removeStyleElements(this.actions.style.removeStyleLayoutCurrent);
+            //  console.log(element.find('[content-name]'),element)
+            //   setTimeout(() => {
+            element
+                .addClass('border-primary')
+                .addClass('content-box-current')
+                .find('[content-name]').show()
+            //   });
+
+
+
 
 
             // setTimeout(() => {
@@ -1593,9 +1673,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             htmlOptionToolBar =
                 '<div class="row p-0 m-0 mt-3 option-textArea">'
 
-                +'<div class="col-12 item-middle bg-secondary">'
-                +'<label class="text-white m-0">Styles</label>'
-                +'</div>'
+                + '<div class="col-12 item-middle bg-secondary">'
+                + '<label class="text-white m-0">Styles</label>'
+                + '</div>'
                 // + '<div class="col-12 d-flex justify-content-center border-bottom">'
                 // + '<div class="form-group w-70 text-center">'
                 // + '<label>Style</label>'
@@ -1690,7 +1770,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
     private setCurrentBox(element?) {
         // console.log("this.currentBox",this.currentBox)
         // this.rootElement.find('[content-name]').hide().find(this.currentBox.find('[content-name]').get(0)).show();
-       if(!element.hasClass('content-box-current')){
+        if (!element.hasClass('content-box-current')) {
             if (element) {
                 this.currentBox = this.contentDCtrlService.currentBox = element;
             } else {
@@ -1698,10 +1778,10 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             }
             let targetContent = ContentRouting.routes.find((content) => content.contentName === this.currentBox.find('[content-name]').attr('content-name'))
             if (targetContent) {
-                this.rootOptionTool.html(this.createContentOption(this.currentBox,targetContent.option))                    
+                this.rootOptionTool.html(this.createContentOption(this.currentBox, targetContent.option))
             }
             this.addStyleElements(this.actions.style.addStyleBoxCurrent, this.currentBox)
-       }
+        }
 
         // let targetOption =  this.currentBox.find('[name="section-option"]');
         // console.log("targetOption",targetOption)
@@ -1715,7 +1795,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
         }
         this.addStyleElements(this.actions.style.addStyleLayoutCurrent, this.currentLayout)
         let targetLayout = LayoutRouting.routes.find((layout) => layout.layoutName === this.currentLayout.attr('layout-name'))
-        if (targetLayout && this.rootOptionTool.find(this.currentLayout.attr('layout-name')+'-option').length === 0) {
+        if (targetLayout && this.rootOptionTool.find(this.currentLayout.attr('layout-name') + '-option').length === 0) {
             this.rootOptionTool.html(this.createLayoutOption(targetLayout.option))
         }
     }
@@ -1809,7 +1889,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
         // })
 
         this.documentService.captureHTML('contentTemplate').subscribe((imgData) => {
-            this.createData(this.actions.data.createDataToSave).then((result:DocumentModel) => {
+            this.createData(this.actions.data.createDataToSave).then((result: DocumentModel) => {
                 let idDocument = this.commonService.getPatternId();
                 if (this.documentDataService.currentDocument.id) {
                     idDocument = this.documentDataService.currentDocument.id;
@@ -1822,7 +1902,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 otherDetail.rulerDevDetail = this.rulerDetail;
                 let saveobjectTemplate: DocumentModel = {
                     userId: Constants.common.user.id,
-                    styles:result.styles,
+                    styles: result.styles,
                     nameDocument: this.documentDataService.currentDocument.nameDocument,
                     previewImg: imgData,
                     id: idDocument,
@@ -2022,68 +2102,73 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                         this.contentDCtrlService.poolContents.textAreas[targetIndexTextArea].html = $(event).html();
                     }
                 })
-                let createDataBoxes =  ()=>{
-                    return new Promise(async (resolve,reject)=>{
+                let createDataBoxes = () => {
+                    return new Promise(async (resolve, reject) => {
                         let boxes = new Array<BoxContentModel>();
-                        if(this.rootElement.find('.content-box').length > 0){
-                           await this.rootElement.find('.content-box').each((index, element) => {
+                        if (this.rootElement.find('.content-box').length > 0) {
+                            await this.rootElement.find('.content-box').each((index, element) => {
                                 let targetElment = $(element);
-                        
+
                                 // if (targetElment.find('[content-name]').attr('content-last')) {
-                                    let newBox = new BoxContentModel()
-                                    newBox.id = targetElment.attr('id');
-                                    newBox.boxType = targetElment.attr('content-box-type');
-                                    newBox.contentType = targetElment.find('[content-name]').attr('content-name')
-                                    newBox.htmlDetail.height = targetElment.height();
-                                    newBox.htmlDetail.width = targetElment.width();
-                                    newBox.htmlDetail.top = targetElment.position().top + $('#'+this.documentDataService.nameTemplate).scrollTop();
-                                    newBox.htmlDetail.left = targetElment.position().left + $('#'+this.documentDataService.nameTemplate).scrollLeft();
-                                    // console.log(targetElment.get(0).getBoundingClientRect().top)
-                                    // console.log(targetElment.get(0).getBoundingClientRect().left)
-                                    newBox.htmlDetail.background  = targetElment.css('background')
-                                    newBox.htmlDetail.selector = targetElment.find('[content-name]').attr('content-name');
-                                    newBox.htmlDetail.level  = targetElment.css("z-index");
-                                    if (!boxes.find((box) => box.id === newBox.id)) {
-                                        boxes.push(newBox)
-                                    }
-                                    if(index === this.rootElement.find('.content-box').length-1){
-                                        this.rootElement.find('.content-box').not('[content-box-type="text"]').remove();
-                                        this.rootElement.find('.content-box[content-box-type="text"]').html(null)
-                                        this.removeStyleElements(this.actions.style.removeAllStyleBoxCurrent);
-                                        this.contentDCtrlService.poolContents.boxes = boxes;
-                                        resolve(Constants.common.message.status.success)
-                                    }
+                                let newBox = new BoxContentModel()
+                                newBox.id = targetElment.attr('id');
+                                // newBox.boxType = targetElment.attr('content-box-type');
+                                newBox.contentType = targetElment.find('[content-name]').attr('content-name')
+                                newBox.htmlDetail.height = targetElment.height();
+                                newBox.htmlDetail.width = targetElment.width();
+                                newBox.htmlDetail.top = targetElment.position().top + $('#' + this.documentDataService.nameTemplate).scrollTop();
+                                newBox.htmlDetail.left = targetElment.position().left + $('#' + this.documentDataService.nameTemplate).scrollLeft();
+                                // console.log(targetElment.get(0).getBoundingClientRect().top)
+                                // console.log(targetElment.get(0).getBoundingClientRect().left)
+                                newBox.htmlDetail.background = targetElment.css('background')
+                                newBox.htmlDetail.selector = targetElment.find('[content-name]').attr('content-name');
+                                newBox.htmlDetail.level = targetElment.css("z-index");
+                                newBox.htmlDetail.boxType  =  targetElment.attr('content-box-type')
+                                if (!boxes.find((box) => box.id === newBox.id)) {
+                                    boxes.push(newBox)
+                                }
+                                if (index === this.rootElement.find('.content-box').length - 1) {
+                                    this.rootElement.find('.content-box').not('[content-box-type="'+Constants.document.boxes.types.boxAsText +'"]').remove();
+                                    this.rootElement.find('.content-box[content-box-type="'+Constants.document.boxes.types.boxAsText +'"]').html(null)
+                                    // this.rootElement.find('.content-box').not('[content-box-type="text"]').remove();
+                                    // this.rootElement.find('.content-box[content-box-type="text"]').html(null)
+                                    this.removeStyleElements(this.actions.style.removeAllStyleBoxCurrent);
+                                    this.contentDCtrlService.poolContents.boxes = boxes;
+                                    resolve(Constants.common.message.status.success)
+                                }
                                 // }
                             })
-                        }else{
+                        } else {
                             resolve(Constants.common.message.status.success)
                         }
-        
+
                     })
                 }
-                let createLayouts =  ()=>{
-                    return new Promise((resolve,reject)=>{
-                        if(this.rootElement.find('.content-layout').length > 0){
+                let createLayouts = () => {
+                    return new Promise((resolve, reject) => {
+                        if (this.rootElement.find('.content-layout').length > 0) {
                             this.rootElement.find('.content-layout').removeClass('content-layout-current')
-                            .find('td').removeClass('border-primary')
-                            this.rootElement.find('.content-layout').find('[contenteditable]').attr('contenteditable','false')
+                                .find('td').removeClass('border-primary')
+                            this.rootElement.find('.content-layout').find('[contenteditable]').attr('contenteditable', 'false')
                         }
                         resolve(Constants.common.message.status.success)
                     })
                 }
-                createLayouts().then(()=>{
-                    createDataBoxes().then(()=>{
+                createLayouts().then(() => {
+                    createDataBoxes().then(() => {
                         let documentObj = new DocumentModel();
-                        documentObj.html  = $('#'+this.documentDataService.nameTemplate).html();
-                        documentObj.styles =  $('#'+this.documentDataService.nameTemplate).attr('style') && $('#'+this.documentDataService.nameTemplate).attr('style').toString();
+                        documentObj.html = $('#' + this.documentDataService.nameTemplate).html();
+                        documentObj.styles = $('#' + this.documentDataService.nameTemplate).attr('style') && $('#' + this.documentDataService.nameTemplate).attr('style').toString();
                         // documentObj.html  = CKEDITOR.instances[this.documentDataService.nameTemplate].getData()
+                        console.log('this.contentDCtrlService.poolContents',this.contentDCtrlService.poolContents)
                         documentObj.contents = this.contentDCtrlService.poolContents
 
-                        documentObj.contents.comments.forEach((comment)=>{
-                            comment.listComment  = new Array<commentDetailModel>();
+
+                        documentObj.contents.comments.forEach((comment) => {
+                            comment.listComment = new Array<commentDetailModel>();
                         })
 
-                        $('#'+this.documentDataService.nameTemplate).remove();
+                        $('#' + this.documentDataService.nameTemplate).remove();
                         resolve(documentObj)
                     })
                 })
@@ -2368,7 +2453,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             // this.rootElement.find('.freedom-layout').draggable("option", "containment", this.contentTemplate.nativeElement);
         }
     }
-    public createContent(parentBox,componnent: Type<any>, contentName: string, data?) {
+    public createContent(parentBox, componnent: Type<any>, contentName: string, data?) {
         if (contentName) {
             const newElement = document.createElement(contentName) as NgElement & WithProperties<
                 {
@@ -2410,7 +2495,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             return componentRef.location.nativeElement;
         }
     }
-    public createContentOption(parentBox,Componnent: Type<any>) {
+    public createContentOption(parentBox, Componnent: Type<any>) {
         if (Componnent) {
             const componentFactory = this.componentFactoryResolver.resolveComponentFactory(Componnent)
             const viewContainerRef = this.adHost.viewContainerRef;
@@ -2453,40 +2538,40 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             if (context.action === 'merge') {
                 //    let targetLayout =  context.targetElement.parents()
                 //    console.log(context.targetElement)
-                let  colSectionNumber =  0
-                let allTr  =  this.rootElement.find('tr');
-     
+                let colSectionNumber = 0
+                let allTr = this.rootElement.find('tr');
 
-                allTr.each((index,element)=>{
-                    let targetSelection  =  $(element).find('.cke_table-faked-selection');
+
+                allTr.each((index, element) => {
+                    let targetSelection = $(element).find('.cke_table-faked-selection');
                     targetSelection.first().attr('colspan', targetSelection.length)
-                    .css('vertical-align','middle')
+                        .css('vertical-align', 'middle')
                     targetSelection.not(':first').remove();
-                    if(targetSelection.length > 0){
+                    if (targetSelection.length > 0) {
                         colSectionNumber++
                     }
-                    if(index === allTr.length -1){
-                        let allTrSelection  = allTr.find('.cke_table-faked-selection').parents('tr')
-                        let firstTrRowspan =  allTrSelection.last()
-                        
+                    if (index === allTr.length - 1) {
+                        let allTrSelection = allTr.find('.cke_table-faked-selection').parents('tr')
+                        let firstTrRowspan = allTrSelection.last()
+
                         //fix bug if colspan equal tr
                         // console.log(this.rootElement.find('td[colspan]').first().attr('colspan'))
                         // if(parseInt(this.rootElement.find('td[colspan]').first().attr('colspan')) === firstTrTdLength){
                         //     colSectionNumber = colSectionNumber+1;
                         // }
 
-                        firstTrRowspan.find('.cke_table-faked-selection').attr('rowspan',colSectionNumber)
-                        firstTrRowspan.find('.cke_table-faked-selection').css('vertical-align','middle')
+                        firstTrRowspan.find('.cke_table-faked-selection').attr('rowspan', colSectionNumber)
+                        firstTrRowspan.find('.cke_table-faked-selection').css('vertical-align', 'middle')
                         allTrSelection.not(':last').find('.cke_table-faked-selection').remove();
                         // for(let i = 1 ; i<= colSectionNumber;i++){
                         //     console.log($(allTrSelection[i]))
                         //    // $(allTrSelection[i]).find('.cke_table-faked-selection').remove();
-                         
+
                         // }
-                    //   let otherTr = allTr.find('.cke_table-faked-selection').parents('tr').not(':eq('+firstRowspan.index()+')')
-                    //   otherTr.remove();
-                     // allTr.find(
-                     //let otherTr  =  allTr.find('.cke_table-faked-selection').not(':first').parents('tr')
+                        //   let otherTr = allTr.find('.cke_table-faked-selection').parents('tr').not(':eq('+firstRowspan.index()+')')
+                        //   otherTr.remove();
+                        // allTr.find(
+                        //let otherTr  =  allTr.find('.cke_table-faked-selection').not(':first').parents('tr')
 
                     }
                 })
@@ -2503,42 +2588,42 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
 
                 // let targetSelection  = this.rootElement.find('tr').find('.cke_table-faked-selection');
                 // console.log(targetSelection)
-               // let firstCell = context.targetElement.find('.cke_table-faked-selection')[0];
-            //    targetSelection.first().attr('colspan', targetSelection.length)
-            //    targetSelection.not(':first').remove();
+                // let firstCell = context.targetElement.find('.cke_table-faked-selection')[0];
+                //    targetSelection.first().attr('colspan', targetSelection.length)
+                //    targetSelection.not(':first').remove();
 
                 //console.log(firstCell)
             }
-            else if(context.action === 'unmerge'){
-               let targetColSpan =  parseInt(context.targetElement.attr('colspan'))
-               let targetRowSpan =  parseInt(context.targetElement.attr('rowspan'))
-               let targetTr =  context.targetElement.parents('tr')
-               context.targetElement.removeAttr('colspan').removeAttr('rowspan')
-            for(let i  = 0 ; i <targetRowSpan ; i++){
-                let targetTd  = targetTr.find('td').eq(context.targetElement.index());
-                for (let j = 0 ; j <targetColSpan ;j++){
-                    let newTd  = targetTd.clone();
-                    if(i==0 && j>0){
-                        newTd.insertAfter(targetTd)
-                        targetTd = targetTd.next();
-                    }else if(i!==0){
-                        newTd.insertAfter(targetTd)
-                        targetTd = targetTd.next();
+            else if (context.action === 'unmerge') {
+                let targetColSpan = parseInt(context.targetElement.attr('colspan'))
+                let targetRowSpan = parseInt(context.targetElement.attr('rowspan'))
+                let targetTr = context.targetElement.parents('tr')
+                context.targetElement.removeAttr('colspan').removeAttr('rowspan')
+                for (let i = 0; i < targetRowSpan; i++) {
+                    let targetTd = targetTr.find('td').eq(context.targetElement.index());
+                    for (let j = 0; j < targetColSpan; j++) {
+                        let newTd = targetTd.clone();
+                        if (i == 0 && j > 0) {
+                            newTd.insertAfter(targetTd)
+                            targetTd = targetTd.next();
+                        } else if (i !== 0) {
+                            newTd.insertAfter(targetTd)
+                            targetTd = targetTd.next();
+                        }
+
+
                     }
-                   
-         
+                    targetTr = targetTr.next()
                 }
-                targetTr = targetTr.next()
-            }
-     
-               
+
+
             }
         } else {
             if (context.action === 'link') {
                 let targetContent = ContentRouting.routes.find((content) => content.contentName === context.contentType);
                 if (targetContent) {
                     let data = {
-                        action:'link',
+                        action: 'link',
                         targetContent: targetContent,
                         result: this.currentTextSelection
                     }
@@ -2559,7 +2644,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
 
     private defineComponent() {
         ContentRouting.routes.forEach((route) => {
-            const customElement = createCustomElement(route.component, { injector: this.injector });
+            let customElement: any = createCustomElement(route.component, { injector: this.injector });
             customElements.get(route.contentName) || customElements.define(route.contentName, customElement)
         })
     }

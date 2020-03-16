@@ -3,10 +3,17 @@ import { Constants } from '../../global/constants';
 import { PostitionDetailModel, ScreenDetailModel, ElementDetailModel } from '../../models/common/common.model';
 import { Observable } from 'rxjs';
 import { VideoConetentDataModel } from 'src/app/models/document/elements/video-content.model';
+import { DocumentDataControlService } from '../document/document-data-control.service';
+import { ContentDataControlService } from '../content/content-data-control.service';
+import { ParagraphContentModel, ParagraphContentHTMLModel } from '../../models/document/elements/paragraph-content.model';
+import { position } from 'html2canvas/dist/types/css/property-descriptors/position';
 
 @Injectable()
 export class CommonService {
-  constructor() { }
+  constructor(
+    public documentDataCtrlService:DocumentDataControlService,
+    public contentDataControlService:ContentDataControlService
+  ) { }
   private selfIsPlatform: any;
   public get isPlatform(): any {
     return this.selfIsPlatform;
@@ -172,4 +179,36 @@ export class CommonService {
     return window.getSelection()
 
   }
+  public getTextCapitalize(string){
+    return string[0].toUpperCase() + string.slice(1);
+  }
+  // public test(){
+  //   $('p').each((index,element)=>{
+  //     let targetElement =  $(element);
+  //     targetElement.attr('id','p-'+index)
+  //     let htmlDetail:ParagraphContentHTMLModel = new ParagraphContentHTMLModel();
+  //     htmlDetail.height = targetElement.height();
+  //     htmlDetail.width = targetElement.width();
+  //     htmlDetail.positionTop =  targetElement.position().top;
+  //     htmlDetail.positionLeft =  targetElement.position().left;
+  //     htmlDetail.offsetTop =  targetElement.offset().top;
+  //     htmlDetail.offsetLeft = targetElement.offset().left;
+  //     let paragraphObj:ParagraphContentModel =  {
+  //         id:'p-'+index,
+  //         htmlDetail:htmlDetail
+  //     }
+  //     this.contentDataControlService.poolContents.paragraphs.push(paragraphObj)
+  //   })
+  //   $('#'+this.documentDataCtrlService.nameTemplate).unbind('DOMNodeInserted').bind('DOMNodeInserted',  (ev:any)=> {
+  //     console.log(ev.target)
+   
+  //   })
+  //   $('#'+this.documentDataCtrlService.nameTemplate).unbind('DOMNodeRemoved').bind('DOMNodeRemoved',  (ev:any)=> {
+  //     console.log(ev.target.id)
+      
+   
+  //   })
+
+  // }
+  
 }

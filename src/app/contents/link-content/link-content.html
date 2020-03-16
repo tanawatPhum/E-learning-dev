@@ -16,6 +16,7 @@
                     <option disabled value="">Link Type</option>
                     <option [value]="linkType.url">Url</option>
                     <option [value]="linkType.document">Document</option>
+                    <option [value]="linkType.content">Content</option>
                 </select>
 
             <p *ngIf="!createLink.type" class="content-font-title1 mt-3">Choose type url</p>
@@ -28,6 +29,12 @@
                     <option  disabled value="">Document List</option>
                     <option [value]="document.id" *ngFor="let document of documentList">{{document.nameDocument}}</option>
                 </select>
+
+            <select (change)="changeDocument($event.target.value)" [(ngModel)]="createLink.childId" *ngIf="createLink.type===linkType.content" class="form-control">
+                    <option  disabled value="">Content List</option>
+                    <option [value]="box.id" *ngFor="let box of boxList">{{box.name}}</option>
+                </select>
+
         </div>
         <div class="col-12">
             <button *ngIf="createLink.type" (click)="addLink()" type="button" class="btn btn-success mt-1">Go</button>

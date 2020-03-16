@@ -136,7 +136,8 @@ export class Constants {
             constats:{
                 linkTypes:{
                     url: 'url',
-                    document: 'document'
+                    document: 'document',
+                    content:'content'
                 },
                 videoTypes:{
                     browseFile:'browseFile',
@@ -175,6 +176,7 @@ export class Constants {
             }
         },
         boxes:{
+            
             types:{
                 boxInitial: 'box-intial',
                 boxTextarea: 'box-textarea',
@@ -193,7 +195,8 @@ export class Constants {
                 boxComment: 'box-comment',
                 boxToDoList: 'box-toDoList',
                 boxExam:'box-exam',
-                boxNote:'box-note'
+                boxNote:'box-note',
+                boxAsText:'box-as-text'
 
             }
         },

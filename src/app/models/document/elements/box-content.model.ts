@@ -15,4 +15,5 @@ export class BoxHTMLModel{
     public background:string;
     public selector:string;
     public level:string;
+    public boxType:string;
 }

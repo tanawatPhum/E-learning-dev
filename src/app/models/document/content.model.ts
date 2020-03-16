@@ -12,6 +12,7 @@ import { ExamContentModel } from './elements/exam-content.model';
 import { ScreenDetailModel, RulerDetailModel } from '../common/common.model';
 import { NoteContentModel } from './elements/note-content.model';
 import { LayoutContentModel } from './elements/layout-content.model';
+import { ParagraphContentModel } from './elements/paragraph-content.model';
 
 
 export class DocumentModel {
@@ -28,6 +29,7 @@ export class DocumentModel {
 
 export class ContentsModel {
     public boxes: BoxContentModel[] =  new Array<BoxContentModel>();
+    public paragraphs:ParagraphContentModel[] = new Array<ParagraphContentModel>();
     public layouts:LayoutContentModel[] = new Array<LayoutContentModel>();
     public files:FileContentModel[] =  new Array<FileContentModel>();
     public textAreas: TextAreaContentModel[] =  new Array<TextAreaContentModel>();

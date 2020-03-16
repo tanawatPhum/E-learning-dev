@@ -4,13 +4,15 @@ import { CommonService } from 'src/app/services/common/common.service';
 import { DocumentService } from 'src/app/services/document/document.service';
 import { ContentDataControlService } from 'src/app/services/content/content-data-control.service';
 import { DocumentDataControlService } from 'src/app/services/document/document-data-control.service';
-import { LinkContentModel, LinkContentConditionModel } from '../../models/document/elements/link-content.model';
+import { LinkContentModel, LinkContentConditionModel, LinkContentOtherDetail } from '../../models/document/elements/link-content.model';
 import { UpdateContentModel } from '../../models/common/common.model';
 import { Constants } from 'src/app/global/constants';
 import { ContentsModel } from 'src/app/models/document/content.model';
 import { SubFormContentDetailModel, SubFormContentLinkModel } from 'src/app/models/document/elements/subForm-content.model';
 import { DocumentNavigatorModel, DocumentTrackContent } from '../../models/document/document.model';
 import { Router } from '@angular/router';
+import { BoxContentModel } from '../../models/document/elements/box-content.model';
+import { resolve } from 'url';
 
 @Component({
     moduleId: module.id,
@@ -23,6 +25,7 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
     @Input() parentBox: JQuery<Element>;
     @Input() data: Range;
     public documentList:DocumentNavigatorModel[] = new Array<DocumentNavigatorModel>();
+    public boxList:BoxContentModel[]  =new Array<BoxContentModel>();
     // public childDocuments: SubFormContentDetailModel[] = new Array<SubFormContentDetailModel>();
     public selectDocument: DocumentNavigatorModel = new DocumentNavigatorModel();
     public currentTextSelection:Range;
@@ -37,6 +40,7 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
     }
     public rootElement: JQuery<Element>;
     public targetLinkInsert;
+    public parentBoxDetail:BoxContentModel = new BoxContentModel();
     public targetLink: LinkContentModel = new LinkContentModel();
     public actionCase = {
         browseLink: 'browseLink',
@@ -55,17 +59,26 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
+        this.parentBoxDetail  =  this.contentDCtrlService.poolContents.boxes.find(box=>box.id === this.parentBox.attr('id'))
+     
+
+        this.boxList  = this.contentDCtrlService.poolContents.boxes.filter(box=>box.id !== this.parentBox.attr('id'));
         this.contentDCtrlService.getUpdateContent().subscribe((detail) => {
             if (detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm && detail.for === this.parentBox.attr('id')) {
                 let targetDocumentContent: ContentsModel = detail.data;
                 this.targetLink = targetDocumentContent.links.find((link) => link.parentId === this.parentBox.attr('id'))
                 this.initialLink()
             }
+
+
+
         })
     }
     ngAfterViewInit() {
-        this.currentTextSelection =  this.data;
+
         this.targetLink = this.contentDCtrlService.poolContents.links.find((link) => link.parentId === this.parentBox.attr('id'))
+        this.currentTextSelection =  this.data;
+       // console.log(' this.currentTextSelection', this.targetLink)
         this.initialLink();
 
     }
@@ -107,33 +120,7 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
         // });
     }
     public addLink() {
-        if(this.currentTextSelection){
-            this.parentBox.css('display','inline-block')
-            this.parentBox.css('position','initial')
-            this.parentBox.css('width','auto')
-            this.parentBox.css('height','auto')
-            this.parentBox.removeClass('ui-resizable');
-            this.parentBox.find('.ui-resizable-handle').remove();
-            this.parentBox.find('.content-box-label').remove();
-            this.replaceSelectionWithHtml(this.parentBox)
-            this.parentBox.css('height','auto')
-            this.parentBox.css('width','auto') 
-            this.parentBox.css('background','transparent') 
-            let updateAction: UpdateContentModel = new UpdateContentModel()
-            updateAction.actionCase = Constants.document.contents.lifeCycle.updateHandleContentBox
-            this.contentDCtrlService.updateContent = updateAction
-            this.contentDCtrlService.setLastContent(this.parentBox);
-            this.parentBox.attr('content-box-type','text')
-           // this.parentBox.wrapInner("<div/>").children(0).unwrap()
-
-        }else{
-            this.parentBox.css('height','auto')
-            this.parentBox.css('width','70') 
-            this.parentBox.css('min-width','70')
-        }
-
- 
-        
+     
         if(this.createLink.type === this.linkType.url && !this.createLink.name){
             try{
                 this.createLink.name = (new URL(this.createLink.path)).hostname;
@@ -148,6 +135,10 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
   
             }
         }
+        else if(this.createLink.type === this.linkType.content){
+            this.createLink.path  =  this.createLink.childId;
+
+        }
         this.createLink.parentId  =  this.parentBox.attr('id');
         this.createLink.id  =  this.parentBox.attr('id')+ '-link';
         let link: LinkContentModel = {
@@ -157,15 +148,34 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
             path: this.createLink.path,
             name: this.createLink.name,
             childId:this.createLink.childId,
-            styles:null
+            styles:null,
+            otherDetail:new LinkContentOtherDetail()
         };
-    console.log(link)
         this.currentCase = this.actionCase.showLink;
         this.contentDCtrlService.setLastContent(this.parentBox);
         this.contentDCtrlService.poolContents.links.push(link)
         this.rootElement.find('.content-link').attr('data-name', this.createLink.name)
             .attr('id', this.parentBox.attr('id') + '-link')
             .text(this.createLink.name)
+
+            if(this.currentTextSelection){
+    
+                this.setStyleForInsertLink().then(()=>{
+                    this.replaceSelectionWithHtml(this.parentBox)
+                    let updateAction: UpdateContentModel = new UpdateContentModel()
+                    updateAction.actionCase = Constants.document.contents.lifeCycle.updateHandleContentBox
+                    this.contentDCtrlService.updateContent = updateAction
+                    this.contentDCtrlService.setLastContent(this.parentBox);
+                    this.parentBox.attr('content-box-type',Constants.document.boxes.types.boxAsText)
+                })
+               // this.parentBox.wrapInner("<div/>").children(0).unwrap()
+    
+            }else{
+                this.parentBox.css('height','auto')
+                this.parentBox.css('width','70') 
+                this.parentBox.css('min-width','70')
+            }
+
         let updateAction: UpdateContentModel = new UpdateContentModel()
         updateAction.actionCase = 'showLink'
         this.contentDCtrlService.updateContent = updateAction
@@ -174,8 +184,19 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
     }
     public loadLink() {
         this.currentCase = this.actionCase.showLink;
-        if(this.parentBox.attr('content-box-type')){
-            this.parentBox.css('position','initial')
+        if(this.parentBoxDetail.htmlDetail.boxType === Constants.document.boxes.types.boxAsText){
+            this.setStyleForInsertLink().then(()=>{
+                $('#insert-'+this.parentBox.attr('id')).after(this.parentBox)   
+            });
+        
+
+           
+            //console.log($('#insert-'+this.parentBox.attr('id')))\
+         
+        
+        
+
+            //this.parentBox.detach().insertAfter($('#insert-'+this.parentBox.attr('id')))
             let updateAction: UpdateContentModel = new UpdateContentModel()
             updateAction.actionCase = Constants.document.contents.lifeCycle.updateHandleContentBox
             this.contentDCtrlService.updateContent = updateAction
@@ -218,7 +239,11 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
                             this.router.navigate(['documentPreview'], { queryParams: { documentId: this.targetLink.path} })
                         });
                 }
+                else if(this.targetLink.type  ===  this.linkType.content){  
+                    console.log(this.targetLink)
+                    document.getElementById(this.targetLink.path).scrollIntoView();
 
+                }
      
             });
      
@@ -291,6 +316,8 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
         var range;
         if (this.currentTextSelection) {
             range = this.currentTextSelection;
+
+
             range.deleteContents();
             // var div = document.createElement("div");
             // div.innerHTML = html;
@@ -299,14 +326,38 @@ export class LinkContentComponent implements OnInit, ContentInterFace, AfterView
           
             $(element).detach().appendTo(frag)
             
-           // $(element).wrap('<span></span>')
+        //    // $(element).wrap('<span></span>')
    
-            // }
+        //     // }
+        //     console.log(range)
+        // console.log(this.currentTextSelection)
+    
             range.insertNode(frag);
-
+         
+            $(this.currentTextSelection.startContainer).wrap('<span id="insert-'+this.parentBox.attr('id')+'"></span>')    
+            // $('<span>xxxx</span>').insertAfter(this.contentDCtrlService.poolContents.links[targetLinkIndex].otherDetail.positionInsertLink)
           //  $('<span>&nbsp;</span>').insertAfter(element)
         }
      
+    }
+
+    setStyleForInsertLink(){
+        return new Promise((resolve,reject)=>{
+            this.parentBox.css('display','inline-block')
+            .css('position','initial')
+            .css('width','auto')
+            .css('height','auto')
+            .removeClass('ui-resizable')
+            .css('height','auto')
+            .css('width','auto') 
+            .css('background','transparent').ready(()=>{
+                this.parentBox.find('.ui-resizable-handle').remove();
+                this.parentBox.find('.content-box-label').remove();
+                resolve(Constants.common.message.status.success)
+            })
+        })
+
+
     }
 
 }
