@@ -6,7 +6,7 @@ import { ScreenDetailModel } from 'src/app/models/common/common.model';
 import { DocumentNavigatorModel } from 'src/app/models/document/document.model';
 import { DocumentService } from './document.service';
 import { CommonService } from '../common/common.service';
-import { DocumentTrackModel } from '../../models/document/document.model';
+import { DocumentTrackModel, DocumentEventControllerModel } from '../../models/document/document.model';
 declare var electron: any;
 @Injectable()
 export class DocumentDataControlService {
@@ -117,6 +117,14 @@ export class DocumentDataControlService {
     }
     public set currentDocumentNav(value: DocumentNavigatorModel) {
         this._currentDocumentNav = value;
+    }
+
+    public setDocumentEvent(event,data,element){
+        let eventobj:DocumentEventControllerModel = new DocumentEventControllerModel();
+        eventobj.event = event;
+        eventobj.data = data;
+        eventobj.element =  element;
+        return eventobj;
     }
     // public get currentDocumentName(): string {
     //     return this._currentDocument;

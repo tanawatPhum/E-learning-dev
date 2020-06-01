@@ -36,6 +36,7 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
     public rootElement: JQuery<Element>;
     public targetPathImg:string = null;
     public targetOriginalPath:string = null;
+    public currentPage:JQuery<Element>;
 
     // private parentBox:JQuery<Element>;
     constructor(
@@ -50,6 +51,7 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
     ngOnInit() {
         this.rootElement = $(this.element.nativeElement);
         this.parentBox = this.rootElement.parents('.content-box');
+        this.currentPage  =  this.rootElement.parents('[element-name="content-page"]')
         this.contentDCtrlService.getUpdateContent().subscribe((detail)=>{
             if(detail.actionCase === Constants.document.contents.lifeCycle.loadsubForm
                 && detail.for === this.parentBox.attr('id')
@@ -62,7 +64,7 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
     }
 
     ngAfterViewInit() {
-        console.log(this.contentDCtrlService.poolContents)
+        // console.log(this.contentDCtrlService.poolContents)
         this.targetimg = this.contentDCtrlService.poolContents.imgs.find((img) => img.parentId === this.parentBox.attr('id'))
         this.initialImg();
 
@@ -80,7 +82,7 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
         }
         else if (this.documentDCtrlService.lifeCycle === Constants.document.lifeCycle.loadEditor || this.documentDCtrlService.lifeCycle===Constants.document.lifeCycle.loadPreview) {
             if(this.targetimg){
-          
+                // this.currentPage  =$('#'+this.targetimg.pageId)
                 this.loadImg(this.targetimg.path)
             }
         }
@@ -122,13 +124,16 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
             event.preventDefault();
             event.stopPropagation();
             this.rootElement.find('.toolbar-browse-img').find('#img-input-url').focus();
-            this.rootElement.find('.toolbar-browse-img').find('#img-input-url').on('input', this.commonService.debounce((event) => {
-                if (event.target.value) {
-                    this.targetFile = event.target.value;
-                    console.log(' ❏ File :', this.targetFile);
-                    this.addImg('url')
-                }
-            }, 2000));
+
+  
+
+            // this.rootElement.find('.toolbar-browse-img').find('#img-input-url').on('input', this.commonService.debounce((event) => {
+            //     if (event.target.value) {
+            //         this.targetFile = event.target.value;
+            //         console.log(' ❏ File :', this.targetFile);
+            //         this.addImg('url')
+            //     }
+            // }, 2000));
         });
         this.rootElement.find('.toolbar-browse-img').find('#img-input-url').bind("paste", (event: any) => {
             event.preventDefault();

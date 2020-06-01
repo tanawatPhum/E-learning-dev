@@ -4,6 +4,7 @@ import { VideoConetentConditionModel } from './elements/video-content.model';
 import {  ExamContentConditionModel } from './elements/exam-content.model';
 import { LinkContentConditionModel } from './elements/link-content.model';
 
+
 export class TriggerEventModel {
     public action:string;
     public data:any;
@@ -43,6 +44,10 @@ export class DocumentTrackContentCondition{
     public examCondition:ExamContentConditionModel = new ExamContentConditionModel();
     public linkCondition:LinkContentConditionModel   =  new LinkContentConditionModel();
 
-
 }
 
+export class DocumentEventControllerModel{
+    event:string;
+    data:any;
+    element:Element;
+}

@@ -14,9 +14,13 @@ export class SocketIoService {
     }
 
     public connectSocketIo(){
-        //this.socket = io.connect('http://localhost:3000');
+        this.socket = io.connect('http://localhost:3000');
         
-      this.socket = io.connect(Constants.common.host.serverSite);
+        // this.socket = io(Constants.common.host.serverSite, {
+        //     path: '/socket',
+        //   });
+
+     // this.socket = io.connect(Constants.common.host.serverSite);
         // this.socket = io.connect();
     }
     public sendData(nameSocket,data?):Observable<any>{

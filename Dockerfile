@@ -10,8 +10,8 @@
 # final image
 FROM nginx:alpine
 
-ENV serverSite="https://smartdoc.alworks.io"
-ENV frontendSite="https://smartdoc.alworks.io"
+ENV serverSite="http://192.168.0.220"
+ENV frontendSite="http://192.168.0.220"
 ENV getImage="/api/getImage/?originalPath="
 
 

@@ -22,7 +22,7 @@
 }
 
 .document-toolbar {
-    height: 100px;
+    // height: 100px;
     .toolbar-name {
         text-align: center;
         font-size: 0.7em;
@@ -190,6 +190,20 @@
     // height: 100%;
     display: inherit;
     padding: 0;
+}
+
+.document-container-content {
+    height: 100%;
+    overflow: auto;
+}
+
+.document-container-toolbar {
+    min-height: 75px;
+}
+
+.content-page {
+    height: 100%;
+    width: 100%;
 }
 
 // .layout-col-grid:hover {

@@ -284,16 +284,7 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
             if (rulerDetail && rulerDetail.paddingLeft < 0) {
                 rulerDetail.paddingLeft = 0;
             }
-            // let html = '<div class="template-scroll" id="contentTemplate" style="overflow:hidden;position:relative;padding-left:'+rulerDetail.paddingLeft+'%;padding-right:' +(100-rulerDetail.paddingRight)+  '%;width:' +  this.contentTemplateSize.width + 'px;height:' + this.contentTemplateSize.height + 'px" >' + data.html + '</div>'
-            
-            
-            
-            // let html = `<div id="contentTemplate"
-            // style="
-            // padding-left:${rulerDetail.paddingLeft}%;padding-right:${(100 - rulerDetail.paddingRight)}%
-            // "
 
-            // ></div>`
             console.log('this.currentResult',this.currentResult)
             this.contentDCtrlService.poolContents =  this.currentResult.contents;
 
@@ -304,98 +295,15 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
             this.currentResult.contents.boxes.forEach((box)=>{
                 if(this.rootElement.find('#contentTemplate').find('#'+box.id).length ===0){
                     this.rootElement.find('#contentTemplate').append(this.documentService.getBoxContentPreview(box));
-                    // this.rootElement.find('#contentTemplate').append(`
-                    // <div contenteditable="false" id="${box.id}" class="content-box freedom-layout"
-                    // style="
-                    // top:${box.htmlDetail.top}px;left:${box.htmlDetail.left}px;
-                    // height:${box.htmlDetail.height}px;width:${box.htmlDetail.width}px;
-                    // z-index:${box.htmlDetail.level};
-                    // position:absolute;
-                    // cursor: default;
-                    // "
-                    // name="${box.name}" ><${box.htmlDetail.selector} class="full-screen"></${box.htmlDetail.selector}></div>`)
                 }else{
                     this.rootElement.find('#contentTemplate').find('#'+box.id).append(this.documentService.createContentPreview(box))
                 }
             })
-            // style="
-            //     height:${this.contentTemplateSize.height}px;
-            //     width:${this.contentTemplateSize.width}px;
-            // "
             this.retrieveData(this.actions.data.retrieveResultData, data);
-            // this.rootElement.html(html);
-               
             this.defineComponent()                
-          
-    
-
-
-            // this.rootElement.find('.template-doc').css('height',this.contentTemplateSize.height +'px');
-            // this.rootElement.find('.template-doc').css('width',this.contentTemplateSize.width +'px');
-
-
-            // setTimeout(() => {
-            //     this.defineComponent()             
-            // }, 3000);
-
-
-
             this.setElements(this.actions.element.previewElement);
-            // this.handles(this.actions.handle.handleSubForm);
-            // this.handles(this.actions.handle.handleVideo);
-
-            // this.handles(this.actions.handle.handleFile);
-            // this.handles(this.actions.handle.handleLink);
-            // this.handles(this.actions.handle.handleExam);
-            // this.handles(this.actions.handle.handleNote);
-
-            // this.handles(this.actions.handle.handleToDoList);
-            //    this.handles(this.actions.handle.handleComment);
-            //     this.setElements(this.actions.element.setCommentElement);
         }
         else if (action === this.actions.element.previewElement) {
-            // this.rootElement.find('.content-box').resizable('destroy')
-            // this.rootElement.find('.content-box').draggable('destroy')
-
-            // this.rootElement.find('.content-box').children().css('cursor', 'default');
-            // this.rootElement.find('.content-box').removeClass('content-box-active border border-primary');
-            // this.rootElement.find('.content-box').removeClass('ui-draggable ui-draggable-handle');
-            // this.rootElement.find('.content-box').removeClass('ui-resizable');
-            // this.rootElement.find('.content-box').removeClass('content-box-current');
-            // this.rootElement.find('.content-box').find('.ui-resizable-handle').remove();
-            // this.rootElement.find('.content-box').css('border', 'none');
-            // this.rootElement.find('.content-box').css('cursor', 'default');
-            // this.rootElement.find('.content-box').find('.content-toolbar').remove();
-            // this.rootElement.find('.content-box').find('.content-video').css('pointer-events', 'initial');
-            // this.rootElement.find('.content-box').find('.content-textarea').each((index, element) => {
-            //     let targetTextArea = this.currentResult.contents.textAreas.find((textArea) => textArea.id == $(element).attr('id'));
-            //     $('[id="' + $(element).attr('id') + '"]').val(targetTextArea.value);
-            //     $('[id="' + $(element).attr('id') + '"]').attr('disabled', 'true');
-            // });
-            // this.rootElement.find('.content-box').find('.content-subform').find('li').attr('contenteditable', 'false');
-            // this.rootElement.find('.content-box').find('.content-box-label').remove();
-      
-
-            // this.rootElement.find('.template-doc').attr('contenteditable', 'false');
-            // this.rootElement.find('.template-doc').removeAttr("title");
-            // this.rootElement.find('.template-doc').css('overflow', 'unset')
-
-            // this.rootElement.find('.template-doc').css('cursor', 'default')
-            // this.rootElement.find('.template-doc').css('cursor', 'default')
-            // // this.rootElement.find('.template-doc').find('.content-box').css('position','relative')
-            // // this.rootElement.find('.template-doc').find('br').remove();
-            // this.rootElement.find('.template-doc').find('.content-layout p').attr('contenteditable','false')
-            // this.rootElement.find('.template-doc').find('.content-layout').removeClass('border border-primary').find('.layout-column')
-            //     .removeClass('border border-primary ui-state-highlight')
-            // // this.rootElement.find('.template-doc').css('width', this.documentDataService.currentScreenSize.width +'px');
-            // this.rootElement.find('.content-box').find('.content-progress-bar').find('.progress-bar').css('width', 0)
-            // this.rootElement.find('.content-comment').css('height', 'auto');
-            // this.rootElement.find('.content-comment').find('.comment-form').css('padding-bottom', '2.5%');
-            // this.rootElement.find('.note-area').hide();
-            // this.rootElement.find('.content-textarea').attr('contenteditable', 'false');
-            // this.rootElement.find('.content-textarea').css('cursor', 'default');
-            // $(document).find('body').css('overflow-x','hidden');
-            // $(document).find('body').css('overflow-y','hidden');
             this.rootElement.find('.content-box').css('border','none')
             this.documentDataService.currentScreenSize.height = $('.document-preview-content').height();
             this.documentDataService.currentScreenSize.width = $('.document-preview-content').width();
@@ -588,6 +496,8 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
             html: this.currentResult.html,
             status: this.currentResult.status,
             styles:this.currentResult.styles,
+            pages:this.currentResult.pages,
+            layoutType:this.currentResult.layoutType,
             otherDetail: this.currentResult.otherDetail,
             contents:contents || this.contentDCtrlService.poolContents
         }

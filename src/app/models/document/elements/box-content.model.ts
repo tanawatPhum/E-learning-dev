@@ -1,4 +1,5 @@
 export class BoxContentModel {
+    public pageId:string;
     public id: string;
     public name:string;
     public contentType: string;

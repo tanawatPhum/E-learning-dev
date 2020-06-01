@@ -154,6 +154,8 @@ export class TodoListContentComponent implements OnInit, ContentInterFace {
             previewImg: this.documentDCtrlService.currentResult.previewImg,
             userId:this.commonDCtrlService.userId,
             id: this.documentDCtrlService.currentResult.id, 
+            layoutType:this.documentDCtrlService.currentResult.layoutType,
+            pages:this.documentDCtrlService.currentResult.pages,
             html: $('#contentTemplate').html(),
             status: this.documentDCtrlService.currentResult.status,
             otherDetail: this.documentDCtrlService.currentResult.otherDetail,

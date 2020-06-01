@@ -21,10 +21,18 @@ export class DocumentModel {
     public previewImg:string;
     public status:string;
     public id: string;
-    public html: string;
     public styles:string;
+    public layoutType:string;
+    public html: string;
     public contents: ContentsModel  =  new ContentsModel();
+    public pages:PageModel[] = new Array<PageModel>();
     public otherDetail:OtherDetailModel =  new OtherDetailModel();
+}
+
+export class PageModel{
+    public html: string;
+    public id: string;
+    public order:number;
 }
 
 export class ContentsModel {

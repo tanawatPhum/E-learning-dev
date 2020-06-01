@@ -1,9 +1,9 @@
-import { Component, OnInit, AfterContentInit, NgZone, ViewEncapsulation, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterContentInit, NgZone, ViewEncapsulation, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Subject, Observable, of } from 'rxjs';
 import { Constants } from 'src/app/global/constants';
 import { DocumentService } from '../../../services/document/document.service';
 import { DocumentModel } from '../../../models/document/content.model';
-import { TriggerEventModel, DocumentNavigatorModel } from 'src/app/models/document/document.model';
+import { TriggerEventModel, DocumentNavigatorModel, DocumentEventControllerModel } from 'src/app/models/document/document.model';
 import { DocumentDataControlService } from '../../../services/document/document-data-control.service';
 import { Router, NavigationEnd, RoutesRecognized } from '@angular/router';
 import { ScreenDetailModel } from '../../../models/common/common.model';
@@ -24,15 +24,20 @@ declare var electron: any;
     styleUrls: ['../../document-page/document-page.component.scss'],
 })
 export class DocumentHomePageComponent implements OnInit, AfterContentInit, AfterViewInit {
+    @ViewChild('documentContainerContent', { static: true }) documentContainerContent: ElementRef;
+    public documentEventController:Subject<DocumentEventControllerModel> = new Subject<DocumentEventControllerModel>();
+
+
     public triggerElement: Subject<TriggerEventModel> = new Subject<TriggerEventModel>();
     public dropElement: Subject<TriggerEventModel> = new Subject<TriggerEventModel>();
     public triggerModal: Subject<TriggerEventModel> = new Subject<TriggerEventModel>();
     public loading: boolean = false;
-    public contentElement: Subject<DocumentModel> = new Subject<DocumentModel>();
     public contentTypes = Constants.document.contents.types;
     public modalTypes = Constants.document.modals.types;
     public modalEvents = Constants.document.modals.events;
     public toolTypes = Constants.document.tools.types;
+    public layoutType = Constants.document.layouts.types;
+
     public contentTypeSelected: Subject<any> = new Subject<any>();
     public isOpenMenu: boolean = true;
     public triggerFromChild: Subject<TriggerEventModel> = new Subject<TriggerEventModel>();
@@ -117,13 +122,32 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
     ngAfterViewInit() {
     
     // console.log("this.documentDataService.currentDocument",this.documentDataService.currentDocument)
+
+            this.handleToolbars()
+            this.documentService.calSizeContainerContent();
+
+
+            this.documentEventController.next(this.documentDataService.setDocumentEvent(Constants.document.events.initialContent,null,this.documentContainerContent.nativeElement))
+       
             if (this.documentDataService.currentDocument.id) {
                 this.loadTargetDoc();
             } else {
                 let newDoc = new DocumentModel();
-                this.contentElement.next(newDoc);
-            }
-            this.handleToolbars()
+                //this.contentElement.next(newDoc);
+                this.documentEventController.next(this.documentDataService.setDocumentEvent(Constants.document.events.loadContent,newDoc,null))
+            } 
+  
+
+
+
+           
+
+            
+            //console.log(this.documentContainerContent.nativeElement.getBoundingClientRect().top)
+     
+
+
+         
         
     
     }
@@ -237,8 +261,10 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
                     this.createNavigatorDocument(targetDocument, null)
                 }
              this.documentList =  this.documentDataService.documentList; 
+
+             this.documentEventController.next(this.documentDataService.setDocumentEvent(Constants.document.events.loadContent,this.currentResult,null))
                 
-             this.contentElement.next(this.currentResult);
+ 
     
 
 
@@ -495,7 +521,14 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
     }
     public dropTool(event) {
         let targetFile = event.dataTransfer.files
-  
+
+      
+        if($(event.target).attr('element-name')!=='content-page'){
+            event.pageTarget =  $(event.target).parents('[element-name="content-page"]').get(0)
+        }else{
+            event.pageTarget =  event.target
+        }
+
         if(targetFile.length>0){
             let targetContentType = this.documentService.getComponentType(targetFile[0].type);
             let targetContent =  ContentRouting.routes.find((content)=>content.contentName === targetContentType);
@@ -552,6 +585,7 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
         $('[toolbar-tools-action][toolbar-tools-action="insert"]').show()
         $('[toolbar-tools-action][toolbar-tools-action!="insert"]').hide()
 
+
         $('[toolbar-title-action]').unbind('click').bind('click',(event)=>{
             let targetTab =  $('[toolbar-tools-action][toolbar-tools-action='+$(event.currentTarget).attr('toolbar-title-action')+']')
             let otherTab  =   $('[toolbar-tools-action][toolbar-tools-action!='+$(event.currentTarget).attr('toolbar-title-action')+']');
@@ -569,7 +603,7 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
                 currentTarget.removeClass('toolbar-background')
                 .css('color','white')
             }
-
+            this.documentService.calSizeContainerContent();
             // targetTab.toggleClass('toolbar-background')
       
             // $(event.currentTarget).toggleClass('toolbar-background')
@@ -578,6 +612,7 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
         $('.dropdown').unbind('click').bind('click',()=>{
             $('.dropdown-menu').toggle();
         })
+        
    
         // this.toolbarService.getFontFamily('#toolbar-font-family');
         // this.toolbarService.getParagraph('[data-font-group="font-alignment"]');
@@ -591,6 +626,11 @@ export class DocumentHomePageComponent implements OnInit, AfterContentInit, Afte
         
        let templateHeight = $(document).height() - ( ($('.document-navbar:visible').height()||0)  + ($('.document-toolbar:visible').height()||0) +($('.col-ruler:visible').height()||0))
         $('.container-content').css('height',templateHeight-20)
+    }
+
+    setTypeLayout(layoutType){
+        this.documentEventController.next(this.documentDataService.setDocumentEvent(Constants.document.events.setLayout,layoutType,null))
+
     }
 
 }

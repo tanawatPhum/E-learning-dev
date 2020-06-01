@@ -1,9 +1,28 @@
 <!--component html goes here -->
 
 
-<ng-template ad-host></ng-template>
 
-<div class="row  h-100">
+<div #contentContainer id="content-container" class="content-container">
+    <ng-template ad-host></ng-template>
+
+
+    <!-- <div element-name="content-container-page" #contentTemplate id="contentTemplate" class="content-template content-template-create"> -->
+
+
+
+
+    <div #contentContainerOption class="full-screen border-left container-option-content">
+        <div #contentOptionTool class="full-screen content-option-tool">
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- <div class="row  h-100">
     <div class="col-11 pl-2 pr-2 col-ruler" style="height: 65px;">
         <range-slider-page class="full-screen" [rulerDetailSubject]="rulerDetailSubject" (eventToParent)="eventFromChild($event)"></range-slider-page>
     </div>
@@ -14,67 +33,16 @@
         </div>
         <div class="container-content">
             <div #contentTemplate id="contentTemplate" class="content-template content-template-create">
-                <!-- <loading-page *ngIf="loading"></loading-page> -->
             </div>
         </div>
     </div>
-
-
-    <!-- <div id="contentTemplateForCaptureHTML" class="content-template content-template-create">
-        <loading-page *ngIf="loading"></loading-page>
-    </div> -->
-
     <div class="full-screen border-left container-option-content col-1">
         <div #contentOptionTool class="full-screen content-option-tool">
-            <!-- <div class="row p-0 m-0 mt-3">
-                <div class="col-12 d-flex justify-content-center border-bottom">
-                    <div class="form-group w-70 text-center">
-                        <label>Style</label>
-                        <select class="form-control" id="sel1">
-                              <option>1</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-12 d-flex justify-content-center border-bottom">
-                    <div class="form-group w-70 text-center">
-                        <label class="mt-2">Character</label>
-
-                        <select class="form-control mb-2" id="sel1">
-                                          <option>1</option>
-                                    </select>
-                        <select class="form-control" id="sel1">
-                                          <option>1</option>
-                                    </select>
-                    </div>
-                </div>
-                <div class="col-12 d-flex justify-content-center border-bottom">
-                    <div class="form-group w-70 text-center">
-                        <label class="mt-2">Paragraph</label>
-                        <div class="row">
-                            <div class="col-3">
-                                <img src="assets/imgs/contentPage/optionTool/left-alignment.svg">
-                            </div>
-                            <div class="col-3">
-                                <img src="assets/imgs/contentPage/optionTool/center-alignment.svg">
-                            </div>
-                            <div class="col-3">
-                                <img src="assets/imgs/contentPage/optionTool/right-alignment.svg">
-                            </div>
-                            <div class="col-3">
-                                <img src="assets/imgs/contentPage/optionTool/justify.svg">
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div> -->
-
-
-
+       
         </div>
 
     </div>
-</div>
+</div> -->
 
 
 

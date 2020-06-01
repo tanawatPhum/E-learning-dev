@@ -859,6 +859,10 @@ export class DocumentService {
         return `<${box.htmlDetail.selector} class="full-screen"></${box.htmlDetail.selector}>`
     }
 
+    public calSizeContainerContent(){
+        $('[element-name="document-container-content"]').height($(window).height()-$('[element-name="document-container-toolbar"]').height())
+    }
+
     // public createDocumentList(){
     //     this.loadDocFromDB().subscribe((document)=>{
     //         console.log('document',document)

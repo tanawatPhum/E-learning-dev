@@ -4,10 +4,13 @@
 
 export const environment = {
   production: false,
+  // SERVER_SITE:'http://61.90.160.219',
+  // FRONTEND_SITE:'http://61.90.160.219',
+  // GET_IMAGE:'/api/getImage/?originalPath='
   // SERVER_SITE:'https://smartdoc.alworks.io',
   // FRONTEND_SITE:'https://smartdoc.alworks.io',
   // GET_IMAGE:'/api/getImage/?originalPath='
-  SERVER_SITE:process.env.serverSite || 'http://localhost:3001',
+  SERVER_SITE:process.env.serverSite || 'http://localhost:3000',
   FRONTEND_SITE:process.env.frontendSite|| 'http://localhost:4200',
   GET_IMAGE:process.env.getImage|| '/api/getImage/?originalPath='
   // SERVER_SITE:window["env"]["serverSite"] || 'http://localhost:3001',

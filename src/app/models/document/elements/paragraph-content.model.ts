@@ -1,5 +1,6 @@
 export class ParagraphContentModel {
     public id:string;
+    public pageId:string;
     public htmlDetail:ParagraphContentHTMLModel = new ParagraphContentHTMLModel();
 
 }

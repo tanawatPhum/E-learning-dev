@@ -88,13 +88,23 @@ export class Constants {
             updateDocumentNav:'updateDocumentNav',
         },
         layouts:{
+            size:{
+                a4:791
+            },
             types: {
                 tableLayout:'table-layout',
                 twoLayout: 'two-layout',
                 threeLayout:'three-layout',
                 fourLayout: 'four-layout',
-                freedomLayout:'freedom-layout'
+                freedomLayout:'freedom-layout',
+                websiteLayout:'website-layout',
+                documentLayout:'document-layout'
             }
+        },
+        events:{
+            initialContent:'initialContent',
+            loadContent:'loadContent',
+            setLayout:'setLayout'
         },
         contents: {
             lifeCycle:{
