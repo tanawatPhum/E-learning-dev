@@ -89,7 +89,7 @@ export class Constants {
         },
         layouts:{
             size:{
-                a4:791
+                a4:{width:1123,height:791}
             },
             types: {
                 tableLayout:'table-layout',

@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { RulerDetailModel } from '../../models/common/common.model';
 import { DocumentDataControlService } from '../document/document-data-control.service';
-import { element } from 'protractor';
+import { element, promise } from 'protractor';
 import { ParagraphContentHTMLModel } from 'src/app/models/document/elements/paragraph-content.model';
 import { ParagraphContentModel } from '../../models/document/elements/paragraph-content.model';
 import { ContentDataControlService } from './content-data-control.service';
 import { PageModel } from '../../models/document/content.model';
 import { BoxContentModel } from '../../models/document/elements/box-content.model';
+import { Constants } from '../../global/constants';
+import { Observable, Subscriber } from 'rxjs';
+import { DocumentService } from '../document/document.service';
 
 declare var CKEDITOR: any;
 
@@ -14,6 +17,7 @@ declare var CKEDITOR: any;
 export class ContentService {
     constructor(
         private documentDataService:DocumentDataControlService,
+        private documentService:DocumentService,
         private contentDataControlService:ContentDataControlService
     ){
 
@@ -124,14 +128,14 @@ export class ContentService {
      
     }
     public createParagraph(){
-        // console.log(this.contentDataControlService.poolContents)
+    
 
         let paragraphHtml = '';
         this.contentDataControlService.poolContents.paragraphs && this.contentDataControlService.poolContents.paragraphs.forEach((paragraph)=>{
           // paragraphHtml +=paragraph.htmlDetail.html
          //  $('#'+this.documentDataService.nameTemplate).append(paragraph.htmlDetail.html)
          $('#'+paragraph.pageId).append(
-                `<p id="${paragraph.id}"><span>${paragraph.htmlDetail.html}</span></p>`
+                `<p id="${paragraph.id}">${paragraph.htmlDetail.html}</p>`
             ).ready(()=>{
                 for(let i = 0 ; i < paragraph.htmlDetail.breakLine ;i++){
                     $('#'+paragraph.id).append('<br>')
@@ -154,14 +158,83 @@ export class ContentService {
         // // //$('#'+this.documentDataService.nameTemplate).innerHTML (paragraphHtml)
         // $('#'+this.documentDataService.nameTemplate).append(paragraphHtml)
     }
-    public handleInsertParagraph(currentPage:JQuery<Element>){
-        currentPage.unbind('DOMNodeInserted').bind('DOMNodeInserted',  (element)=> {
+    // public handleInsertParagraph2(targetPage:JQuery<Element>){
+    //     targetPage.get(0).childNodes.forEach((node)=>{
+    //         console.log(node)
+    //         if(node.nodeName === '#text'){
+    //          let newDiv  =  document.createElement('div')
+    //          newDiv.classList.add('paragraph-line')
+    //          newDiv.appendChild(node.cloneNode())
+    //          $( node ).replaceWith(newDiv);
+    //         }
+    //     })
+        
+    // }
+    
+    public handleInsertParagraph(targetPage:JQuery<Element>){
+
+        // targetPage.get(0).childNodes.forEach((node)=>{
+        //     console.log(node)
+        //     if(node.nodeName === '#text'){
+
+        //             $(node).wrapInner('<div class="xxx"></div>')
+        //     }
+        // })
+
+
+       // targetElement.wrapInner('<div class="paragraph-line"><span class="paragraph-text"></span></div>');
+        // targetPage.on('keyup',(event)=> {
+        //     console.log(event.target.childNodes)
+        //     event.stopPropagation();
+        //     setTimeout(() => {
+        //         if (event.which == 13) {
+        //             event.target.childNodes.forEach((node)=>{
+        //                 console.log(node.nodeName)
+        //                 // if(node.nodeName === '#text'){
+        //                 //     console.log('<===isNode===>')
+        //                 //     let newDiv  =  document.createElement('div')
+        //                 //     newDiv.appendChild(node.cloneNode())
+    
+        //                 //     $( node ).replaceWith(newDiv);
+    
+        //                 //     targetPage.append(newDiv)
+        //                 //     targetPage.remove('br')
+    
+    
+    
+    
+        //                 //     // $(node).wrapInner('<div element-name="content-paragraph" class="content-paragraph"></div>')
+        //                 // }
+    
+        //             })
+        //         }               
+        //     }, 1500);
+ 
+        // });
+
+
+        
+
+
+        targetPage.unbind('DOMNodeInserted').bind('DOMNodeInserted',  (element)=> {
                     let targetElement =  $(element.target);
-                    if(typeof targetElement.attr('id') === typeof undefined && targetElement.prop('tagName')==="P"){
-                        targetElement.wrapInner('<span></span>');
+         
+                    if(typeof targetElement.attr('id') === typeof undefined && targetElement.prop('tagName')==="DIV"
+                    && targetElement.parent('[element-name="content-page"]').length > 0
+                    ){
+                        console.log('DOMNodeInserted')
+                        //console.log('targetElement',targetElement)
+
+                    targetElement.wrapInner('<span class="paragraph-text"></span>');
+
+                    //    targetElement.find('.paragraph-text').wrapInner('<div class="paragraph-line">') 
+                        
+
                         let index = this.contentDataControlService.poolContents.paragraphs.length;
                         let id = 'p-'+index;
                         targetElement.attr('id',id)
+                        targetElement.addClass('content-paragraph')
+                        targetElement.attr('element-name','content-paragraph')
                         let htmlDetail:ParagraphContentHTMLModel = new ParagraphContentHTMLModel();
                         htmlDetail.height = targetElement.height();
                         htmlDetail.width = targetElement.width();
@@ -175,28 +248,110 @@ export class ContentService {
                         htmlDetail.breakLine  = targetElement.find('br').length;
                         let paragraphObj:ParagraphContentModel =  {
                             id:id,
-                            pageId:currentPage.attr('id'),
+                            pageId:targetPage.attr('id'),
+                            level:this.contentDataControlService.poolContents.paragraphs.length,
                             htmlDetail:htmlDetail
                         }
-                        this.contentDataControlService.poolContents.paragraphs.push(paragraphObj)
-                       
+                        this.contentDataControlService.poolContents.paragraphs.push(paragraphObj)  
+
+                        targetElement.on('dragover',(event)=>{
+                            console.log(event.currentTarget)
+
+                        })
+
+                        // targetElement.droppable({
+                        //     greedy: true,
+                        //     activeClass: "ui-state-default",
+                        //     hoverClass: "ui-state-hover",
+                        //     drop: ( event, ui )=> {
+                          
+                        //     },
+                        //     over:(event, ui)=> {
+                        //         console.log(event.target)      
+                        //     }
+                        //   });
+              
                     }
+
+
             })
+ 
             
     }
-    public handleUpdateParagraph(currentPage:JQuery<Element>){
-        currentPage.unbind('DOMSubtreeModified').bind('DOMSubtreeModified',  (element)=> {
-            let targetElement =  $(element.target).parents('p');
-            if(targetElement.prop('tagName')==="P"){
-                let targetParagraphIndex  =this.contentDataControlService.poolContents.paragraphs.findIndex((paragraph)=>paragraph.id === targetElement.attr('id'))
-                if(targetParagraphIndex >= 0){
-                    // targetElement.prop('outerHTML')
-                    let cloneTarget  = targetElement.clone().find('.content-box').remove().end();
-                    this.contentDataControlService.poolContents.paragraphs[targetParagraphIndex].htmlDetail.html =  cloneTarget.html();
-                }
-              
-            }
-        })
+    public handleUpdateParagraph(targetPage:JQuery<Element>){
+
+        // targetPage.unbind('input').bind('input',  (event)=> {
+        //         let currentCursor  = window.getSelection().getRangeAt(0);
+        //         let spanText = $(currentCursor.startContainer.parentNode)
+        //         let textInSpan = spanText.text();
+        //         if(spanText.width() > spanText.parent('div[id^="p"]').width()){
+        //             let  adaptText =   spanText.text().slice(0,textInSpan.length-1)
+        //             let newLineText =   spanText.text().slice(textInSpan.length-1)
+        //             let nextSpanText  = spanText.clone().next('span');
+        //             if(nextSpanText.length > 0){
+        //                 nextSpanText.text(newLineText+nextSpanText.text())
+        //             }else{
+        //                 spanText.parent().append(`<span class="span-text">${newLineText}</span>`) 
+        //             }
+        //             if(currentCursor.endOffset=== textInSpan.length){
+        //                 this.setCursor(spanText.parent().attr('id'),spanText.next().get(0).firstChild,0)
+        //                 spanText.text(adaptText)
+        //             }else{
+        //                 let lastOffsetCursor = currentCursor.endOffset
+        //                 spanText.text(adaptText)                    
+        //                 this.setCursor(spanText.parent().attr('id'),spanText.get(0).firstChild,lastOffsetCursor)
+        //             }
+        //         }
+
+        // })
+
+   
+        // targetPage.on("dragover", (event)=> {
+        //     console.log("Dropped!",event.target);
+        // });
+        //document.execCommand('insertHTML',false,'<br>');
+            // targetPage.unbind('DOMSubtreeModified').bind('DOMSubtreeModified',  (element)=> {
+            //     let currentCursor  = window.getSelection().getRangeAt(0);
+            //     let spanText = $(currentCursor.startContainer.parentNode);
+            //     let textInSpan = spanText.text();
+            //     if(spanText.width() > spanText.parent('div[id^="p"]').width()){
+            //         let  adaptText =   spanText.text().slice(0,textInSpan.length-1)
+            //         let newLineText =   spanText.text().slice(textInSpan.length-1)
+            //         let nextSpanText  = spanText.next('span');
+            //         if(nextSpanText.length > 0){
+            //             nextSpanText.text(newLineText+nextSpanText.text())
+            //         }else{
+            //             spanText.parent().append(`<span class="span-text">${newLineText}</span>`)
+            //         }
+            //         // spanText.get(0).firstChild.dataadaptText)
+            //         // console.log('xxxxxxxxxxxxxxx')
+            //         // element.can
+            //        // console.log(currentCursor.endOffset,spanText.length)
+            //         // if(currentCursor.endOffset=== spanText.length){
+            //         //     console.log('xxxxxxxxxxx')
+            //         //     //this.setCursor(spanText.parent().attr('id'))
+            //         // }
+           
+            //     }
+
+            //     //console.log(parent.text().length)
+            //    //console.log(parent.text().split("\n")) 
+
+            //    // console.log(parent.position().left + parent.width())
+            //     //console.log(parent.text())
+            //     // let targetElement =  $(element.target).parents('div');
+            //     // if(targetElement.prop('tagName')==="DIV"){
+            //     //     let targetParagraphIndex  =this.contentDataControlService.poolContents.paragraphs.findIndex((paragraph)=>paragraph.id === targetElement.attr('id'))
+            //     //     if(targetParagraphIndex >= 0){
+            //     //         // targetElement.prop('outerHTML')
+            //     //         let cloneTarget  = targetElement.clone().find('.content-box').remove().end();
+            //     //         this.contentDataControlService.poolContents.paragraphs[targetParagraphIndex].htmlDetail.html =  cloneTarget.html();
+            //     //     }
+                  
+            //     // }
+            // })
+   
+    
 
 
     }
@@ -213,12 +368,19 @@ export class ContentService {
         // })
     }
 
+    public setCursor(id,node?,offset?){
+        let el = document.getElementById(id);
+        let range = document.createRange();
+        let sel = window.getSelection();
+        range.setStart(node || el.childNodes[el.childNodes.length-1], offset||1);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+
     public setContainmentContent(targetBox:JQuery<Element>){
         let currentPage = targetBox.parents('[element-name="content-page"]');
         let boxPosition = targetBox.position();
-
-        console.log(boxPosition)
-        console.log(targetBox)
         if(boxPosition.top < 0){
             targetBox.css('top',0)
         }
@@ -236,6 +398,8 @@ export class ContentService {
         }
 
     }
+
+
 
     public setPositionBoxForMutiPage(targetBox:JQuery<Element>,currentPage:JQuery<Element>,targetPage:JQuery<Element>,pages:PageModel[],boxes:BoxContentModel[]){
         if(targetPage.attr('element-name')!=="content-page"){
@@ -263,8 +427,112 @@ export class ContentService {
         }
         return boxes;
     }
+
+
+    setPositionBoxToParagraph(targetBox:JQuery<Element>){
+        let positionBox = targetBox.offset()
+        let isBoxPushInParagraph = false
+       // console.log("this.contentDataControlService.poolContents",this.contentDataControlService.poolContents)
+
+        for (let i = 0; i < this.contentDataControlService.poolContents.paragraphs.length; i++){
+             let paragraph =  this.contentDataControlService.poolContents.paragraphs[i];
+             let targetParagraph  = $('#'+paragraph.id);
+            //  if(positionBox.top >= paragraph.htmlDetail.positionTop  &&  positionBox.top< paragraph.htmlDetail.positionTop+targetParagraph.height()){
+            //     console.log('targetParagraph',targetParagraph.attr('id'))
+            //     console.log(targetParagraph.find('.paragraph-text'))
+            //     targetBox.prependTo(targetParagraph.find('.paragraph-text'))
+            //  }
+
+             if( positionBox.top >= paragraph.htmlDetail.offsetTop && positionBox.top <= paragraph.htmlDetail.offsetTop+targetParagraph.height()
+
+             ){
+                // console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',targetParagraph,targetBox)
+                 targetBox.appendTo(targetParagraph)
+                 //console.log(targetParagraph,targetParagraph.children())
+                isBoxPushInParagraph  = true;
+                //  let positionSpanText = targetParagraph.children().first().position().top+targetParagraph.children().height();
+                //  if(positionSpanText-5 >= positionBox.top
+                //  && positionBox.top + targetBox.height() >  positionSpanText
+                 
+                //  ){
+                //      targetBox.prependTo(targetParagraph)
+                //  }
+                //  else{
+                //      targetBox.appendTo(targetParagraph)
+                //  }
+                // targetBox.appendTo(targetParagraph)
+                // targetBox.css('position','relative')
+                 targetBox.css('top','unset')
+             }
+
+          
+            //  if( positionBox.top >= paragraph.htmlDetail.positionTop && positionBox.top <= paragraph.htmlDetail.positionTop+targetParagraph.height()
+
+            //  ){
+            //      //console.log(targetParagraph,targetParagraph.children())
+            //      isBoxPushInParagraph  = true;
+            //      let positionSpanText = targetParagraph.children().first().position().top+targetParagraph.children().height();
+            //      if(positionSpanText-5 >= positionBox.top
+            //      && positionBox.top + targetBox.height() >  positionSpanText
+                 
+            //      ){
+            //          targetBox.prependTo(targetParagraph)
+            //      }
+            //      else{
+            //          targetBox.appendTo(targetParagraph)
+            //      }
+            //      targetBox.css('top','unset')
+            //  }
+        }
+
+        // this.contentDataControlService.poolContents.paragraphs.forEach((paragraph)=>{
+        //     let targetParagraph  = $('#'+paragraph.id);
+
+        //     if( positionBox.top+targetBox.height() >= paragraph.htmlDetail.positionTop && positionBox.top <= (paragraph.htmlDetail.positionTop+targetParagraph.height())){
+        //         console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+
+
+        //         //console.log(targetParagraph,targetParagraph.children())
+        //         isBoxPushInParagraph  = true;
+        //         let positionSpanText = targetParagraph.children().first().position().top+targetParagraph.children().height();
+        //         if(positionSpanText >= positionBox.top
+        //         && positionBox.top + targetBox.height() >  positionSpanText
+                
+        //         ){
+        //             targetBox.prependTo(targetParagraph)
+        //         }
+        //         else{
+        //             targetBox.appendTo(targetParagraph)
+        //         }
+        //         targetBox.css('top','unset')
+        //         return;
+        //     }
+
+        //     // if( positionBox.top+targetBox.height() >= paragraph.htmlDetail.positionTop && positionBox.top <= (paragraph.htmlDetail.positionTop+targetParagraph.height())){
+        //     //     //console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxx',targetParagraph.first())
+
+        //     //     //console.log(targetParagraph,targetParagraph.children())
+        //     //     isBoxPushInParagraph  = true;
+        //     //     if(targetParagraph.children().first().position().top > positionBox.top-1 && positionBox.top+targetBox.height() < targetParagraph.children().first().position().top){
+        //     //         console.log('xxxxxxxxxxxxxxxxxxxx')
+        //     //         targetBox.prependTo(targetParagraph)
+        //     //     }else{
+        //     //         console.log('yyyyyyyyyyyyyy')
+        //     //         targetBox.appendTo(targetParagraph)
+        //     //     }
+        //     //     targetBox.css('top','unset')
+                
+        //     // }
+
+        // })
+        if(!isBoxPushInParagraph){
+            targetBox.appendTo(targetBox.parents('[element-name="content-page"]').get(0));
+        }
+
+    }
   
-    
+
+   
      
      
     

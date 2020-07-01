@@ -53,6 +53,8 @@ export class HomePageComponent implements OnInit , AfterViewInit , OnDestroy{
     ngOnInit(){
         // this.socketIoService.connectSocketIo();
         this.getDocumentList();
+
+       
         //this.getDocumentNavigator();
   
     }

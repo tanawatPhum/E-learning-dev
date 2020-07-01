@@ -30,13 +30,14 @@ body {
     font-style: $font-style !important;
 }
 
-// section {
-//     width: 100%;
-//     height: 100%;
-//     // display: flex;
-//     // justify-content: center;
-//     // align-items: center;
-// }
+section {
+    width: 100%;
+    height: 100%;
+    // display: flex;
+    // justify-content: center;
+    // align-items: center;
+}
+
 textarea {
     resize: none;
     overflow: hidden;
@@ -52,6 +53,19 @@ p {
     margin: 0;
 }
 
+// .paragraph-line {
+//     display: block;
+//     // position: relative;
+// }
+.paragraph-text {
+    display: block;
+    //white-space: pre;
+}
+
+// .content-paragraph {
+//     // display: block;
+//     // position: relative;
+// }
 //custome bootstap
 .carousel-control-next,
 .carousel-control-prev {
@@ -658,4 +672,9 @@ video::-webkit-media-controls-pausebutton {
     outline: 0;
     -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+}
+
+.content-container {
+    width: 100%;
+    height: 100%;
 }

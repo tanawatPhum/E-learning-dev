@@ -53,6 +53,7 @@ declare var electron: any;
 declare var rangy: any;
 declare var CKEDITOR: any;
 declare var Wistia: any;
+declare var AVATEXTEDITOR: any;
 @Component({
     selector: 'create-content-page',
     templateUrl: 'create-content-page.component.html',
@@ -203,7 +204,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
         editor: {
             setEditor: 'setEditor',
             setEditorLayout: 'setEditorLayout',
-            setEventEditorContent: 'setEventEditorContent',
+            setContentPage:'setContentPage',
             setEditorContentNote: 'setEditorContentNote',
             openEditorContentNote: 'openEditorContentNote',
             closeEditorContentNote: 'closeEditorContentNote',
@@ -240,6 +241,11 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
 
     }
     ngAfterViewInit() {
+
+
+
+    //  console.log( AVATEXTEDITOR)
+
         this.documentEventController.subscribe((res) => {
             if (res.event === Constants.document.events.initialContent) {
                 this.rootElement = $(this.contentContainer.nativeElement);
@@ -276,6 +282,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
             }
             else if (res.event === Constants.document.events.setLayout) {
                 this.currentLayoutType = res.data;
+                this.handleEditor(this.actions.editor.setContentPage);
 
             }
         })
@@ -357,22 +364,49 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
     }
     private async setTemplate(action) {
         if (action === this.actions.template.setDocument) {
-            if (this.pages.length === 0) {
-                let objPage = this.createNewPage()
-                this.pages.push(objPage)
+            return new Promise(async (resolve,reject)=>{
                 this.defineComponent();
+
+                //setEditor
+                if (this.pages.length === 0) {
+                    let objPage = this.createNewPage()
+                    this.pages.push(objPage)
+                    await this.handleEditor(this.actions.editor.setEditor,null,null,null,this.currentPage.attr('id'));
+                } else {
+                    for (let page of this.pages){
+                        this.createNewPage(page.id)
+                        await this.handleEditor(this.actions.editor.setEditor,null,null,null,page.id);
+                    }        
+                }
+
+                this.handleEditor(this.actions.editor.setContentPage);
+                $('[element-name="content-page"]').get(0).focus()
+                this.currentTextSelection = window.getSelection().getRangeAt(0);
+
+                //setParagraph
                 this.contentService.createParagraph();
-                await this.handleEditor(this.actions.editor.setEditor);
-                this.handleEditor(this.actions.editor.setEventEditorContent)
-            } else {
-                this.pages.forEach((page) => {
-                    this.createNewPage(page.id)
-                })
+                this.contentService.handleInsertParagraph($('[element-name="content-page"]'));
+                this.contentService.handleUpdateParagraph(($('[element-name="content-page"]')));
 
-                await this.handleEditor(this.actions.editor.setEditor);
-                this.handleEditor(this.actions.editor.setEventEditorContent)
+                //setInitialToolbar
+                this.currentToolbar = this.actions.toolbar.templateDocTool;
+                this.addOptionToolBar();
 
-            }
+                //setEvent
+                this.addElements(this.actions.event.addElLayout).then(() => {
+                    //this.removeData(this.actions.data.removeAllContentObj);
+                });
+                this.addElements(this.actions.event.addContextMenu, this.rootElement)
+    
+                this.addElements(this.actions.event.addEventBox).then(() => {
+    
+                });
+                this.addElements(this.actions.event.addEventLayout).then(() => {
+    
+                });
+
+                resolve(Constants.common.message.status.success)
+            })
         }
         else if (action === this.actions.template.setDocumentTrack) {
             this.documentService.loadDocTrackFromDB().subscribe((documentTrack) => {
@@ -398,31 +432,82 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
 
 
 
-    private handleEditor(action: string, element?: JQuery<Element>) {
+    private handleEditor(action: string, element?: JQuery<Element>, subaction?: string, subElement?: any, data?: any) {
         if (action === this.actions.editor.setEditor) {
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 // this.documentDataService.nameTemplate = 'content-container-page';
    
                 // this.rootElement.html(this.currentDocument.html).ready(() => {
                 //this.rootElement.find('#' + this.documentDataService.nameTemplate).attr('contenteditable', 'true')
-
-
-                this.currentPage.attr('contenteditable', 'true')
+                let pageId = data;
+                let targetPage = $('#'+pageId)
+                targetPage.attr('contenteditable', 'true')
                 CKEDITOR.disableAutoInline = true;
-                CKEDITOR.inline(this.currentPage.attr('id'), {
+                CKEDITOR.inline(targetPage.attr('id'), {
                     allowedContent: true,
                     menu_groups: '',
+                    // entities :false,
+                    enterMode:CKEDITOR.ENTER_DIV,
                     removePlugins: 'contextmenu,liststyle,tabletools,magicline,forms',
                     extraPlugins: 'tableresizerowandcolumn,undo',
                     pasteFilter:'input'
                 });
+                // on: {'key': ckeditorKeyPress}
 
+                // CKEDITOR.instances[pageId].on('beforeCommandExec',(ev)=>{
+                //     //  console.log('event',ev)
+                //     if(ev.data.name==='enter'){
+                //         // ev.cancel();
+                //         // console.log(CKEDITOR.instances[pageId].getSelection().getStartElement()[0])
+                //         let targetParagraph=  $(CKEDITOR.instances[pageId].getSelection().getStartElement().$);
+                //         this.contentService.handleInsertParagraph2(targetParagraph)
+                        
+                //         //this.contentService.handleInsertParagraph(this.currentPage)
+                //     }
+                // })
 
-                CKEDITOR.instances[this.currentPage.attr('id')].on('instanceReady', (ev) => {
+      
+                // CKEDITOR.instances[pageId].on('afterCommandExec',(ev)=>{
+                //     //let targetParagraph =  $( CKEDITOR.instances[pageId].getSelection().getStartElement().$);
+                //    // console.log(targetParagraph)
+              
+                //     this.currentPage.find("br").replaceWith('<div class="content-paragraph"></div>')
+                //     this.contentService.handleInsertParagraph2(this.currentPage)
+                //         // console.log('this.currentPage',this.currentPage)
+                //         // this.currentPage.remove('br') 
+                
+                //     // console.log('event',ev)
+                //     // if(ev.data.name==='enter'){
+                //     //     this.currentPage.remove('br')
+                //     //     // let targetParagraph =  $( CKEDITOR.instances[pageId].getSelection().getStartElement().$);
+                //     //     // // console.log(a)
+                //     //     // this.contentService.handleInsertParagraph2(targetParagraph)
+                //     // }
+                // })
 
+                CKEDITOR.instances[pageId].on('instanceReady', (ev)=>{
+                    $(ev.editor.element.$).removeAttr("title");
+                    $('.cke_top').css('display', 'none')
 
+                    // AVATEXTEDITOR.editors[targetPage.attr('id')].styles('test')
+                    //console.log( AVATEXTEDITOR.editors[targetPage.attr('id')].compileStyles('test'))
 
-                    // CKEDITOR.instances[this.currentPage.attr('id')].on('key', (ev) => {
+                    // $('[element-name="content-page"]').avatexteditor(
+                    //     {
+                    //         option:'test',
+                    //         change:(color)=> {
+
+                               
+                    //         }
+                    //     }
+
+                    // )
+
+                    // $('[element-name="content-page"]').avatexteditor()
+
+                    // console.log( $('[element-name="content-page"]').avatexteditor())
+
+                 // CKEDITOR.instances[this.currentPage.attr('id')].on('key', (ev) => {
                     //     let k = ev.data.keyCode;
                     //     let targetElement = $(event.target);
                     //     if ([8].includes(k)) { 
@@ -435,101 +520,23 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                     //     }
     
                     // })
-
-                    $('.cke_top').css('display', 'none')
-                    $(ev.editor.element.$).removeAttr("title");
-                    this.currentPage.focus();
-
-                    this.currentPage.attr('style', this.currentDocument.styles)
-                    this.currentTextSelection = window.getSelection().getRangeAt(0);
-                    this.currentToolbar = this.actions.toolbar.templateDocTool;
-                    this.addOptionToolBar();
-          
-
-                    if (this.contentDCtrlService.poolContents.paragraphs.length > 0) {
-                        this.currentPage.find('p').not('[id]').remove();
-                    }
-
-                    if(this.currentLayoutType === Constants.document.layouts.types.websiteLayout){
-                        this.rootElement.find('[element-name="content-page"]').css('overflow','auto')
-                    }
-                   // let countKeydown = 0;
-                    $('[element-name="content-page"]').unbind('click').bind('click', (event) => {
-                        // console.log(window.getSelection().getRangeAt(0).startContainer)
-                        // let targetEL = $(window.getSelection().getRangeAt(0).startContainer);
-                        // this.currentPage = $(event.currentTarget)
-                        // if (this.currentLayoutType === Constants.document.layouts.types.documentLayout) {
-                        //     console.log(window.getSelection().getRangeAt(0).startContainer)
-                        // //   if(window.getSelection().getRangeAt(0).startContainer.parentNode )
-                        //     let targetContainer = window.getSelection().getRangeAt(0).startContainer;
-                        //     if(targetContainer.nodeName === '#text'){
-                        //         targetContainer = targetContainer.parentNode
-                        //     }
-                        //     let targetParagraph = $(targetContainer)
-                        //     if (Constants.document.layouts.size.a4 === Math.floor(targetParagraph.position().top + targetParagraph.height())) {
-                        //         countKeydown = 2;
-                        //     }
-                        // }
-                        //console.log(this.currentPage)
-                        // $("#context-menu").removeClass("show").hide();
-                        // this.rootOptionTool.html(null);
-                        // this.removeStyleElements(this.actions.style.removeAllStyleBoxCurrent)
-                        // this.currentToolbar = this.actions.toolbar.templateDocTool;
-                        // this.addOptionToolBar();
-                        // this.handleEditor(this.actions.editor.setRuler);
-                    })
-                    // $('[element-name="content-page"]').unbind('keyup').bind("keyup", (event) => {
-                    //     let targetParagraph = $(window.getSelection().getRangeAt(0).startContainer);
-                    //     let prevPage = this.pages[this.currentPage.index()-1];
-                    //     console.log('xxxx',targetParagraph.position().top,prevPage)
-                    //     if(prevPage && targetParagraph.position().top === 0){
-                    //         this.currentPage = $('#' + prevPage.id)
-                    //         this.currentPage.focus();
-                    //     }
-
-                    // })
-
-
-                    $('[element-name="content-page"]').unbind('keydown').bind("keydown", (event) => {
-                        if (this.currentLayoutType === Constants.document.layouts.types.documentLayout
-                        &&(event.keyCode===8 || event.keyCode===13)
-                            ) {
-                            let targetindex = $('[element-name="content-page"]').index(event.currentTarget)
-                            let targetParagraph = $(window.getSelection().getRangeAt(0).startContainer.parentNode);
-                            if (targetParagraph.position().top === 0) {
-                                let prevPage = this.pages[targetindex - 1];
-                                if (prevPage) {
-                                    this.currentPage = $('#' + prevPage.id)
-                                    this.currentPage.focus();
-                                }
-                            }
-                            if ((Constants.document.layouts.size.a4 < targetParagraph.position().top + targetParagraph.height())) {
-                               // countKeydown++;
-                                let nextPage = this.pages[targetindex + 1];
-                                //if (countKeydown >= 2) {
-                                    if (!nextPage) {
-                                        console.log("👉 Create New Page")
-                                        let objPage = this.createNewPage()
-                                        this.pages.push(objPage)
-                                        this.handleEditor(this.actions.editor.setEditor);
-                                    } else {
-                                        this.currentPage = $('#' + nextPage.id)
-                                        this.currentPage.focus();
-                                    }
-                                    // countKeydown = 0;
-                                //}
-                            }
-                        }
-                    });
-
-
-             
-
-
-
-
-
                     resolve(Constants.common.message.status.success)
+                })
+
+
+
+
+                    
+                    //this.currentToolbar = this.actions.toolbar.templateDocTool;
+                    //this.addOptionToolBar();
+                  //  this.handleEditor(this.actions.editor.setContentPage);
+                    //this.currentTextSelection = window.getSelection().getRangeAt(0);
+
+
+
+
+
+
                     //this.handleEditor(this.actions.editor.setTabIndent);
 
                     //    console.log(this.currentDocument)
@@ -558,31 +565,121 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
 
 
 
-                });
+ 
             })
+        }
+        else if(action === this.actions.editor.setContentPage){
+            this.currentPage.attr('style', this.currentDocument.styles)
+            if (this.contentDCtrlService.poolContents.paragraphs.length > 0) {
+                this.currentPage.find('p').not('[id]').remove();
+            }
 
 
+            if(this.currentLayoutType === Constants.document.layouts.types.websiteLayout){
+                this.rootElement.find('[element-name="content-page"]').css('overflow','auto')
+            }
+           // let countKeydown = 0;
+            $('[element-name="content-page"]').unbind('click').bind('click', (event) => {
+                // console.log(window.getSelection().getRangeAt(0).startContainer)
+                // let targetEL = $(window.getSelection().getRangeAt(0).startContainer);
+                // this.currentPage = $(event.currentTarget)
+                // if (this.currentLayoutType === Constants.document.layouts.types.documentLayout) {
+                //     console.log(window.getSelection().getRangeAt(0).startContainer)
+                // //   if(window.getSelection().getRangeAt(0).startContainer.parentNode )
+                //     let targetContainer = window.getSelection().getRangeAt(0).startContainer;
+                //     if(targetContainer.nodeName === '#text'){
+                //         targetContainer = targetContainer.parentNode
+                //     }
+                //     let targetParagraph = $(targetContainer)
+                //     if (Constants.document.layouts.size.a4 === Math.floor(targetParagraph.position().top + targetParagraph.height())) {
+                //         countKeydown = 2;
+                //     }
+                // }
+                //console.log(this.currentPage)
+                // $("#context-menu").removeClass("show").hide();
+                // this.rootOptionTool.html(null);
+                // this.removeStyleElements(this.actions.style.removeAllStyleBoxCurrent)
+                // this.currentToolbar = this.actions.toolbar.templateDocTool;
+                // this.addOptionToolBar();
+                // this.handleEditor(this.actions.editor.setRuler);
+            })
+            // $('[element-name="content-page"]').unbind('keyup').bind("keyup", (event) => {
+            //     let targetParagraph = $(window.getSelection().getRangeAt(0).startContainer);
+            //     let prevPage = this.pages[this.currentPage.index()-1];
+            //     console.log('xxxx',targetParagraph.position().top,prevPage)
+            //     if(prevPage && targetParagraph.position().top === 0){
+            //         this.currentPage = $('#' + prevPage.id)
+            //         this.currentPage.focus();
+            //     }
 
+            // })
+
+
+            // $('[element-name="content-page"]').unbind('keydown').bind("keydown", (event) => {
+
+
+                
+            //     if (this.currentLayoutType === Constants.document.layouts.types.documentLayout){
+            //         let targetPage = $(event.currentTarget);
+            //         let targetParagraph = $(window.getSelection().getRangeAt(0).startContainer);
+            //         if(targetParagraph.prop('tagName')!=="P"){
+            //             targetParagraph = $(window.getSelection().getRangeAt(0).startContainer.parentNode)
+            //         }
+            //        // if(targetParagraph.prop('tagName')==="P"){
+            //                           //  if(event.keyCode===8 || event.keyCode===13 
+            //             //|| (Constants.document.layouts.size.a4.height < targetLastParagraph.height() + targetLastParagraph.position().top))
+            //         //{
+            //         let targetindex = $('[element-name="content-page"]').index(targetPage)
+            //         if (targetParagraph.position().top === 0 && event.keyCode===8
+            //         &&!targetParagraph.text()
+            //         ) {
+            //             let prevPage = this.pages[targetindex - 1];
+            //             if (prevPage) {
+            //                 if(this.currentPage.find('.content-box').length === 0 
+            //                     && (this.currentPage.find('p').length === 1 && !this.currentPage.find('p').text())
+            //                 ){
+            //                     this.currentPage.remove(); 
+            //                     this.pages.splice(targetindex,1)
+            //                 }
+            //                 this.currentPage = $('#' + prevPage.id)
+            //                 this.currentPage.focus();
+            //             }
+            //         }
+            //         else if (Constants.document.layouts.size.a4.height < targetParagraph.height() + targetParagraph.position().top
+            //         && (targetParagraph.prop('tagName')==="P" ||event.keyCode===13  )
+            //         ) {
+            //            // countKeydown++;
+            //             let nextPage = this.pages[targetindex + 1];
+            //             //if (countKeydown >= 2) {
+            //                 if (!nextPage) {
+            //                     console.log("👉 Create New Page")
+            //                     let objPage = this.createNewPage()
+            //                     this.pages.push(objPage)
+            //                     this.handleEditor(this.actions.editor.setEditor,null,null,null,this.currentPage.attr('id'));
+            //                     this.handleEditor(this.actions.editor.setContentPage);
+            //                     this.contentService.handleInsertParagraph(this.currentPage);
+            //                     this.contentService.handleUpdateParagraph(this.currentPage);
+            //                 } else {
+            //                     this.currentPage = $('#' + nextPage.id)
+            //                 }
+            //                 this.currentPage.focus();
+
+            //                 //this.load
+            //                 // this.currentPage.focus();
+            //                 // countKeydown = 0;
+            //             //}
+            //             }
+
+
+            //         //}
+
+
+            //     }
+            // });
 
 
         }
         else if (action === this.actions.editor.setEditorLayout) {
-
-        }
-        else if (action === this.actions.editor.setEventEditorContent) {
-            this.addElements(this.actions.event.addElLayout).then(() => {
-                //this.removeData(this.actions.data.removeAllContentObj);
-            });
-            this.addElements(this.actions.event.addContextMenu, this.rootElement)
-
-            this.addElements(this.actions.event.addEventBox).then(() => {
-
-            });
-
-            this.addElements(this.actions.event.addEventLayout).then(() => {
-
-            });
-
 
         }
         else if (action === this.actions.editor.openEditorContentNote) {
@@ -792,13 +889,13 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                         }
                     })
                     let tagElement = `div`
-                    if (data && data.action === "link" || box.htmlDetail.boxType === Constants.document.boxes.types.boxAsText) {
-                        tagElement = `span`
-                    }
+                    // if (data && data.action === "link" || box.htmlDetail.boxType === Constants.document.boxes.types.boxAsText) {
+                    //     tagElement = `span`
+                    // }
 
 
                     let targetPage;
-                    if($(data?.element?.pageTarget).attr('element-name')==='content-page'){
+                    if($(data&&data.element&&data.element.pageTarget).attr('element-name')==='content-page'){
                         targetPage = $(data.element.pageTarget);
                     }
                     else if (box.pageId) {
@@ -811,13 +908,15 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                     targetPage.append(`<${tagElement} content-box-type="${box.htmlDetail.boxType || Constants.document.boxes.types.boxInitial}"  contenteditable="false" id="${box.id}" class="content-box ${this.boxType.boxInitial} freedom-layout"
                     > </${tagElement}>`).ready(async () => {
                         this.removeStyleElements(this.actions.toolbar.removeTool);
-                        $('[id="' + box.id + '"]').css('position', 'absolute')
+                        $('[id="' + box.id + '"]').css('position', 'relative')
+                        .css('display','inline-block')
                             .css('top', box.htmlDetail.top)
                             .css('left', box.htmlDetail.left)
                             .css('width', box.htmlDetail.width)
                             .css('height', box.htmlDetail.height)
                             .css('background', box.htmlDetail.background)
                             .css('z-index', topZindex)
+                            
                     }).ready(() => {
                         if (!this.contentDCtrlService.poolContents.boxes.find(poolBox => poolBox.id === box.id)) {
                             let newBox = new BoxContentModel();
@@ -842,6 +941,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                         stack: '.freedom-layout',
                         scroll: true,
                         start: ((event) => {
+                            // $(event.target).css('position','absolute')
                             // let updateContent = new UpdateContentModel();
                             // updateContent.actionCase = Constants.document.contents.events.startDrag;
                             // this.contentDCtrlService.updateContent = updateContent;
@@ -849,8 +949,24 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                             // this.addElements(this.actions.style.addStyleBoxCurrent, $(event.target), 'startDrag');
                         }),
                         drag: ((event) => {
-                            let targetBox = $(event.target);
+                            //  let targetBox = $(event.target);
+                            //  this.contentService.setPositionBoxToParagraph(targetBox) 
+                            // let handleTimeOut;
+
+                            // if(!handleTimeOut){
+                            //     console.log('zzzzzz')
+                            //     handleTimeOut = setTimeout(() => {
+                            //         console.log('vvvvvv')
+                            //         this.contentService.setPositionBoxToParagraph(targetBox)    
+                            //     },1000);
+                            // }
+
+
+                               
                       
+                                                         
+                           
+
                            // this.contentService.setContainmentContent(targetBox)
                         // let target = $(event.target).parents('.content-page')
                         // console.log("target",target)
@@ -862,12 +978,23 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                         }),
                         stop: ((event) => {
                             let targetBox = $(event.target);
-                            this.contentService.setContainmentContent(targetBox)
-                            let dragX = event.pageX, dragY = event.pageY;
-                            let targetPage = $(document.elementFromPoint(dragX, dragY));
-                            let currentPage = targetBox.parents('[element-name="content-page"]');
-                            let newBoxes =  this.contentService.setPositionBoxForMutiPage(targetBox,currentPage,targetPage,this.pages,this.boxes)
-                            console.log("newBoxes",newBoxes)
+                            this.contentService.setPositionBoxToParagraph(targetBox) 
+                            //  let targetBox = $(event.target);
+                            //  this.contentService.setPositionBoxToParagraph(targetBox) 
+                            // this.contentService.setContainmentContent(targetBox)
+                            // let dragX = event.pageX, dragY = event.pageY;
+                            // // let targetElement  =  this.contentService.allElementsFromPoint(dragX,dragY)
+                            // // console.log("targetElement",targetElement)
+                            // // let targetPage = $(document.allElementsFromPoint(dragX, dragY));
+                            // // console.log(targetPage)
+                            // // console.log('targetPage',targetPage)
+
+
+                            // // let currentPage = targetBox.parents('[element-name="content-page"]');
+                            // // this.contentService.setPositionBoxForMutiPage(targetBox,currentPage,targetPage,this.pages,this.boxes)
+                            // this.contentService.setPositionBoxToParagraph(targetBox)
+
+
                             // if(targetPage.attr('element-name')==="content-page" && currentPage.attr('id')!== targetPage.attr('id')){
                             //     targetBox.appendTo(targetPage.get(0)).css('top',0)
                             // }
@@ -934,6 +1061,8 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                                 updateContent.actionCase = Constants.document.contents.events.stopResize;
                                 updateContent.for = $(event.target).attr('id');
                                 this.contentDCtrlService.updateContent = updateContent;
+
+                                
 
 
 
@@ -1888,9 +2017,9 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
 
         // })
 
-        //  this.documentService.captureHTML('contentTemplate').subscribe((imgData) => {
-        let imgData = null;
+      //  this.documentService.captureHTML($('[element-name="content-page"]').get(0).getAttribute('id')).subscribe((imgData) => {
 
+        let imgData = null;
         this.createData(this.actions.data.createDataToSave).then((result: DocumentModel) => {
             let idDocument = this.commonService.getPatternId();
             if (this.documentDataService.currentDocument.id) {
@@ -1915,6 +2044,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
                 contents: contents,
                 otherDetail: otherDetail
             }
+
             let targetDocumentNav = this.documentDataService.documentNavList.find((docNav) => docNav.id === this.documentDataService.currentDocument.id)
             let saveobjectNavTemplate: DocumentNavigatorModel;
             if (targetDocumentNav) {
@@ -1965,7 +2095,7 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
 
             // })
         });
-        // })
+      //  })
     }
     // private saveTempDocument(nameDocument) {
     //     const requestTableNav = this.documentService.indexDB.transaction(['temp-navigators'], 'readwrite');
@@ -2640,11 +2770,6 @@ export class CreateContentPageComponent implements OnInit, AfterViewInit, OnDest
         //this.contentContainer.nativeElement.insertAdjacentHTML('beforeend', `<div element-name="content-page" class="content-page" id="${objPage.id}"></div>`);
         this.rootElement.append(`<div element-name="content-page" class="content-page" id="${objPage.id}"></div>`)
         this.currentPage = this.rootElement.find(`#${objPage.id}`)
-
-
-       // this.contentService.createParagraph();
-        this.contentService.handleInsertParagraph(this.currentPage);
-        this.contentService.handleUpdateParagraph(this.currentPage);
        // this.contentService.handleRemoveParagraph(this.currentPage);
 
         return objPage;

@@ -863,6 +863,27 @@ export class DocumentService {
         $('[element-name="document-container-content"]').height($(window).height()-$('[element-name="document-container-toolbar"]').height())
     }
 
+    public responsiveCore(){
+        
+        // let targetPage =  $('.content-container')
+        // let currentPageWidth  =targetPage.width();
+        // console.log(currentPageWidth)
+
+        // $('.content-box').each((index,element)=>{
+        //     let targetBox =  $(element)
+        //     console.log(targetBox.position().left)
+        //    if(targetBox.position().left+ > currentPageWidth){
+        //     targetBox.css('left',currentPageWidth)
+        //    }
+
+        // })
+  
+
+
+    }
+
+
+
     // public createDocumentList(){
     //     this.loadDocFromDB().subscribe((document)=>{
     //         console.log('document',document)

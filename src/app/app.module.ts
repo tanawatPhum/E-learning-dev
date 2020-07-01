@@ -32,6 +32,7 @@ import { LayoutRouting } from './app-layout-routing';
 import { CusSrc } from './directives/cus-src.directive';
 import { ToolBarService } from './services/document/toolbar.service';
 import { ContentService } from './services/content/content.service';
+import { DemoPageComponent } from './components/demo-page/demo-page.component';
 
 export const COMPONENTS: any[] = [
   AppComponent,
@@ -40,6 +41,7 @@ export const COMPONENTS: any[] = [
  CreateContentPageComponent,
  DocumentPreviewPageComponent,
  DocumentModalPageComponent,
+ DemoPageComponent
 ];
 export const PLUGINS: any[] = [
   LoadingPageComponent,

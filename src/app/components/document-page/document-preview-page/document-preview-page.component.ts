@@ -2,7 +2,7 @@ import { Component, ViewChild, ElementRef, OnInit, OnDestroy, HostListener, Inje
 import { DocumentDataControlService } from '../../../services/document/document-data-control.service';
 import { DocumentService } from '../../../services/document/document.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { DocumentModel } from '../../../models/document/content.model';
+import { DocumentModel, PageModel } from '../../../models/document/content.model';
 import { ScreenDetailModel, UpdateContentModel } from 'src/app/models/common/common.model';
 import { CommonService } from '../../../services/common/common.service';
 import { find } from 'rxjs/operators';
@@ -29,6 +29,7 @@ import { ContentDataControlService } from '../../../services/content/content-dat
 import { ContentRouting } from '../../../app-content-routing';
 import { createCustomElement, NgElement, WithProperties } from '@angular/elements';
 import { AttachSession } from 'protractor/built/driverProviders';
+import { ContentService } from '../../../services/content/content.service';
 
 declare var CKEDITOR: any;
 
@@ -41,6 +42,7 @@ declare var Wistia: any;
 })
 export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
     @ViewChild('documentPreviewContent', { static: true }) documentPreviewContent: ElementRef;
+    @ViewChild('contentContainer', { static: true }) contentContainer: ElementRef;
     private rootElement: JQuery<Element>;
     private currentResult: DocumentModel = new DocumentModel();
     private contentTemplateSize: ScreenDetailModel = new ScreenDetailModel();
@@ -95,10 +97,14 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
     private currentUrlParam: any;
     private systemDocument: DocumentModel = new DocumentModel();
     private timeoutSaveDoc: any;
+
+    public pages:PageModel[] = new Array<PageModel>();
+
     constructor(
         private documentDataService: DocumentDataControlService,
         private documentDCtrlService: DocumentDataControlService,
         private contentDCtrlService: ContentDataControlService,
+        private contentService:ContentService,
         private documentService: DocumentService,
         private commonDataService: CommonDataControlService,
         private commonService: CommonService,
@@ -201,6 +207,7 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
                     // }, 1000);
                     result.html  = this.documentDataService.systemReult.html;
                     this.currentResult = this.documentDataService.currentResult = result &&result[0] ;
+                    this.pages = this.documentDataService.currentResult.pages;
 
                     
                     this.setTemplate(this.actions.template.setDocumentTrack);
@@ -215,7 +222,7 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
     public setTemplate(action) {
         if (action === this.actions.template.setDocument) {
             // this.contentTemplateSize = JSON.parse(localStorage.getItem('contentTemplateSize'))|| new ScreenDetailModel();
-            this.rootElement = $(this.documentPreviewContent.nativeElement);
+            this.rootElement = $(this.contentContainer.nativeElement);
             // - Constants.general.element.css.navBar.height
             //  this.rootElement.css('height', $(window).height())
 
@@ -288,15 +295,34 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
             console.log('this.currentResult',this.currentResult)
             this.contentDCtrlService.poolContents =  this.currentResult.contents;
 
-            this.rootElement.find('#contentTemplate').html(this.currentResult.html);
-            this.rootElement.find('#contentTemplate').attr('style',this.currentResult.styles)
 
-            // this.rootElement.find('#contentTemplate').append(this.currentResult.html);
+            this.pages.forEach((page)=>{
+                this.createNewPage(page.id)
+            })
+
+
+            this.contentService.createParagraph()
+
+
+
+            // this.rootElement.find('[element-name="content-page"]').css({
+            //     zoom: ratioW
+            // })
+
+            // .content-container
+
+
+            // this.rootElement.find('.content-container').html(this.currentResult.html);
+            // this.rootElement.find('.content-container').attr('style',this.currentResult.styles)
+
+            // // this.rootElement.find('.content-container').append(this.currentResult.html);
             this.currentResult.contents.boxes.forEach((box)=>{
-                if(this.rootElement.find('#contentTemplate').find('#'+box.id).length ===0){
-                    this.rootElement.find('#contentTemplate').append(this.documentService.getBoxContentPreview(box));
+                let targetPage = $('#'+box.pageId)
+
+                if(targetPage.find('#'+box.id).length ===0){
+                    targetPage.append(this.documentService.getBoxContentPreview(box));
                 }else{
-                    this.rootElement.find('#contentTemplate').find('#'+box.id).append(this.documentService.createContentPreview(box))
+                    targetPage.find('#'+box.id).append(this.documentService.createContentPreview(box))
                 }
             })
             this.retrieveData(this.actions.data.retrieveResultData, data);
@@ -308,14 +334,31 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
             this.documentDataService.currentScreenSize.height = $('.document-preview-content').height();
             this.documentDataService.currentScreenSize.width = $('.document-preview-content').width();
             $(window).resize(() => {
-                this.documentDataService.currentScreenSize.height = $('.document-preview-content').height();
-                this.documentDataService.currentScreenSize.width = $('.document-preview-content').width();
-                this.setElements(this.actions.element.ratioElement)
+                this.documentService.responsiveCore();
+                // this.documentDataService.currentScreenSize.height = $('.document-preview-content').height();
+                // this.documentDataService.currentScreenSize.width = $('.document-preview-content').width();
+                // this.setElements(this.actions.element.ratioElement)
             })
 
             this.setElements(this.actions.element.ratioElement)
         }
         if (action === this.actions.element.ratioElement) {
+
+
+            let ratioW;
+            // ratioW = this.rootElement.width() / Constants.document.layouts.size.a4.width;
+            // ratioW = (this.documentDataService.currentScreenSize.width-Constants.document.layouts.size.a4.width)/this.documentDataService.currentScreenSize.width;
+            // console.log(ratioW)
+            if (this.rootElement.width()  > Constants.document.layouts.size.a4.width) {
+                ratioW = this.rootElement.width()  / Constants.document.layouts.size.a4.width;
+            } else {
+                ratioW = Constants.document.layouts.size.a4.width / this.rootElement.width() ;
+            }
+            this.rootElement.css({
+                zoom: ratioW
+            })
+
+
             // console.log("currentH",this.documentDataService.currentScreenSize.height)
             // console.log("currentW",this.documentDataService.currentScreenSize.width)
             // console.log("templateH",this.contentTemplateSize.height)
@@ -332,29 +375,30 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
             // //let ratioH = this.documentDataService.currentScreenSize.height / (this.contentTemplateSize.height)
             // //console.log("ratioH",ratioH)
             //let ratioH = this.documentDataService.currentScreenSize.height / this.contentTemplateSize.height;
-            let ratioW;
-            if (this.documentDataService.currentScreenSize.width > this.contentTemplateSize.width) {
-                ratioW = this.documentDataService.currentScreenSize.width / (this.contentTemplateSize.width);
-            } else {
-                ratioW = this.contentTemplateSize.width / this.documentDataService.currentScreenSize.width;
-            }
+            // let ratioW;
+            // if (this.documentDataService.currentScreenSize.width > this.contentTemplateSize.width) {
+            //     ratioW = this.documentDataService.currentScreenSize.width / (this.contentTemplateSize.width);
+            // } else {
+            //     ratioW = this.contentTemplateSize.width / this.documentDataService.currentScreenSize.width;
+            // }
+            // this.rootElement.find('.content-container').css({
+            //     width: this.contentTemplateSize.width + 'px',
+            //     height: '100%',
+            //     zoom: ratioW
+            // })
 
             // $(this.rootElement).resize(()=>{
             //     // this.documentDataService.currentScreenSize.height =  $('.document-preview-content').height();
             //     // this.documentDataService.currentScreenSize.width =  $('.document-preview-content').width();
             //     // ratioW = this.documentDataService.currentScreenSize.width / (this.contentTemplateSize.width );
-            //     // this.rootElement.find('#contentTemplate').css({
+            //     // this.rootElement.find('.content-container').css({
             //     //     zoom:ratioW
             //     // })
             // })
 
 
 
-            this.rootElement.find('#contentTemplate').css({
-                width: this.contentTemplateSize.width + 'px',
-                height: '100%',
-                zoom: ratioW
-            })
+          
 
             // let updateAction:UpdateContentModel = new UpdateContentModel()
             // updateAction.actionCase  = Constants.document.contents.lifeCycle.setRatio;
@@ -624,5 +668,11 @@ export class DocumentPreviewPageComponent implements OnInit, OnDestroy {
             $('#cke_' + parentId + '-note-area').css('width', document.getElementById(parentId).getBoundingClientRect().width)
         }
     }
+
+    public createNewPage(id?) {
+        this.rootElement.append(`<div element-name="content-page" class="content-page" id="${id}"></div>`)
+    }
+
+
 
 }
