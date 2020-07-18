@@ -135,7 +135,10 @@ export class ImgContentComponent implements OnInit, ContentInterFace {
             //     }
             // }, 2000));
         });
-        this.rootElement.find('.toolbar-browse-img').find('#img-input-url').bind("paste", (event: any) => {
+
+
+        
+        this.rootElement.find('.toolbar-browse-img').find('#img-input-url').unbind.bind("paste", (event: any) => {
             event.preventDefault();
             event.stopPropagation();
             console.log(event.originalEvent.clipboardData)

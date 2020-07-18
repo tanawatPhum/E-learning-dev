@@ -11,7 +11,14 @@ export class DemoPageComponent implements OnInit ,AfterViewInit {
     private targetEditor = 'editor1';
     ngOnInit(){
         $('.content-box').draggable({
-                     
+            stop: ((event) => {
+                AVATEXTEDITOR.editors[this.targetEditor].insertImage(event.target,'inLine')
+            })
+        });
+        $('.content-box1').draggable({
+            stop: ((event) => {
+                AVATEXTEDITOR.editors[this.targetEditor].insertImage(event.target,'inLine')
+            })
         });
     }
     ngAfterViewInit(){
@@ -50,6 +57,13 @@ export class DemoPageComponent implements OnInit ,AfterViewInit {
         AVATEXTEDITOR.editors[this.targetEditor].compileStyles({
             styles:{
                 'font-style': 'italic'
+            }
+        })
+    }
+    changeAlign(position){
+        AVATEXTEDITOR.editors[this.targetEditor].compileStyles({
+            styles:{
+                'text-align': position
             }
         })
     }

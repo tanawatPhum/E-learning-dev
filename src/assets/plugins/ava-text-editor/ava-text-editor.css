@@ -1,0 +1,33 @@
+.ava-container-wrap-paragraph {
+    height: auto;
+    width: 100%;
+    display: flex;
+    position: relative;
+}
+
+.ava-container-paragraph {
+    display: inline-block;
+    width: 100%;
+    white-space: nowrap;
+}
+
+.ava-container-paragraph-inLine {
+    position: absolute;
+    height: 100%;
+    white-space: normal;
+}
+
+.ava-container-line {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.ava-container-wrap-text {
+    display: inline;
+}
+
+.ava-container-text {
+    display: inline;
+}

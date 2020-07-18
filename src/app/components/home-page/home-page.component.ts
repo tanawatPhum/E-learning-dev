@@ -187,7 +187,7 @@ export class HomePageComponent implements OnInit , AfterViewInit , OnDestroy{
                     let maxNumber = 0;
                     this.documentNavList.forEach((docNav) => {
                         let regexMatchDocNumber  = RegExp('(?<='+this.documentDataService.currentDocument.nameDocument+')\\d+');
-                        let findDocNumber = docNav.nameDocument.match(regexMatchDocNumber)
+                        let findDocNumber = docNav.nameDocument && docNav.nameDocument.match(regexMatchDocNumber)
                         if(findDocNumber){
                             let  docNumber  = parseInt(findDocNumber[findDocNumber.length-1]);
                             if(maxNumber<docNumber){
@@ -213,8 +213,6 @@ export class HomePageComponent implements OnInit , AfterViewInit , OnDestroy{
                     // this.documentDataService.currentDocument.nameDocument  =  $(event.currentTarget).attr('document-data');
 
                 }
-
-                console.log(this.documentDataService.currentDocument)
                 this.router.navigate(['documentHome'])                    
       
 
