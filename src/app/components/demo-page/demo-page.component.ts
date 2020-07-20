@@ -20,6 +20,11 @@ export class DemoPageComponent implements OnInit ,AfterViewInit {
                 AVATEXTEDITOR.editors[this.targetEditor].insertImage(event.target,'inLine')
             })
         });
+        $('.content-box2').draggable({
+            stop: ((event) => {
+                AVATEXTEDITOR.editors[this.targetEditor].insertImage(event.target,'section')
+            })
+        });
     }
     ngAfterViewInit(){
         AVATEXTEDITOR.initial(this.targetEditor)
