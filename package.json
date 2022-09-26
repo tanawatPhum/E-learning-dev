@@ -22,7 +22,7 @@
         "@angular/platform-browser": "~8.0.0",
         "@angular/platform-browser-dynamic": "~8.0.0",
         "@angular/router": "~8.0.0",
-        "@capacitor/cli": "^1.1.0",
+        "@capacitor/cli": "^1.5.3",
         "@capacitor/core": "^1.1.0",
         "@types/jquery": "^3.3.30",
         "@types/jqueryui": "^1.12.10",
